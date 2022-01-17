@@ -2,7 +2,7 @@ using Microsoft.Graph.Cli.Core.Authentication;
 
 namespace Microsoft.Graph.Cli.Core.Utils
 {
-    class Constants
+    public class Constants
     {
         public const string ApplicationDataDirectory = ".mgc";
 

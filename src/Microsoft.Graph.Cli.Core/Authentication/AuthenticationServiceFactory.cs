@@ -8,7 +8,7 @@ using Microsoft.Graph.Cli.Core.Utils;
 
 namespace Microsoft.Graph.Cli.Core.Authentication;
 
-class AuthenticationServiceFactory {
+public class AuthenticationServiceFactory {
     public async Task<ILoginService> GetAuthenticationServiceAsync(AuthenticationStrategy strategy, string tenantId, string clientId) {
         switch (strategy) {
             case AuthenticationStrategy.DeviceCode:

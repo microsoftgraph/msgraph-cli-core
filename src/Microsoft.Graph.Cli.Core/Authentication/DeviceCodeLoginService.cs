@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Microsoft.Graph.Cli.Core.Authentication;
 
-class DeviceCodeLoginService : LoginServiceBase {
+public class DeviceCodeLoginService : LoginServiceBase {
     private DeviceCodeCredential credential;
 
     public DeviceCodeLoginService(DeviceCodeCredential credential, IPathUtility pathUtility) : base(pathUtility) {

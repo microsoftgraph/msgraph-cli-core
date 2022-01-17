@@ -7,7 +7,7 @@ using Microsoft.Graph.Cli.Core.Utils;
 
 namespace Microsoft.Graph.Cli.Core.Authentication;
 
-abstract class LoginServiceBase : ILoginService {
+public abstract class LoginServiceBase : ILoginService {
     private readonly IPathUtility pathUtility;
 
     protected LoginServiceBase(IPathUtility pathUtility) {
