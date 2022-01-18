@@ -22,8 +22,7 @@ public abstract class LoginServiceBase : ILoginService {
     protected abstract Task<AuthenticationRecord> DoLoginAsync(string[] scopes);
 
     public async Task SaveSessionAsync(AuthenticationRecord record) {
-        var homeDir = pathUtility.GetUserHomeDirectory();
-        var recordPath = Path.Combine(homeDir, Constants.ApplicationDataDirectory, Constants.AuthRecordPath);
+        var recordPath = Path.Combine(pathUtility.GetApplicationDataDirectory(), Constants.AuthRecordPath);
         using var authRecordStream = new FileStream(recordPath, FileMode.OpenOrCreate, FileAccess.Write);
         await record.SerializeAsync(authRecordStream);
     }
