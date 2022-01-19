@@ -16,7 +16,7 @@ public class AuthenticationServiceFactory {
         this.pathUtility = pathUtility;
     }
 
-    public async Task<ILoginService> GetAuthenticationServiceAsync(AuthenticationStrategy strategy, string tenantId, string clientId) {
+    public async Task<ILoginService> GetAuthenticationServiceAsync(AuthenticationStrategy strategy, string? tenantId, string? clientId) {
         switch (strategy) {
             case AuthenticationStrategy.DeviceCode:
                 return await GetDeviceCodeLoginServiceAsync(tenantId, clientId);
@@ -26,7 +26,7 @@ public class AuthenticationServiceFactory {
 
     }
 
-    public async Task<TokenCredential> GetTokenCredentialAsync(AuthenticationStrategy strategy, string tenantId, string clientId) {
+    public async Task<TokenCredential> GetTokenCredentialAsync(AuthenticationStrategy strategy, string? tenantId, string? clientId) {
         switch (strategy) {
             case AuthenticationStrategy.DeviceCode:
                 return await GetDeviceCodeCredentialAsync(tenantId, clientId);
@@ -35,12 +35,12 @@ public class AuthenticationServiceFactory {
         }
     }
 
-    private async Task<DeviceCodeLoginService> GetDeviceCodeLoginServiceAsync(string tenantId, string clientId) {
+    private async Task<DeviceCodeLoginService> GetDeviceCodeLoginServiceAsync(string? tenantId, string? clientId) {
         var credential = await GetDeviceCodeCredentialAsync(tenantId, clientId);
         return new(credential, pathUtility);
     }
 
-    private async Task<DeviceCodeCredential> GetDeviceCodeCredentialAsync(string tenantId, string clientId) {
+    private async Task<DeviceCodeCredential> GetDeviceCodeCredentialAsync(string? tenantId, string? clientId) {
         DeviceCodeCredentialOptions credOptions = new()
         {
             ClientId = clientId,
