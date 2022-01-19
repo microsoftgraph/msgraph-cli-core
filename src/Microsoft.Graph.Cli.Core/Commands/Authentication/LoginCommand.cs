@@ -9,7 +9,7 @@ using System.CommandLine.Invocation;
 
 namespace Microsoft.Graph.Cli.Core.Commands.Authentication;
 
-class LoginCommand
+public class LoginCommand
 {
     private AuthenticationServiceFactory authenticationServiceFactory;
 

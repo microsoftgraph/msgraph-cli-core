@@ -5,7 +5,7 @@ using System.CommandLine.Invocation;
 
 namespace Microsoft.Graph.Cli.Core.Commands.Authentication;
 
-class LogoutCommand
+public class LogoutCommand
 {
     private readonly LogoutService logoutService;
 
