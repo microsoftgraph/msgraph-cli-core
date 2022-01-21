@@ -14,16 +14,16 @@ public abstract class LoginServiceBase : ILoginService {
         this.pathUtility = pathUtility;
     }
 
-    public async Task LoginAsync(string[] scopes) {
-        var record = await this.DoLoginAsync(scopes);
-        await this.SaveSessionAsync(record);
+    public async Task LoginAsync(string[] scopes, CancellationToken cancellationToken = default(CancellationToken)) {
+        var record = await this.DoLoginAsync(scopes, cancellationToken);
+        await this.SaveSessionAsync(record, cancellationToken);
     }
 
-    protected abstract Task<AuthenticationRecord> DoLoginAsync(string[] scopes);
+    protected abstract Task<AuthenticationRecord> DoLoginAsync(string[] scopes, CancellationToken cancellationToken = default(CancellationToken));
 
-    public async Task SaveSessionAsync(AuthenticationRecord record) {
+    public async Task SaveSessionAsync(AuthenticationRecord record, CancellationToken cancellationToken = default(CancellationToken)) {
         var recordPath = Path.Combine(pathUtility.GetApplicationDataDirectory(), Constants.AuthRecordPath);
         using var authRecordStream = new FileStream(recordPath, FileMode.OpenOrCreate, FileAccess.Write);
-        await record.SerializeAsync(authRecordStream);
+        await record.SerializeAsync(authRecordStream, cancellationToken);
     }
 }
