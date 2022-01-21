@@ -30,7 +30,7 @@ public class LoginCommand
         loginCommand.SetHandler<string[], AuthenticationStrategy, IHost, CancellationToken>(async (scopes, strategy, host, cancellationToken) =>
         {
             var options = host.Services.GetRequiredService<IOptionsMonitor<AuthenticationOptions>>().CurrentValue;
-            var authService = await this.authenticationServiceFactory.GetAuthenticationServiceAsync(strategy, options?.TenantId, options?.ClientId);
+            var authService = await this.authenticationServiceFactory.GetAuthenticationServiceAsync(strategy, options?.TenantId, options?.ClientId, cancellationToken);
             await authService.LoginAsync(scopes, cancellationToken);
         }, scopes, strategy, new HostBinder());
 
