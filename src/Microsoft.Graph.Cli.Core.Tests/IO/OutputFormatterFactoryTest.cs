@@ -40,5 +40,15 @@ public class OutputFormatterFactoryTest {
             Assert.NotNull(formatter);
             Assert.True(formatter is JsonOutputFormatter);
         }
+
+        [Fact]
+        public void Return_JsonOutputFormatter_On_JSON_String() {
+            var factory = OutputFormatterFactory.Instance;
+
+            var formatter = factory.GetFormatter("json");
+
+            Assert.NotNull(formatter);
+            Assert.True(formatter is JsonOutputFormatter);
+        }
     }
 }

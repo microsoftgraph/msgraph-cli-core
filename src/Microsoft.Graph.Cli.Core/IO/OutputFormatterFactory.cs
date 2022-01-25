@@ -26,4 +26,9 @@ public sealed class OutputFormatterFactory
                 throw new System.NotSupportedException();
         }
     }
+
+    public IOutputFormatter GetFormatter(string format) {
+        var type = Enum.Parse<FormatterType>(format.ToUpper());
+        return this.GetFormatter(type);
+    }
 }
