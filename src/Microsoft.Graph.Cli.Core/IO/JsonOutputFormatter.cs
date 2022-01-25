@@ -8,4 +8,11 @@ public class JsonOutputFormatter : IOutputFormatter
     {
         console.WriteLine(content);
     }
+
+    public void WriteOutput(Stream content, IConsole console)
+    {
+        using var reader = new StreamReader(content);
+        var strContent = reader.ReadToEnd();
+        console.WriteLine(strContent);
+    }
 }
