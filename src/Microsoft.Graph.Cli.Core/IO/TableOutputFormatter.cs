@@ -41,15 +41,13 @@ namespace Microsoft.Graph.Cli.Core.IO
             }
 
             var properties = new List<(JsonValueKind,string)>();
-            var table = new Table();
+            var table = new Table().Expand();
             if (firstElement.ValueKind != JsonValueKind.Object) {
                 properties.Add((firstElement.ValueKind, "Value"));
             } else {
                 var restrictedValueKinds = new JsonValueKind[] {
                     JsonValueKind.Array,
-                    JsonValueKind.Null,
-                    JsonValueKind.Object,
-                    JsonValueKind.Undefined
+                    JsonValueKind.Object
                 };
                 properties = firstElement.EnumerateObject()
                     .Where(p => !restrictedValueKinds.Contains(p.Value.ValueKind))

@@ -24,7 +24,7 @@ public class OutputFormatterFactoryTest {
 
     public class GetFormatterFunction_Should {
         [Theory]
-        [InlineData(FormatterType.TABLE)]
+        [InlineData(FormatterType.NONE)]
         public void ThrowException_On_Invalid_FormatterType(FormatterType formatterType) {
             var factory = OutputFormatterFactory.Instance;
 
