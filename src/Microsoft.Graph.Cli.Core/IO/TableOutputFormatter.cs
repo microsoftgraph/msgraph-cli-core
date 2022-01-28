@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text.Json;
 using Spectre.Console;
+using Spectre.Console.Rendering;
 
 namespace Microsoft.Graph.Cli.Core.IO
 {
@@ -24,75 +25,102 @@ namespace Microsoft.Graph.Cli.Core.IO
             AnsiConsole.Write(table);
         }
 
-        private Table ConstructTable(JsonDocument document) {
+        public Table ConstructTable(JsonDocument document)
+        {
             var root = document.RootElement;
             JsonElement firstElement;
             JsonElement value;
-            var hasValueProperty = root.TryGetProperty("value", out value);
-            if (hasValueProperty) {
+            if (root.ValueKind == JsonValueKind.Object && root.TryGetProperty("value", out value))
                 root = value;
-            }
 
-            if (root.ValueKind == JsonValueKind.Array && root.GetArrayLength() > 0) {
+            if (root.ValueKind == JsonValueKind.Array && root.GetArrayLength() > 0)
+            {
                 var enumerated = root.EnumerateArray();
                 firstElement = enumerated.FirstOrDefault();
-            } else {
+            }
+            else
+            {
                 firstElement = root;
             }
 
-            var properties = new List<(JsonValueKind,string)>();
-            var table = new Table().Expand();
-            if (firstElement.ValueKind != JsonValueKind.Object) {
-                properties.Add((firstElement.ValueKind, "Value"));
-            } else {
+            IEnumerable<string> propertyNames;
+            var table = new Table();
+            table.Expand();
+            if (firstElement.ValueKind != JsonValueKind.Object)
+            {
+                propertyNames = new List<string> { "Value" };
+            }
+            else
+            {
                 var restrictedValueKinds = new JsonValueKind[] {
                     JsonValueKind.Array,
                     JsonValueKind.Object
                 };
-                properties = firstElement.EnumerateObject()
+                propertyNames = firstElement.EnumerateObject()
                     .Where(p => !restrictedValueKinds.Contains(p.Value.ValueKind))
-                    .Select(p => (p.Value.ValueKind, p.Name)).ToList();
+                    .Select(p => p.Name);
             }
 
-            if (root.ValueKind == JsonValueKind.Array) {
-                foreach (var property in properties)
-                    table.AddColumn(property.Item2, column => {
-                        if (property.Item1 == JsonValueKind.Number)
+            foreach (var propertyName in propertyNames)
+                table.AddColumn(propertyName, column =>
+                {
+                    if (firstElement.ValueKind == JsonValueKind.Object) {
+                        JsonElement property;
+                        var hasProp = firstElement.TryGetProperty(propertyName, out property);
+                        if (property.ValueKind == JsonValueKind.Number)
                             column.RightAligned().PadLeft(10);
-                    });
+                    }
+                });
 
+            if (root.ValueKind == JsonValueKind.Array)
+            {
                 foreach (var row in root.EnumerateArray())
                 {
-                    var rowCols = properties.Select(p => {
-                        var valueKind = p.Item1;
-                        var propertyName = p.Item2;
-                        JsonElement property;
-                        var hasProp = row.TryGetProperty(propertyName, out property);
-                        if (hasProp) {
-                            object? value = null;
-                            switch (valueKind)
-                            {
-                                case JsonValueKind.String:
-                                    value = property.GetString();
-                                    break;
-                                case JsonValueKind.True:
-                                case JsonValueKind.False:
-                                    value = property.GetBoolean();
-                                    break;
-                                case JsonValueKind.Number:
-                                    value = property.GetDecimal();
-                                    break;
-                            }
-                            return new Markup(value?.ToString() ?? "-");
-                        } else {
-                            return new Markup("-");
-                        }
-                    });
+                    var rowCols = this.GetRowColumns(propertyNames, row);
                     table.AddRow(rowCols);
                 }
+            } else if (root.ValueKind == JsonValueKind.Object) {
+                var rowCols = this.GetRowColumns(propertyNames, root);
+                table.AddRow(rowCols);
+            } else {
+                table.AddRow(this.GetPropertyValue(root));
             }
 
             return table;
+        }
+
+        private IEnumerable<IRenderable> GetRowColumns(IEnumerable<string> propertyNames, JsonElement row)
+        {
+            return propertyNames.Select(p =>
+            {
+                var propertyName = p;
+                JsonElement property;
+                var hasProp = row.TryGetProperty(propertyName, out property);
+                var valueKind = property.ValueKind;
+                if (hasProp)
+                    return this.GetPropertyValue(property);
+                else
+                    return new Markup("-");
+            });
+        }
+
+        private IRenderable GetPropertyValue(JsonElement property) {
+            var valueKind = property.ValueKind;
+            object? value = null;
+            switch (valueKind)
+            {
+                case JsonValueKind.String:
+                    value = property.GetString();
+                    break;
+                case JsonValueKind.True:
+                case JsonValueKind.False:
+                    value = property.GetBoolean();
+                    break;
+                case JsonValueKind.Number:
+                    value = property.GetDecimal();
+                    break;
+            }
+            return new Markup(value?.ToString() ?? "-");
         }
     }
 }
