@@ -45,6 +45,7 @@ public class AuthenticationServiceFactory {
         {
             ClientId = clientId,
             TenantId = tenantId,
+            DisableAutomaticAuthentication = true,
         };
 
         TokenCachePersistenceOptions tokenCacheOptions = new() { Name = Constants.TokenCacheName };
