@@ -1,21 +1,7 @@
 namespace Microsoft.Graph.Cli.Core.IO;
 
-public sealed class OutputFormatterFactory
+public sealed class OutputFormatterFactory : IOutputFormatterFactory
 {
-    private static readonly Lazy<OutputFormatterFactory> instance = new Lazy<OutputFormatterFactory>(() => new OutputFormatterFactory());
-
-    private OutputFormatterFactory()
-    {
-    }
-
-    public static OutputFormatterFactory Instance
-    {
-        get
-        {
-            return instance.Value;
-        }
-    }
-
     public IOutputFormatter GetFormatter(FormatterType formatterType)
     {
         switch (formatterType)
