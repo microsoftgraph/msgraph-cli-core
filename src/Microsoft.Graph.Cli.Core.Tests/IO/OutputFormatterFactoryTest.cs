@@ -8,17 +8,9 @@ public class OutputFormatterFactoryTest {
     public class InstanceProperty_Should {
         [Fact]
         public void ReturnOutputFormatterFactoryInstance() {
-            var instance = OutputFormatterFactory.Instance;
+            var instance = new OutputFormatterFactory();
 
             Assert.NotNull(instance);
-        }
-
-        [Fact]
-        public void ReturnSingletonInstance_On_Multiple_Calls() {
-            var instance1 = OutputFormatterFactory.Instance;
-            var instance2 = OutputFormatterFactory.Instance;
-
-            Assert.Same(instance1, instance2);
         }
     }
 
@@ -26,14 +18,14 @@ public class OutputFormatterFactoryTest {
         [Theory]
         [InlineData(FormatterType.NONE)]
         public void ThrowException_On_Invalid_FormatterType(FormatterType formatterType) {
-            var factory = OutputFormatterFactory.Instance;
+            var factory = new OutputFormatterFactory();
 
             Assert.Throws<NotSupportedException>(() => factory.GetFormatter(formatterType));
         }
 
         [Fact]
         public void Return_JsonOutputFormatter_On_JSON_FormatterType() {
-            var factory = OutputFormatterFactory.Instance;
+            var factory = new OutputFormatterFactory();
 
             var formatter = factory.GetFormatter(FormatterType.JSON);
 
@@ -43,7 +35,7 @@ public class OutputFormatterFactoryTest {
 
         [Fact]
         public void Return_JsonOutputFormatter_On_JSON_String() {
-            var factory = OutputFormatterFactory.Instance;
+            var factory = new OutputFormatterFactory();
 
             var formatter = factory.GetFormatter("json");
 

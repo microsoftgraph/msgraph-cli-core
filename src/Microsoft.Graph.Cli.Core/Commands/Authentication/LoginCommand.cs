@@ -32,7 +32,7 @@ public class LoginCommand
             var options = host.Services.GetRequiredService<IOptionsMonitor<AuthenticationOptions>>().CurrentValue;
             var authService = await this.authenticationServiceFactory.GetAuthenticationServiceAsync(strategy, options?.TenantId, options?.ClientId, cancellationToken);
             await authService.LoginAsync(scopes, cancellationToken);
-        }, scopes, strategy, new HostBinder());
+        }, scopes, strategy);
 
         return loginCommand;
     }

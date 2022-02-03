@@ -12,7 +12,7 @@ public class JsonOutputFormatterTest {
     public class WriteOutputFunction_Should {
         [Fact]
         public void Write_A_Line_With_String_Content() {
-            var formatter = OutputFormatterFactory.Instance.GetFormatter(FormatterType.JSON);
+            var formatter = new OutputFormatterFactory().GetFormatter(FormatterType.JSON);
             var consoleMock = new Mock<IConsole>();
             consoleMock.Setup(c => c.Out.Write(It.IsAny<string>()));
             var content = "Test content";
@@ -26,7 +26,7 @@ public class JsonOutputFormatterTest {
 
         [Fact]
         public void Write_A_Line_With_Stream_Content() {
-            var formatter = OutputFormatterFactory.Instance.GetFormatter(FormatterType.JSON);
+            var formatter = new OutputFormatterFactory().GetFormatter(FormatterType.JSON);
             var consoleMock = new Mock<IConsole>();
             consoleMock.Setup(c => c.Out.Write(It.IsAny<string>()));
             var content = "Test content";
