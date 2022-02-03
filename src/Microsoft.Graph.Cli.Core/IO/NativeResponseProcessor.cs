@@ -6,8 +6,7 @@ public class NativeResponseProcessor : IResponseProcessor
 {
     public async Task<string?> ExtractStringResponseAsync(IResponseHandler responseHandler)
     {
-        var handler = responseHandler as NativeResponseHandler;
-        var response = handler?.Value as HttpResponseMessage;
+        var response = this.GetHttpResponseMessage(responseHandler);
         if (response is not null)
         {
             return await response.Content.ReadAsStringAsync();
@@ -18,8 +17,7 @@ public class NativeResponseProcessor : IResponseProcessor
 
     public async Task<Stream?> ExtractStreamResponseAsync(IResponseHandler responseHandler)
     {
-        var handler = responseHandler as NativeResponseHandler;
-        var response = handler?.Value as HttpResponseMessage;
+        var response = this.GetHttpResponseMessage(responseHandler);
         if (response is not null)
         {
             return await response.Content.ReadAsStreamAsync();
@@ -30,13 +28,17 @@ public class NativeResponseProcessor : IResponseProcessor
 
     public bool IsResponseSuccessful(IResponseHandler responseHandler)
     {
-        var handler = responseHandler as NativeResponseHandler;
-        var response = handler?.Value as HttpResponseMessage;
+        var response = this.GetHttpResponseMessage(responseHandler);
         if (response is not null)
         {
             return response.IsSuccessStatusCode;
         }
 
         return false;
+    }
+
+    private HttpResponseMessage? GetHttpResponseMessage(IResponseHandler responseHandler) {
+        var handler = responseHandler as NativeResponseHandler;
+        return handler?.Value as HttpResponseMessage;
     }
 }
