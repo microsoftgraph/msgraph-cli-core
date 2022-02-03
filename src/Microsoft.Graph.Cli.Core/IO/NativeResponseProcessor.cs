@@ -25,7 +25,7 @@ public class NativeResponseProcessor : IResponseProcessor
             return await response.Content.ReadAsStreamAsync();
         }
 
-        return Stream.Null;
+        return null;
     }
 
     public bool IsResponseSuccessful(IResponseHandler responseHandler)
