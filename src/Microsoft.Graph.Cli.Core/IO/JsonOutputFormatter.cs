@@ -1,18 +1,20 @@
 using System.CommandLine;
+using Microsoft.Kiota.Cli.Commons.IO;
+using Spectre.Console;
 
 namespace Microsoft.Graph.Cli.Core.IO;
 
 public class JsonOutputFormatter : IOutputFormatter
 {
-    public void WriteOutput(string content, IConsole console)
+    public void WriteOutput(string content)
     {
-        console.WriteLine(content);
+        AnsiConsole.WriteLine(content);
     }
 
-    public void WriteOutput(Stream content, IConsole console)
+    public void WriteOutput(Stream content)
     {
         using var reader = new StreamReader(content);
         var strContent = reader.ReadToEnd();
-        console.WriteLine(strContent);
+        AnsiConsole.WriteLine(strContent);
     }
 }

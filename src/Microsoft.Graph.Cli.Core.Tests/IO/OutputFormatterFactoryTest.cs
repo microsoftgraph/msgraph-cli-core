@@ -1,5 +1,6 @@
 using System;
 using Microsoft.Graph.Cli.Core.IO;
+using Microsoft.Kiota.Cli.Commons.IO;
 using Xunit;
 
 namespace Microsoft.Graph.Cli.Core.Tests.IO;
