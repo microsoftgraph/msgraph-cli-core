@@ -12,14 +12,14 @@ namespace Microsoft.Graph.Cli.Core.IO
 
     public class TableOutputFormatter : IOutputFormatter
     {
-        public void WriteOutput(string content, IConsole console)
+        public void WriteOutput(string content)
         {
             using var doc = JsonDocument.Parse(content);
             var table = this.ConstructTable(doc);
             AnsiConsole.Write(table);
         }
 
-        public void WriteOutput(Stream content, IConsole console)
+        public void WriteOutput(Stream content)
         {
             using var doc = JsonDocument.Parse(content);
             var table = this.ConstructTable(doc);
