@@ -3,6 +3,7 @@ using System.CommandLine;
 using System.IO;
 using System.Text;
 using Microsoft.Graph.Cli.Core.IO;
+using Microsoft.Kiota.Cli.Commons.IO;
 using Moq;
 using Xunit;
 

@@ -1,3 +1,5 @@
+using Microsoft.Kiota.Cli.Commons.IO;
+
 namespace Microsoft.Graph.Cli.Core.IO;
 
 public sealed class OutputFormatterFactory : IOutputFormatterFactory

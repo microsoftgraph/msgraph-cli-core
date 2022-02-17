@@ -3,6 +3,7 @@ using System.CommandLine;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
+using Microsoft.Kiota.Cli.Commons.IO;
 using Spectre.Console;
 using Spectre.Console.Rendering;
 

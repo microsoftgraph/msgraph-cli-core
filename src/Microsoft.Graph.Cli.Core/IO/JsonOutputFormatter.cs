@@ -1,4 +1,5 @@
 using System.CommandLine;
+using Microsoft.Kiota.Cli.Commons.IO;
 
 namespace Microsoft.Graph.Cli.Core.IO;
 
