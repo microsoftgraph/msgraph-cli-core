@@ -33,7 +33,7 @@ public class TableOutputFormatterTest {
         }
 
         [Fact]
-        public void Create_A_Table_Given_An_JSON_Array() {
+        public void Create_A_Table_Given_A_JSON_Array() {
             var console = new TestConsole();
             var formatter = new TableOutputFormatter();
             var content = "[{\"a\": \"value a\", \"b\": null, \"c\": \"value c\"}, {\"a\": \"value a\", \"b\": \"value b\", \"c\": null}]";
@@ -50,7 +50,7 @@ public class TableOutputFormatterTest {
         }
 
         [Fact]
-        public void Create_A_Table_Given_An_JSON_ObjectWith_Value_Array() {
+        public void Create_A_Table_Given_A_JSON_Object_With_Value_Array() {
             var console = new TestConsole();
             var formatter = new TableOutputFormatter();
             var content = "{\"value\": [{\"a\": \"value a\", \"b\": null, \"c\": \"value c\"}, {\"a\": \"value a\", \"b\": \"value b\", \"c\": null}]}";
@@ -64,6 +64,44 @@ public class TableOutputFormatterTest {
             Assert.Equal("a", headerText);
             var row0col1Text = table.Rows.First()[1].GetSegments(console).Select(s => s.Text).FirstOrDefault();
             Assert.Equal("-", row0col1Text);
+        }
+
+        [Fact]
+        public void Create_A_Table_Given_An_Array_Of_Non_Object_Values()
+        {
+            var console = new TestConsole();
+            var formatter = new TableOutputFormatter();
+            var content = "[1, 2, 3, 4, 5, [10, 11]]";
+            var doc = JsonDocument.Parse(content);
+
+            var table = formatter.ConstructTable(doc);
+
+            Assert.Equal(1, table.Columns.Count);
+            Assert.Equal(6, table.Rows.Count);
+            var headerText = table.Columns[0].Header.GetSegments(console).Select(s => s.Text).FirstOrDefault();
+            Assert.Equal("Value", headerText);
+            var row0col0Text = table.Rows.First().First().GetSegments(console).Select(s => s.Text).FirstOrDefault();
+            Assert.Equal("1", row0col0Text);
+            var row5col0Text = table.Rows.Skip(5).First().First().GetSegments(console).Select(s => s.Text).FirstOrDefault();
+            Assert.Equal("-", row5col0Text);
+        }
+
+        [Fact]
+        public void Create_A_Table_Given_A_Scalar_Values()
+        {
+            var console = new TestConsole();
+            var formatter = new TableOutputFormatter();
+            var content = "1";
+            var doc = JsonDocument.Parse(content);
+
+            var table = formatter.ConstructTable(doc);
+
+            Assert.Equal(1, table.Columns.Count);
+            Assert.Equal(1, table.Rows.Count);
+            var headerText = table.Columns[0].Header.GetSegments(console).Select(s => s.Text).FirstOrDefault();
+            Assert.Equal("Value", headerText);
+            var row0col0Text = table.Rows.First().First().GetSegments(console).Select(s => s.Text).FirstOrDefault();
+            Assert.Equal("1", row0col0Text);
         }
     }
 }

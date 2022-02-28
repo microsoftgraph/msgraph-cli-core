@@ -96,12 +96,15 @@ namespace Microsoft.Graph.Cli.Core.IO
             {
                 var propertyName = p;
                 JsonElement property;
-                var hasProp = row.TryGetProperty(propertyName, out property);
-                var valueKind = property.ValueKind;
-                if (hasProp)
-                    return this.GetPropertyValue(property);
-                else
-                    return new Markup("-");
+                if (row.ValueKind == JsonValueKind.Object) {
+                    var hasProp = row.TryGetProperty(propertyName, out property);
+                    if (hasProp)
+                        return this.GetPropertyValue(property);
+                    else
+                        return new Markup("-");
+                }
+                
+                return this.GetPropertyValue(row);
             });
         }
 
