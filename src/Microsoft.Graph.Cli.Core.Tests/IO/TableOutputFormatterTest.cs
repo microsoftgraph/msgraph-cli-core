@@ -85,5 +85,23 @@ public class TableOutputFormatterTest {
             var row5col0Text = table.Rows.Skip(5).First().First().GetSegments(console).Select(s => s.Text).FirstOrDefault();
             Assert.Equal("-", row5col0Text);
         }
+
+        [Fact]
+        public void Create_A_Table_Given_A_Scalar_Values()
+        {
+            var console = new TestConsole();
+            var formatter = new TableOutputFormatter();
+            var content = "1";
+            var doc = JsonDocument.Parse(content);
+
+            var table = formatter.ConstructTable(doc);
+
+            Assert.Equal(1, table.Columns.Count);
+            Assert.Equal(1, table.Rows.Count);
+            var headerText = table.Columns[0].Header.GetSegments(console).Select(s => s.Text).FirstOrDefault();
+            Assert.Equal("Value", headerText);
+            var row0col0Text = table.Rows.First().First().GetSegments(console).Select(s => s.Text).FirstOrDefault();
+            Assert.Equal("1", row0col0Text);
+        }
     }
 }
