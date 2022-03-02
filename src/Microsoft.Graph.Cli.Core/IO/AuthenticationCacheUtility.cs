@@ -28,7 +28,7 @@ public class AuthenticationCacheUtility : IAuthenticationCacheUtility {
         return (split[0], split[1]);
     }
 
-    public async Task SaveAuthenticationIdentifiersAsync(string clientId, string tenantId, CancellationToken cancellationToken = default(CancellationToken)) {
+    public async Task SaveAuthenticationIdentifiersAsync(string clientId, string tenantId, CancellationToken cancellationToken = default) {
         cancellationToken.ThrowIfCancellationRequested();
         var path = this.GetAuthenticationIdFilePath();
         var data = $"{clientId}:{tenantId}";
