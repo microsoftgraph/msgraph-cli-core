@@ -33,7 +33,7 @@ public class AuthenticationCacheUtility : IAuthenticationCacheUtility {
         return configRoot.AuthenticationOptions;
     }
 
-    public async Task SaveAuthenticationIdentifiersAsync(string clientId, string tenantId, CancellationToken cancellationToken = default(CancellationToken)) {
+    public async Task SaveAuthenticationIdentifiersAsync(string clientId, string tenantId, CancellationToken cancellationToken = default) {
         cancellationToken.ThrowIfCancellationRequested();
         var path = this.GetAuthenticationCacheFilePath();
         var configuration = new Configuration.ConfigurationRoot {
