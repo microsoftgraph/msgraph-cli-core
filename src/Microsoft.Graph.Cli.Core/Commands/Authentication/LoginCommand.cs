@@ -35,11 +35,10 @@ public class LoginCommand
         var strategyOption = new Option<AuthenticationStrategy>("--strategy", () => Constants.defaultAuthStrategy, "The authentication strategy to use.");
         loginCommand.AddOption(strategyOption);
 
-        loginCommand.SetHandler<string[], string, string, AuthenticationStrategy, IHost, CancellationToken>(async (scopes, clientId, tenantId, strategy, host, cancellationToken) =>
+        loginCommand.SetHandler<string[], string?, string?, AuthenticationStrategy, IHost, CancellationToken>(async (scopes, clientId, tenantId, strategy, host, cancellationToken) =>
         {
             var authUtil = host.Services.GetRequiredService<IAuthenticationCacheUtility>();
-            var options = host.Services.GetRequiredService<IOptionsMonitor<AuthenticationOptions>>().CurrentValue;
-            var authService = await this.authenticationServiceFactory.GetAuthenticationServiceAsync(strategy, options?.TenantId, options?.ClientId, cancellationToken);
+            var authService = await this.authenticationServiceFactory.GetAuthenticationServiceAsync(strategy, tenantId, clientId, cancellationToken);
             await authService.LoginAsync(scopes, cancellationToken);
             await authUtil.SaveAuthenticationIdentifiersAsync(clientId, tenantId, cancellationToken);
         }, scopesOption, clientIdOption, tenantIdOption, strategyOption);
