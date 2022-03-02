@@ -8,9 +8,9 @@ namespace Microsoft.Graph.Cli.Core.Utils
 
         public const string AuthRecordPath = "authRecord";
 
-        public const string TokenCacheName = "MicrosoftGraph";
+        public const string AuthenticationIdCachePath = "authentication-id-cache.json";
 
-        public const string AuthenticationSection = "Authentication";
+        public const string TokenCacheName = "MicrosoftGraph";
 
         public const AuthenticationStrategy defaultAuthStrategy = AuthenticationStrategy.DeviceCode;
     }

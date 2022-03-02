@@ -1,42 +1,49 @@
 using System.Text;
+using System.Text.Json;
+using Microsoft.Graph.Cli.Core.Configuration;
+using Microsoft.Graph.Cli.Core.Utils;
 
 namespace Microsoft.Graph.Cli.Core.IO;
 
 public class AuthenticationCacheUtility : IAuthenticationCacheUtility {
     private readonly IPathUtility pathUtility;
 
-    private const string AUTHENTICATION_ID_FILE = "authentication-id";
-
     public AuthenticationCacheUtility(IPathUtility pathUtility)
     {
         this.pathUtility = pathUtility;
     }
 
-    public async Task<(string, string)> ReadAuthenticationIdentifiersAsync(CancellationToken cancellationToken = default)
+    public string GetAuthenticationCacheFilePath()
+    {
+        return Path.Join(pathUtility.GetApplicationDataDirectory(), Constants.AuthenticationIdCachePath);
+    }
+
+    public async Task<AuthenticationOptions> ReadAuthenticationIdentifiersAsync(CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        var path = this.GetAuthenticationIdFilePath();
+        var path = this.GetAuthenticationCacheFilePath();
         if (!File.Exists(path)) {
             throw new FileNotFoundException();
         }
 
-        var text = await File.ReadAllTextAsync(path, cancellationToken);
-        if (string.IsNullOrWhiteSpace(text)) throw new AuthenticationIdentifierException("The authentication identifier cache file is empty");
-        var split = text.Split(':', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
-        if (split.Length != 2) throw new AuthenticationIdentifierException("The authentication identifier cache file cannot be parsed");
+        using var fileStream = File.OpenRead(path);
+        var configRoot = await JsonSerializer.DeserializeAsync<Configuration.ConfigurationRoot>(fileStream, cancellationToken: cancellationToken);
+        if (configRoot?.AuthenticationOptions is null) throw new AuthenticationIdentifierException("Cannot find cached authentication identifiers.");
         
-        return (split[0], split[1]);
+        return configRoot.AuthenticationOptions;
     }
 
     public async Task SaveAuthenticationIdentifiersAsync(string clientId, string tenantId, CancellationToken cancellationToken = default(CancellationToken)) {
         cancellationToken.ThrowIfCancellationRequested();
-        var path = this.GetAuthenticationIdFilePath();
-        var data = $"{clientId}:{tenantId}";
-        await File.WriteAllTextAsync(path, data, cancellationToken);
-    }
-
-    private string GetAuthenticationIdFilePath() {
-        return Path.Join(pathUtility.GetApplicationDataDirectory(), AUTHENTICATION_ID_FILE);
+        var path = this.GetAuthenticationCacheFilePath();
+        var configuration = new Configuration.ConfigurationRoot {
+            AuthenticationOptions = new AuthenticationOptions {
+                ClientId = clientId,
+                TenantId = tenantId
+            }
+        };
+        using FileStream fileStream = File.OpenWrite(path);
+        await JsonSerializer.SerializeAsync(fileStream, configuration, cancellationToken: cancellationToken);
     }
 
     public class AuthenticationIdentifierException : Exception
