@@ -10,14 +10,17 @@ using Xunit;
 
 namespace Microsoft.Graph.Cli.Core.Tests.IO;
 
-public class JsonOutputFormatterTest {
-    public class WriteOutputFunction_Should {
+public class JsonOutputFormatterTest
+{
+    public class WriteOutputFunction_Should
+    {
         [Fact]
-        public void Write_A_Line_With_String_Content() {
+        public void Write_A_Line_With_String_Content()
+        {
             var formatter = new OutputFormatterFactory().GetFormatter(FormatterType.JSON);
             var content = "Test content";
             var stringWriter = new StringWriter();
-            var console = AnsiConsole.Create(new AnsiConsoleSettings {Out = new AnsiConsoleOutput(stringWriter)});
+            var console = AnsiConsole.Create(new AnsiConsoleSettings { Out = new AnsiConsoleOutput(stringWriter) });
             AnsiConsole.Console = console;
 
             formatter.WriteOutput(content, new JsonOutputFormatterOptions());
@@ -26,11 +29,12 @@ public class JsonOutputFormatterTest {
         }
 
         [Fact]
-        public void Write_Indented_Output_Given_A_Minified_Json_String() {
+        public void Write_Indented_Output_Given_A_Minified_Json_String()
+        {
             var formatter = new OutputFormatterFactory().GetFormatter(FormatterType.JSON);
             var content = "{\"a\": 1, \"b\": \"test\"}";
             var stringWriter = new StringWriter();
-            var console = AnsiConsole.Create(new AnsiConsoleSettings {Out = new AnsiConsoleOutput(stringWriter)});
+            var console = AnsiConsole.Create(new AnsiConsoleSettings { Out = new AnsiConsoleOutput(stringWriter) });
             AnsiConsole.Console = console;
 
             formatter.WriteOutput(content, new JsonOutputFormatterOptions());
@@ -40,12 +44,28 @@ public class JsonOutputFormatterTest {
         }
 
         [Fact]
-        public void Write_A_Line_With_Stream_Content() {
+        public void Write_Minified_Output_Given_A_Minified_Json_String_If_Indentation_Disabled()
+        {
+            var formatter = new OutputFormatterFactory().GetFormatter(FormatterType.JSON);
+            var content = "{\"a\": 1, \"b\": \"test\"}";
+            var stringWriter = new StringWriter();
+            var console = AnsiConsole.Create(new AnsiConsoleSettings { Out = new AnsiConsoleOutput(stringWriter) });
+            AnsiConsole.Console = console;
+
+            formatter.WriteOutput(content, new JsonOutputFormatterOptions { OutputIndented = false });
+            var expected = $"{content}{Environment.NewLine}";
+
+            Assert.Equal(expected, stringWriter.ToString());
+        }
+
+        [Fact]
+        public void Write_A_Line_With_Stream_Content()
+        {
             var formatter = new OutputFormatterFactory().GetFormatter(FormatterType.JSON);
             var content = "Test content";
             var stream = new MemoryStream(Encoding.ASCII.GetBytes(content));
             var stringWriter = new StringWriter();
-            var console = AnsiConsole.Create(new AnsiConsoleSettings {Out = new AnsiConsoleOutput(stringWriter)});
+            var console = AnsiConsole.Create(new AnsiConsoleSettings { Out = new AnsiConsoleOutput(stringWriter) });
             AnsiConsole.Console = console;
 
             formatter.WriteOutput(stream, new JsonOutputFormatterOptions());
@@ -54,16 +74,33 @@ public class JsonOutputFormatterTest {
         }
 
         [Fact]
-        public void Write_Indented_Output_Given_A_Minified_Json_Stream() {
+        public void Write_Indented_Output_Given_A_Minified_Json_Stream()
+        {
             var formatter = new OutputFormatterFactory().GetFormatter(FormatterType.JSON);
             var content = "{\"a\": 1, \"b\": \"test\"}";
             var stream = new MemoryStream(Encoding.ASCII.GetBytes(content));
             var stringWriter = new StringWriter();
-            var console = AnsiConsole.Create(new AnsiConsoleSettings {Out = new AnsiConsoleOutput(stringWriter)});
+            var console = AnsiConsole.Create(new AnsiConsoleSettings { Out = new AnsiConsoleOutput(stringWriter) });
             AnsiConsole.Console = console;
 
             formatter.WriteOutput(stream, new JsonOutputFormatterOptions());
             var expected = "\"{\\u0022a\\u0022: 1, \\u0022b\\u0022: \\u0022test\\u0022}\"\r\n";
+
+            Assert.Equal(expected, stringWriter.ToString());
+        }
+
+        [Fact]
+        public void Write_Minified_Output_Given_A_Minified_Json_Stream_If_Indentation_Disabled()
+        {
+            var formatter = new OutputFormatterFactory().GetFormatter(FormatterType.JSON);
+            var content = "{\"a\": 1, \"b\": \"test\"}";
+            var stream = new MemoryStream(Encoding.ASCII.GetBytes(content));
+            var stringWriter = new StringWriter();
+            var console = AnsiConsole.Create(new AnsiConsoleSettings { Out = new AnsiConsoleOutput(stringWriter) });
+            AnsiConsole.Console = console;
+
+            formatter.WriteOutput(stream, new JsonOutputFormatterOptions { OutputIndented = false });
+            var expected = $"{content}{Environment.NewLine}";
 
             Assert.Equal(expected, stringWriter.ToString());
         }
