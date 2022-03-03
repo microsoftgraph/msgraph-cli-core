@@ -38,9 +38,9 @@ public class JsonOutputFormatterTest
             AnsiConsole.Console = console;
 
             formatter.WriteOutput(content, new JsonOutputFormatterOptions());
-            var expected = "\"{\\u0022a\\u0022: 1, \\u0022b\\u0022: \\u0022test\\u0022}\"\r\n";
+            var expected = "\"{\\u0022a\\u0022: 1, \\u0022b\\u0022: \\u0022test\\u0022}\"";
 
-            Assert.Equal(expected, stringWriter.ToString());
+            Assert.Equal($"{expected}{Environment.NewLine}", stringWriter.ToString());
         }
 
         [Fact]
@@ -84,9 +84,9 @@ public class JsonOutputFormatterTest
             AnsiConsole.Console = console;
 
             formatter.WriteOutput(stream, new JsonOutputFormatterOptions());
-            var expected = "\"{\\u0022a\\u0022: 1, \\u0022b\\u0022: \\u0022test\\u0022}\"\r\n";
+            var expected = "\"{\\u0022a\\u0022: 1, \\u0022b\\u0022: \\u0022test\\u0022}\"";
 
-            Assert.Equal(expected, stringWriter.ToString());
+            Assert.Equal($"{expected}{Environment.NewLine}", stringWriter.ToString());
         }
 
         [Fact]
