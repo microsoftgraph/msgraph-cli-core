@@ -20,9 +20,23 @@ public class JsonOutputFormatterTest {
             var console = AnsiConsole.Create(new AnsiConsoleSettings {Out = new AnsiConsoleOutput(stringWriter)});
             AnsiConsole.Console = console;
 
-            formatter.WriteOutput(content);
+            formatter.WriteOutput(content, new JsonOutputFormatterOptions());
 
-            Assert.Equal($"{content}{Environment.NewLine}", stringWriter.ToString());
+            Assert.Equal($"\"{content}\"{Environment.NewLine}", stringWriter.ToString());
+        }
+
+        [Fact]
+        public void Write_Indented_Output_Given_A_Minified_Json_String() {
+            var formatter = new OutputFormatterFactory().GetFormatter(FormatterType.JSON);
+            var content = "{\"a\": 1, \"b\": \"test\"}";
+            var stringWriter = new StringWriter();
+            var console = AnsiConsole.Create(new AnsiConsoleSettings {Out = new AnsiConsoleOutput(stringWriter)});
+            AnsiConsole.Console = console;
+
+            formatter.WriteOutput(content, new JsonOutputFormatterOptions());
+            var expected = "\"{\\u0022a\\u0022: 1, \\u0022b\\u0022: \\u0022test\\u0022}\"\r\n";
+
+            Assert.Equal(expected, stringWriter.ToString());
         }
 
         [Fact]
@@ -34,9 +48,24 @@ public class JsonOutputFormatterTest {
             var console = AnsiConsole.Create(new AnsiConsoleSettings {Out = new AnsiConsoleOutput(stringWriter)});
             AnsiConsole.Console = console;
 
-            formatter.WriteOutput(stream);
+            formatter.WriteOutput(stream, new JsonOutputFormatterOptions());
 
-            Assert.Equal($"{content}{Environment.NewLine}", stringWriter.ToString());
+            Assert.Equal($"\"{content}\"{Environment.NewLine}", stringWriter.ToString());
+        }
+
+        [Fact]
+        public void Write_Indented_Output_Given_A_Minified_Json_Stream() {
+            var formatter = new OutputFormatterFactory().GetFormatter(FormatterType.JSON);
+            var content = "{\"a\": 1, \"b\": \"test\"}";
+            var stream = new MemoryStream(Encoding.ASCII.GetBytes(content));
+            var stringWriter = new StringWriter();
+            var console = AnsiConsole.Create(new AnsiConsoleSettings {Out = new AnsiConsoleOutput(stringWriter)});
+            AnsiConsole.Console = console;
+
+            formatter.WriteOutput(stream, new JsonOutputFormatterOptions());
+            var expected = "\"{\\u0022a\\u0022: 1, \\u0022b\\u0022: \\u0022test\\u0022}\"\r\n";
+
+            Assert.Equal(expected, stringWriter.ToString());
         }
     }
 }
