@@ -25,7 +25,7 @@ public class JsonOutputFormatterTest
 
             formatter.WriteOutput(content, new JsonOutputFormatterOptions());
 
-            Assert.Equal($"\"{content}\"{Environment.NewLine}", stringWriter.ToString());
+            Assert.Equal($"{content}{Environment.NewLine}", stringWriter.ToString());
         }
 
         [Fact]
@@ -36,11 +36,12 @@ public class JsonOutputFormatterTest
             var stringWriter = new StringWriter();
             var console = AnsiConsole.Create(new AnsiConsoleSettings { Out = new AnsiConsoleOutput(stringWriter) });
             AnsiConsole.Console = console;
+            var n = Environment.NewLine;
 
             formatter.WriteOutput(content, new JsonOutputFormatterOptions());
-            var expected = "\"{\\u0022a\\u0022: 1, \\u0022b\\u0022: \\u0022test\\u0022}\"";
+            var expected = $"{{{n}  \"a\": 1,{n}  \"b\": \"test\"{n}}}";
 
-            Assert.Equal($"{expected}{Environment.NewLine}", stringWriter.ToString());
+            Assert.Equal($"{expected}{n}", stringWriter.ToString());
         }
 
         [Fact]
@@ -70,7 +71,7 @@ public class JsonOutputFormatterTest
 
             formatter.WriteOutput(stream, new JsonOutputFormatterOptions());
 
-            Assert.Equal($"\"{content}\"{Environment.NewLine}", stringWriter.ToString());
+            Assert.Equal($"{content}{Environment.NewLine}", stringWriter.ToString());
         }
 
         [Fact]
@@ -82,11 +83,12 @@ public class JsonOutputFormatterTest
             var stringWriter = new StringWriter();
             var console = AnsiConsole.Create(new AnsiConsoleSettings { Out = new AnsiConsoleOutput(stringWriter) });
             AnsiConsole.Console = console;
+            var n = Environment.NewLine;
 
             formatter.WriteOutput(stream, new JsonOutputFormatterOptions());
-            var expected = "\"{\\u0022a\\u0022: 1, \\u0022b\\u0022: \\u0022test\\u0022}\"";
+            var expected = $"{{{n}  \"a\": 1,{n}  \"b\": \"test\"{n}}}";
 
-            Assert.Equal($"{expected}{Environment.NewLine}", stringWriter.ToString());
+            Assert.Equal($"{expected}{n}", stringWriter.ToString());
         }
 
         [Fact]

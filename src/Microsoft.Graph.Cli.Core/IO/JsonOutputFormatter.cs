@@ -1,4 +1,5 @@
 using System.CommandLine;
+using System.Text;
 using System.Text.Json;
 using Microsoft.Kiota.Cli.Commons.IO;
 using Spectre.Console;
@@ -11,7 +12,8 @@ public class JsonOutputFormatter : IOutputFormatter
     {
         if (options is JsonOutputFormatterOptions jsonOptions && jsonOptions.OutputIndented)
         {
-            AnsiConsole.WriteLine(JsonSerializer.Serialize(content, options: new() { WriteIndented = true }));
+            var result = this.ProcessJson(content, jsonOptions.OutputIndented);
+            AnsiConsole.WriteLine(result);
         }
         else
         {
@@ -25,11 +27,27 @@ public class JsonOutputFormatter : IOutputFormatter
         var strContent = reader.ReadToEnd();
         if (options is JsonOutputFormatterOptions jsonOptions && jsonOptions.OutputIndented)
         {
-            AnsiConsole.WriteLine(JsonSerializer.Serialize(strContent, options: new() { WriteIndented = true }));
+            var result = this.ProcessJson(strContent, jsonOptions.OutputIndented);
+            AnsiConsole.WriteLine(result);
         }
         else
         {
             AnsiConsole.WriteLine(strContent);
         }
+    }
+
+    private string ProcessJson(string input, bool indent = true)
+    {
+        var result = input;
+        try
+        {
+            var jsonDoc = JsonDocument.Parse(input);
+            result = JsonSerializer.Serialize(jsonDoc, options: new() { WriteIndented = indent });
+        }
+        catch (JsonException)
+        {
+        }
+
+        return result;
     }
 }
