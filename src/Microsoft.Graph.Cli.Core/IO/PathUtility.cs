@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using Microsoft.Graph.Cli.Core.Utils;
 
 namespace Microsoft.Graph.Cli.Core.IO;

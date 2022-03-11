@@ -1,3 +1,4 @@
+using System;
 using Microsoft.Extensions.Hosting;
 
 namespace Microsoft.Graph.Cli.Core.IO;
