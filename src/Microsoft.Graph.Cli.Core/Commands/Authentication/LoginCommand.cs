@@ -7,6 +7,7 @@ using Microsoft.Graph.Cli.Core.Configuration;
 using Microsoft.Graph.Cli.Core.IO;
 using Microsoft.Graph.Cli.Core.Utils;
 using System.CommandLine;
+using System.Threading;
 
 namespace Microsoft.Graph.Cli.Core.Commands.Authentication;
 

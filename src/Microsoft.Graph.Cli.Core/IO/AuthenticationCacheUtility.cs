@@ -1,5 +1,8 @@
-using System.Text;
+using System;
+using System.IO;
 using System.Text.Json;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Graph.Cli.Core.Configuration;
 using Microsoft.Graph.Cli.Core.Utils;
 

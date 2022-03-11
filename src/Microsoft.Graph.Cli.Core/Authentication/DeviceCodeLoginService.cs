@@ -1,3 +1,5 @@
+using System.Threading;
+using System.Threading.Tasks;
 using Azure.Core;
 using Azure.Identity;
 using Microsoft.Graph.Cli.Core.IO;
@@ -11,7 +13,7 @@ public class DeviceCodeLoginService : LoginServiceBase {
         this.credential = credential;
     }
 
-    protected override async Task<AuthenticationRecord> DoLoginAsync(string[] scopes, CancellationToken cancellationToken = default(CancellationToken)) {
+    protected override async Task<AuthenticationRecord> DoLoginAsync(string[] scopes, CancellationToken cancellationToken = default) {
         return await credential.AuthenticateAsync(new TokenRequestContext(scopes), cancellationToken);
     }
 }
