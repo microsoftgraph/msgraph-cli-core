@@ -11,7 +11,6 @@ public class GraphCliClientFactory
     public IEnumerable<DelegatingHandler> GetDefaultMiddlewaresWithOptions(GraphClientOptions options, IAuthenticationProvider authenticationProvider)
     {
         var result = new List<DelegatingHandler>();
-        var kiotaMiddlewares = KiotaClientFactory.CreateDefaultHandlers();
         var graphMiddlewares = GraphClientFactory.CreateDefaultHandlers(options);
         result.AddRange(kiotaMiddlewares);
         result.AddRange(graphMiddlewares);
