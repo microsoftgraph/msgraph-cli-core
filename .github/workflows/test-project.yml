@@ -5,7 +5,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       MS_NUGET_URL: https://nuget.pkg.github.com/microsoft/index.json
-      MSGRAPH_NUGET_URL: https://nuget.pkg.github.com/microsoft/index.json
+      MSGRAPH_NUGET_URL: https://nuget.pkg.github.com/microsoftgraph/index.json
     steps:
       - name: Checkout
         uses: actions/checkout@v3
