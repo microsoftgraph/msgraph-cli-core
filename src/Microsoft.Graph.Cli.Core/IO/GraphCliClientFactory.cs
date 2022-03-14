@@ -18,7 +18,7 @@ public class GraphCliClientFactory
         return result;
     }
 
-    public HttpClient GetDefaultClient(GraphClientOptions options, IAuthenticationProvider authenticationProvider, string nationalCloud = GraphClientFactory.Global_Cloud, params DelegatingHandler[] middlewares)
+    public HttpClient GetDefaultClient(GraphClientOptions options, string nationalCloud = GraphClientFactory.Global_Cloud, params DelegatingHandler[] middlewares)
     {
         IEnumerable<DelegatingHandler> m = middlewares;
         if (middlewares.Length == 0)
