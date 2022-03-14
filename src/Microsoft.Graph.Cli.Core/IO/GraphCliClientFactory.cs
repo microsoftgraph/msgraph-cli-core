@@ -8,14 +8,7 @@ namespace Microsoft.Graph.Cli.Core.IO;
 
 public class GraphCliClientFactory
 {
-    public IEnumerable<DelegatingHandler> GetDefaultMiddlewaresWithOptions(GraphClientOptions options)
-    {
-        var result = new List<DelegatingHandler>();
-        var graphMiddlewares = GraphClientFactory.CreateDefaultHandlers(options);
-        result.AddRange(graphMiddlewares);
-
-        return result;
-    }
+    public IEnumerable<DelegatingHandler> GetDefaultMiddlewaresWithOptions(GraphClientOptions options) => GraphClientFactory.CreateDefaultHandlers(options);
 
     public HttpClient GetDefaultClient(GraphClientOptions options, string nationalCloud = GraphClientFactory.Global_Cloud, params DelegatingHandler[] middlewares)
     {
