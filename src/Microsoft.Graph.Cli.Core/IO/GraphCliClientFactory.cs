@@ -8,11 +8,10 @@ namespace Microsoft.Graph.Cli.Core.IO;
 
 public class GraphCliClientFactory
 {
-    public IEnumerable<DelegatingHandler> GetDefaultMiddlewaresWithOptions(GraphClientOptions optionsr)
+    public IEnumerable<DelegatingHandler> GetDefaultMiddlewaresWithOptions(GraphClientOptions options)
     {
         var result = new List<DelegatingHandler>();
         var graphMiddlewares = GraphClientFactory.CreateDefaultHandlers(options);
-        result.AddRange(kiotaMiddlewares);
         result.AddRange(graphMiddlewares);
 
         return result;
@@ -23,7 +22,7 @@ public class GraphCliClientFactory
         IEnumerable<DelegatingHandler> m = middlewares;
         if (middlewares.Length == 0)
         {
-            m = GetDefaultMiddlewaresWithOptions(options, authenticationProvider);
+            m = GetDefaultMiddlewaresWithOptions(options);
         }
         var finalHandler = KiotaClientFactory.ChainHandlersCollectionAndGetFirstLink(KiotaClientFactory.GetDefaultHttpMessageHandler(), middlewares);
         return GraphClientFactory.Create(graphClientOptions: options, nationalCloud: nationalCloud, finalHandler: finalHandler);
