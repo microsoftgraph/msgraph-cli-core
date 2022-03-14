@@ -8,7 +8,7 @@ namespace Microsoft.Graph.Cli.Core.IO;
 
 public class GraphCliClientFactory
 {
-    public IEnumerable<DelegatingHandler> GetDefaultMiddlewaresWithOptions(GraphClientOptions options, IAuthenticationProvider authenticationProvider)
+    public IEnumerable<DelegatingHandler> GetDefaultMiddlewaresWithOptions(GraphClientOptions optionsr)
     {
         var result = new List<DelegatingHandler>();
         var graphMiddlewares = GraphClientFactory.CreateDefaultHandlers(options);
