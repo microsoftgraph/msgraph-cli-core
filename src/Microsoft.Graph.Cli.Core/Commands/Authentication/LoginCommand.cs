@@ -1,11 +1,13 @@
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using Microsoft.Graph.Cli.Core.Authentication;
 using Microsoft.Graph.Cli.Core.Configuration;
+using Microsoft.Graph.Cli.Core.IO;
 using Microsoft.Graph.Cli.Core.Utils;
 using System.CommandLine;
-using System.CommandLine.NamingConventionBinder;
+using System.Threading;
 
 namespace Microsoft.Graph.Cli.Core.Commands.Authentication;
 
@@ -19,20 +21,28 @@ public class LoginCommand
 
     public Command Build() {
         var loginCommand = new Command("login", "Login and store the session for use in subsequent commands");
-        var scopes = new Option<string>("--scopes", "The login scopes e.g. User.Read") {
+        var scopesOption = new Option<string[]>("--scopes", "The login scopes e.g. User.Read") {
             Arity = ArgumentArity.OneOrMore
         };
-        scopes.IsRequired = true;
-        loginCommand.AddOption(scopes);
+        scopesOption.IsRequired = true;
+        loginCommand.AddOption(scopesOption);
 
-        var strategy = new Option<AuthenticationStrategy>("--strategy", () => Constants.defaultAuthStrategy, "The authentication strategy to use.");
-        loginCommand.AddOption(strategy);
-        loginCommand.Handler = CommandHandler.Create<string[], AuthenticationStrategy, IHost>(async (scopes, strategy, host) =>
+        var clientIdOption = new Option<string>("--client-id", "The client id");
+        loginCommand.AddOption(clientIdOption);
+
+        var tenantIdOption = new Option<string>("--tenant-id", "The tenant id");
+        loginCommand.AddOption(tenantIdOption);
+
+        var strategyOption = new Option<AuthenticationStrategy>("--strategy", () => Constants.defaultAuthStrategy, "The authentication strategy to use.");
+        loginCommand.AddOption(strategyOption);
+
+        loginCommand.SetHandler<string[], string?, string?, AuthenticationStrategy, IHost, CancellationToken>(async (scopes, clientId, tenantId, strategy, host, cancellationToken) =>
         {
-            var options = host.Services.GetRequiredService<IOptionsMonitor<AuthenticationOptions>>().CurrentValue;
-            var authService = await this.authenticationServiceFactory.GetAuthenticationServiceAsync(strategy, options?.TenantId, options?.ClientId);
-            await authService.LoginAsync(scopes);
-        });
+            var authUtil = host.Services.GetRequiredService<IAuthenticationCacheUtility>();
+            var authService = await this.authenticationServiceFactory.GetAuthenticationServiceAsync(strategy, tenantId, clientId, cancellationToken);
+            await authService.LoginAsync(scopes, cancellationToken);
+            await authUtil.SaveAuthenticationIdentifiersAsync(clientId, tenantId, cancellationToken);
+        }, scopesOption, clientIdOption, tenantIdOption, strategyOption);
 
         return loginCommand;
     }

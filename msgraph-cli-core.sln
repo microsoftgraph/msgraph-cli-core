@@ -1,0 +1,34 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30114.105
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{4B774674-A434-4316-AF37-8670A1BE63C3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Graph.Cli.Core", "src\Microsoft.Graph.Cli.Core\Microsoft.Graph.Cli.Core.csproj", "{DF97A342-74F6-4082-98F9-1CF143B8E46C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Graph.Cli.Core.Tests", "src\Microsoft.Graph.Cli.Core.Tests\Microsoft.Graph.Cli.Core.Tests.csproj", "{34AA821B-0DE0-4EE0-B1A4-4F532E24070E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{DF97A342-74F6-4082-98F9-1CF143B8E46C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DF97A342-74F6-4082-98F9-1CF143B8E46C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DF97A342-74F6-4082-98F9-1CF143B8E46C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DF97A342-74F6-4082-98F9-1CF143B8E46C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{34AA821B-0DE0-4EE0-B1A4-4F532E24070E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{34AA821B-0DE0-4EE0-B1A4-4F532E24070E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{34AA821B-0DE0-4EE0-B1A4-4F532E24070E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{34AA821B-0DE0-4EE0-B1A4-4F532E24070E}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{DF97A342-74F6-4082-98F9-1CF143B8E46C} = {4B774674-A434-4316-AF37-8670A1BE63C3}
+		{34AA821B-0DE0-4EE0-B1A4-4F532E24070E} = {4B774674-A434-4316-AF37-8670A1BE63C3}
+	EndGlobalSection
+EndGlobal
