@@ -13,7 +13,7 @@ public class GraphCliClientFactory
     public HttpClient GetDefaultClient(GraphClientOptions options, string nationalCloud = GraphClientFactory.Global_Cloud, params DelegatingHandler[] middlewares)
     {
         IEnumerable<DelegatingHandler> m = middlewares;
-        if (middlewares.Length == 0)
+        if (!middlewares.Any())
         {
             m = GetDefaultMiddlewaresWithOptions(options);
         }
