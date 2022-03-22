@@ -39,7 +39,8 @@ public class LoginCommand
         loginCommand.SetHandler<string[], string?, string?, AuthenticationStrategy, IHost, CancellationToken>(async (scopes, clientId, tenantId, strategy, host, cancellationToken) =>
         {
             var authUtil = host.Services.GetRequiredService<IAuthenticationCacheUtility>();
-            var authService = await this.authenticationServiceFactory.GetAuthenticationServiceAsync(strategy, tenantId, clientId, cancellationToken);
+            var options = host.Services.GetRequiredService<IOptionsMonitor<AuthenticationOptions>>().CurrentValue;
+            var authService = await this.authenticationServiceFactory.GetAuthenticationServiceAsync(strategy, tenantId, clientId, options.AllowUnencryptedTokenCache, cancellationToken);
             await authService.LoginAsync(scopes, cancellationToken);
             await authUtil.SaveAuthenticationIdentifiersAsync(clientId, tenantId, cancellationToken);
         }, scopesOption, clientIdOption, tenantIdOption, strategyOption);

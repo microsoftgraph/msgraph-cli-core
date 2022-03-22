@@ -17,31 +17,30 @@ public class AuthenticationServiceFactory {
         this.pathUtility = pathUtility;
     }
 
-    public async Task<ILoginService> GetAuthenticationServiceAsync(AuthenticationStrategy strategy, string? tenantId, string? clientId, CancellationToken cancellationToken = default) {
+    public async Task<ILoginService> GetAuthenticationServiceAsync(AuthenticationStrategy strategy, string? tenantId, string? clientId, bool allowUnencryptedTokenCache = false, CancellationToken cancellationToken = default) {
         switch (strategy) {
             case AuthenticationStrategy.DeviceCode:
-                return await GetDeviceCodeLoginServiceAsync(tenantId, clientId, cancellationToken);
-            default:
-                throw new InvalidOperationException($"The authentication strategy {strategy} is not supported");
-        }
-
-    }
-
-    public async Task<TokenCredential> GetTokenCredentialAsync(AuthenticationStrategy strategy, string? tenantId, string? clientId, CancellationToken cancellationToken = default) {
-        switch (strategy) {
-            case AuthenticationStrategy.DeviceCode:
-                return await GetDeviceCodeCredentialAsync(tenantId, clientId, cancellationToken);
+                return await GetDeviceCodeLoginServiceAsync(tenantId, clientId, allowUnencryptedTokenCache, cancellationToken);
             default:
                 throw new InvalidOperationException($"The authentication strategy {strategy} is not supported");
         }
     }
 
-    private async Task<DeviceCodeLoginService> GetDeviceCodeLoginServiceAsync(string? tenantId, string? clientId, CancellationToken cancellationToken = default) {
-        var credential = await GetDeviceCodeCredentialAsync(tenantId, clientId, cancellationToken);
+    public async Task<TokenCredential> GetTokenCredentialAsync(AuthenticationStrategy strategy, string? tenantId, string? clientId, bool allowUnencryptedTokenCache = false, CancellationToken cancellationToken = default) {
+        switch (strategy) {
+            case AuthenticationStrategy.DeviceCode:
+                return await GetDeviceCodeCredentialAsync(tenantId, clientId, allowUnencryptedTokenCache, cancellationToken);
+            default:
+                throw new InvalidOperationException($"The authentication strategy {strategy} is not supported");
+        }
+    }
+
+    private async Task<DeviceCodeLoginService> GetDeviceCodeLoginServiceAsync(string? tenantId, string? clientId, bool allowUnencryptedTokenCache = false, CancellationToken cancellationToken = default) {
+        var credential = await GetDeviceCodeCredentialAsync(tenantId, clientId, allowUnencryptedTokenCache, cancellationToken);
         return new(credential, pathUtility);
     }
 
-    private async Task<DeviceCodeCredential> GetDeviceCodeCredentialAsync(string? tenantId, string? clientId, CancellationToken cancellationToken = default) {
+    private async Task<DeviceCodeCredential> GetDeviceCodeCredentialAsync(string? tenantId, string? clientId, bool allowUnencryptedTokenCache = false, CancellationToken cancellationToken = default) {
         DeviceCodeCredentialOptions credOptions = new()
         {
             ClientId = clientId,
@@ -49,7 +48,7 @@ public class AuthenticationServiceFactory {
             DisableAutomaticAuthentication = true,
         };
 
-        TokenCachePersistenceOptions tokenCacheOptions = new() { Name = Constants.TokenCacheName };
+        TokenCachePersistenceOptions tokenCacheOptions = new() { Name = Constants.TokenCacheName, UnsafeAllowUnencryptedStorage = allowUnencryptedTokenCache };
         credOptions.TokenCachePersistenceOptions = tokenCacheOptions;
         var recordPath = Path.Combine(pathUtility.GetApplicationDataDirectory(), Constants.AuthRecordPath);
 
