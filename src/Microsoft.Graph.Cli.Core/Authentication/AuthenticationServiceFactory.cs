@@ -44,8 +44,8 @@ public class AuthenticationServiceFactory {
     private async Task<DeviceCodeCredential> GetDeviceCodeCredentialAsync(string? tenantId, string? clientId, CancellationToken cancellationToken = default) {
         DeviceCodeCredentialOptions credOptions = new()
         {
-            ClientId = clientId,
-            TenantId = tenantId,
+            ClientId = clientId ?? Constants.DefaultAppId,
+            TenantId = tenantId ?? Constants.DefaultTenant,
             DisableAutomaticAuthentication = true,
         };
 
