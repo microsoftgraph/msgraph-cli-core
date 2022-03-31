@@ -1,7 +1,7 @@
 name: "Run tests in solution"
 on: [push]
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
     env:
       MS_NUGET_URL: https://nuget.pkg.github.com/microsoft/index.json
