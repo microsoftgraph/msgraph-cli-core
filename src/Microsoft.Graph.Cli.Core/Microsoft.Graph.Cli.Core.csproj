@@ -5,6 +5,8 @@
     <RootNamespace>Microsoft.Graph.Cli.Core</RootNamespace>
     <ImplicitUsings>disable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <RepositoryUrl>https://github.com/microsoftgraph/msgraph-cli-core</RepositoryUrl>
     <Version>0.1.0-preview.1</Version>
   </PropertyGroup>
 
