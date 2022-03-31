@@ -1,4 +1,4 @@
-name: Release Core
+name: Release solution
 
 on:
   workflow_dispatch:
@@ -11,12 +11,18 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      MS_NUGET_URL: https://nuget.pkg.github.com/microsoft/index.json
     steps:
       - uses: actions/checkout@v3
       - name: Setup .NET
         uses: actions/setup-dotnet@v2
         with:
           dotnet-version: 6.x
+      - name: Add NuGet kiota source
+        # NOTE: Password encryption is not supported for the linux platform (Encryption is only supported on Windows platforms.)
+        run: |
+          dotnet nuget add source ${{env.MS_NUGET_URL}} -n ms-gh -u ${{secrets.NUGET_USER}} -p ${{secrets.NUGET_PASSWORD}} --store-password-in-clear-text
       - uses: actions/cache@v3
         with:
           path: ~/.nuget/packages
@@ -26,12 +32,8 @@ jobs:
             ${{ runner.os }}-nuget
       - name: Restore dependencies
         run: dotnet restore
-      - name: Build
-        run: dotnet build --no-restore -c Release
-      - name: Test
-        run: dotnet test --no-build --verbosity normal -c Release
       - name: Publish
-        run: dotnet publish --no-restore --no-build --verbosity normal -c Release
+        run: dotnet publish --no-restore --verbosity normal -c Release
       - name: Pack
         run: dotnet pack --no-restore --no-build --verbosity normal -c Release
       - name: Upload Nuget Package
