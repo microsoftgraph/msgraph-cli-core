@@ -1,10 +1,19 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+    <Description>Microsoft Graph CLI Core Library implements the core functionality used by Microsoft Graph CLI.</Description>
+    <Copyright>© Microsoft Corporation. All rights reserved.</Copyright>
+    <AssemblyTitle>Microsoft Graph CLI Core Library</AssemblyTitle>
+    <Authors>Microsoft</Authors>
     <TargetFramework>net6.0</TargetFramework>
     <RootNamespace>Microsoft.Graph.Cli.Core</RootNamespace>
     <ImplicitUsings>disable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <RepositoryUrl>https://github.com/microsoftgraph/msgraph-cli-core</RepositoryUrl>
+    <Deterministic>true</Deterministic>
+    <!-- Recommended: Embed symbols containing Source Link in the main file (exe/dll) -->
+    <DebugType>embedded</DebugType>
     <Version>0.1.0-preview.1</Version>
   </PropertyGroup>
 
