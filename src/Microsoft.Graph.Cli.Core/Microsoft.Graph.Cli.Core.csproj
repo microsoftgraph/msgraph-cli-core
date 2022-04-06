@@ -14,17 +14,17 @@
     <Deterministic>true</Deterministic>
     <!-- Recommended: Embed symbols containing Source Link in the main file (exe/dll) -->
     <DebugType>embedded</DebugType>
-    <Version>0.1.1-preview.1</Version>
+    <Version>0.1.2-preview.1</Version>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Azure.Identity" Version="1.5.0" />
+    <PackageReference Include="Azure.Identity" Version="1.6.0" />
     <PackageReference Include="JmesPath.Net" Version="1.0.182" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="6.0.1" />
-    <PackageReference Include="Microsoft.Graph.Core" Version="3.0.0-preview.1" />
-    <PackageReference Include="Microsoft.Kiota.Abstractions" Version="1.0.0-preview.1" />
+    <PackageReference Include="Microsoft.Graph.Core" Version="3.0.0-preview.2" />
+    <PackageReference Include="Microsoft.Kiota.Abstractions" Version="1.0.0-preview.3" />
     <PackageReference Include="Microsoft.Kiota.Cli.Commons" Version="0.1.6-preview.1" />
-    <PackageReference Include="Microsoft.Kiota.Http.HttpClientLibrary" Version="1.0.0-preview.2" />
+    <PackageReference Include="Microsoft.Kiota.Http.HttpClientLibrary" Version="1.0.0-preview.3" />
     <PackageReference Include="Spectre.Console" Version="0.44.0" />
     <PackageReference Include="System.CommandLine" Version="2.0.0-beta3.22114.1" />
   </ItemGroup>
