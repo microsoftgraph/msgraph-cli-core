@@ -51,7 +51,7 @@ jobs:
         uses: actions/setup-dotnet@v2
         with:
           dotnet-version: 6.x
-      - uses: actions/download-artifact@v2
+      - uses: actions/download-artifact@v3
         with:
           name: drop
       - run: dotnet nuget push "*.nupkg" --skip-duplicate -s https://nuget.pkg.github.com/microsoftgraph/index.json -k ${{ secrets.GITHUB_TOKEN }}
