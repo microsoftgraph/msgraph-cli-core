@@ -24,7 +24,7 @@
     <PackageReference Include="Microsoft.Graph.Core" Version="3.0.0-preview.4" />
     <PackageReference Include="Microsoft.Kiota.Abstractions" Version="1.0.0-preview.3" />
     <PackageReference Include="Microsoft.Kiota.Cli.Commons" Version="0.1.6-preview.1" />
-    <PackageReference Include="Microsoft.Kiota.Http.HttpClientLibrary" Version="1.0.0-preview.3" />
+    <PackageReference Include="Microsoft.Kiota.Http.HttpClientLibrary" Version="1.0.0-preview.6" />
     <PackageReference Include="Spectre.Console" Version="0.44.0" />
     <PackageReference Include="System.CommandLine" Version="2.0.0-beta3.22114.1" />
   </ItemGroup>
