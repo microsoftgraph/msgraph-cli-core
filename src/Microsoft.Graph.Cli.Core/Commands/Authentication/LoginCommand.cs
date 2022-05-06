@@ -24,7 +24,7 @@ public class LoginCommand
         var scopesOption = new Option<string[]>("--scopes", "The login scopes e.g. User.Read") {
             Arity = ArgumentArity.OneOrMore
         };
-        scopesOption.IsRequired = true;
+        scopesOption.IsRequired = false;
         loginCommand.AddOption(scopesOption);
 
         var clientIdOption = new Option<string>("--client-id", "The client id");
