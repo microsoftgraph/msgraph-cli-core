@@ -26,7 +26,7 @@ public class LoginCommandTest
         var scopes = result.FindResultFor(command.Options[0])?.Tokens.Select(t => t.Value);
 
         // Then
-        Assert.Empty(scopes);
+        Assert.Null(scopes);
     }
 
     [Fact]
