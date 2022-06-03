@@ -15,14 +15,18 @@ public class LoginCommand
 {
     private AuthenticationServiceFactory authenticationServiceFactory;
 
-    public LoginCommand(AuthenticationServiceFactory authenticationServiceFactory) {
+    public LoginCommand(AuthenticationServiceFactory authenticationServiceFactory)
+    {
         this.authenticationServiceFactory = authenticationServiceFactory;
     }
 
-    public Command Build() {
+    public Command Build()
+    {
         var loginCommand = new Command("login", "Login and store the session for use in subsequent commands");
-        var scopesOption = new Option<string[]>("--scopes", "The login scopes e.g. User.Read") {
-            Arity = ArgumentArity.OneOrMore
+        var scopesOption = new Option<string[]>("--scopes", "The login scopes e.g. User.Read")
+        {
+            Arity = ArgumentArity.ZeroOrMore,
+            AllowMultipleArgumentsPerToken = true
         };
         scopesOption.IsRequired = false;
         loginCommand.AddOption(scopesOption);
@@ -36,13 +40,20 @@ public class LoginCommand
         var strategyOption = new Option<AuthenticationStrategy>("--strategy", () => Constants.defaultAuthStrategy, "The authentication strategy to use.");
         loginCommand.AddOption(strategyOption);
 
-        loginCommand.SetHandler<string[], string?, string?, AuthenticationStrategy, IHost, CancellationToken>(async (scopes, clientId, tenantId, strategy, host, cancellationToken) =>
+        loginCommand.SetHandler(async (context) =>
         {
+            string[] scopes = context.ParseResult.GetValueForOption(scopesOption) ?? new string[] { };
+            var clientId = context.ParseResult.GetValueForOption(clientIdOption);
+            var tenantId = context.ParseResult.GetValueForOption(tenantIdOption);
+            var strategy = context.ParseResult.GetValueForOption(strategyOption);
+            var host = context.BindingContext.GetRequiredService<IHost>();
+            var cancellationToken = context.BindingContext.GetRequiredService<CancellationToken>();
+
             var authUtil = host.Services.GetRequiredService<IAuthenticationCacheUtility>();
             var authService = await this.authenticationServiceFactory.GetAuthenticationServiceAsync(strategy, tenantId, clientId, cancellationToken);
             await authService.LoginAsync(scopes, cancellationToken);
             await authUtil.SaveAuthenticationIdentifiersAsync(clientId, tenantId, cancellationToken);
-        }, scopesOption, clientIdOption, tenantIdOption, strategyOption);
+        });
 
         return loginCommand;
     }

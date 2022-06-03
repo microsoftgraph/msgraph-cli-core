@@ -9,7 +9,8 @@ using Microsoft.Graph.Cli.Core.Utils;
 
 namespace Microsoft.Graph.Cli.Core.Authentication;
 
-public class AuthenticationServiceFactory {
+public class AuthenticationServiceFactory
+{
     private readonly IPathUtility pathUtility;
 
     public AuthenticationServiceFactory(IPathUtility pathUtility)
@@ -17,8 +18,10 @@ public class AuthenticationServiceFactory {
         this.pathUtility = pathUtility;
     }
 
-    public async Task<ILoginService> GetAuthenticationServiceAsync(AuthenticationStrategy strategy, string? tenantId, string? clientId, CancellationToken cancellationToken = default) {
-        switch (strategy) {
+    public virtual async Task<ILoginService> GetAuthenticationServiceAsync(AuthenticationStrategy strategy, string? tenantId, string? clientId, CancellationToken cancellationToken = default)
+    {
+        switch (strategy)
+        {
             case AuthenticationStrategy.DeviceCode:
                 return await GetDeviceCodeLoginServiceAsync(tenantId, clientId, cancellationToken);
             default:
@@ -27,8 +30,10 @@ public class AuthenticationServiceFactory {
 
     }
 
-    public async Task<TokenCredential> GetTokenCredentialAsync(AuthenticationStrategy strategy, string? tenantId, string? clientId, CancellationToken cancellationToken = default) {
-        switch (strategy) {
+    public virtual async Task<TokenCredential> GetTokenCredentialAsync(AuthenticationStrategy strategy, string? tenantId, string? clientId, CancellationToken cancellationToken = default)
+    {
+        switch (strategy)
+        {
             case AuthenticationStrategy.DeviceCode:
                 return await GetDeviceCodeCredentialAsync(tenantId, clientId, cancellationToken);
             default:
@@ -36,12 +41,14 @@ public class AuthenticationServiceFactory {
         }
     }
 
-    private async Task<DeviceCodeLoginService> GetDeviceCodeLoginServiceAsync(string? tenantId, string? clientId, CancellationToken cancellationToken = default) {
+    private async Task<DeviceCodeLoginService> GetDeviceCodeLoginServiceAsync(string? tenantId, string? clientId, CancellationToken cancellationToken = default)
+    {
         var credential = await GetDeviceCodeCredentialAsync(tenantId, clientId, cancellationToken);
         return new(credential, pathUtility);
     }
 
-    private async Task<DeviceCodeCredential> GetDeviceCodeCredentialAsync(string? tenantId, string? clientId, CancellationToken cancellationToken = default) {
+    private async Task<DeviceCodeCredential> GetDeviceCodeCredentialAsync(string? tenantId, string? clientId, CancellationToken cancellationToken = default)
+    {
         DeviceCodeCredentialOptions credOptions = new()
         {
             ClientId = clientId ?? Constants.DefaultAppId,
