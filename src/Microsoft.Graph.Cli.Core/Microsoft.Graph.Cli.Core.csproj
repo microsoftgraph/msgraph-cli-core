@@ -14,7 +14,7 @@
     <Deterministic>true</Deterministic>
     <!-- Recommended: Embed symbols containing Source Link in the main file (exe/dll) -->
     <DebugType>embedded</DebugType>
-    <Version>0.1.1-preview.5</Version>
+    <Version>0.1.1-preview.6</Version>
   </PropertyGroup>
 
   <ItemGroup>
