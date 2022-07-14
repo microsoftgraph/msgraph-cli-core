@@ -52,7 +52,7 @@ public class LoginCommand
             var authUtil = host.Services.GetRequiredService<IAuthenticationCacheUtility>();
             var authService = await this.authenticationServiceFactory.GetAuthenticationServiceAsync(strategy, tenantId, clientId, cancellationToken);
             await authService.LoginAsync(scopes, cancellationToken);
-            await authUtil.SaveAuthenticationIdentifiersAsync(clientId, tenantId, cancellationToken);
+            await authUtil.SaveAuthenticationIdentifiersAsync(clientId, tenantId, strategy, cancellationToken);
         });
 
         return loginCommand;
