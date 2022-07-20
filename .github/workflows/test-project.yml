@@ -7,6 +7,6 @@ jobs:
       MS_NUGET_URL: https://nuget.pkg.github.com/microsoft/index.json
     steps:
       - name: Install
-        uses: ${{github.repository}}/.github/workflows/install-dependencies.yml@${{github.ref_name || 'main'}}
+        uses: ./.github/workflows/install-dependencies.yml
       - name: Test
         run: dotnet test --no-restore
