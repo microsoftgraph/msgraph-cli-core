@@ -3,6 +3,7 @@ using System.IO;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Graph.Cli.Core.Authentication;
 using Microsoft.Graph.Cli.Core.Configuration;
 using Microsoft.Graph.Cli.Core.Utils;
 
@@ -31,27 +32,55 @@ public class AuthenticationCacheUtility : IAuthenticationCacheUtility
             throw new FileNotFoundException();
         }
 
-        using var fileStream = File.OpenRead(path);
-        var configRoot = await JsonSerializer.DeserializeAsync<Configuration.ConfigurationRoot>(fileStream, cancellationToken: cancellationToken);
+        var configRoot = await ReadConfigurationAsync(cancellationToken);
         if (configRoot?.AuthenticationOptions is null) throw new AuthenticationIdentifierException("Cannot find cached authentication identifiers.");
 
         return configRoot.AuthenticationOptions;
     }
 
-    public async Task SaveAuthenticationIdentifiersAsync(string? clientId, string? tenantId, CancellationToken cancellationToken = default)
+    public async Task SaveAuthenticationIdentifiersAsync(string? clientId, string? tenantId, AuthenticationStrategy strategy, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
         var path = this.GetAuthenticationCacheFilePath();
-        var configuration = new Configuration.ConfigurationRoot
-        {
-            AuthenticationOptions = new AuthenticationOptions
-            {
-                ClientId = clientId ?? Constants.DefaultAppId,
-                TenantId = tenantId ?? Constants.DefaultTenant
-            }
-        };
+        ConfigurationRoot configuration = await ReadConfigurationAsync(cancellationToken) ?? new Configuration.ConfigurationRoot();
+        var authOptions = configuration.AuthenticationOptions;
+        clientId = clientId ?? Constants.DefaultAppId;
+        tenantId = tenantId ?? Constants.DefaultTenant;
 
-        await WriteConfigurationAsync(path, configuration, cancellationToken);
+        // Only write auth configuration if the values have changed
+        if (clientId != authOptions.ClientId || tenantId != authOptions.TenantId || strategy != authOptions.Strategy)
+        {
+            configuration.AuthenticationOptions = new AuthenticationOptions
+            {
+                ClientId = clientId,
+                TenantId = tenantId,
+                Strategy = strategy,
+            };
+
+            await WriteConfigurationAsync(path, configuration, cancellationToken);
+        }
+    }
+
+    private async Task<ConfigurationRoot?> ReadConfigurationAsync(CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        var path = this.GetAuthenticationCacheFilePath();
+        if (!File.Exists(path))
+        {
+            return null;
+        }
+
+        using var fileStream = File.OpenRead(path);
+
+        try
+        {
+            return await JsonSerializer.DeserializeAsync<Configuration.ConfigurationRoot>(fileStream, cancellationToken: cancellationToken);
+        }
+        catch (Exception)
+        {
+            // Don't fail on invalid JSON
+            return null;
+        }
     }
 
     private async Task WriteConfigurationAsync(string path, ConfigurationRoot configuration, CancellationToken cancellationToken = default, int retryCount = 0)
