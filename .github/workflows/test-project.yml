@@ -6,26 +6,7 @@ jobs:
     env:
       MS_NUGET_URL: https://nuget.pkg.github.com/microsoft/index.json
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-        with:
-          submodules: true
-      - name: Setup .NET Core SDK 6
-        uses: actions/setup-dotnet@v2
-        with:
-          dotnet-version: 6.x
-      - name: Add NuGet kiota source
-        # NOTE: Password encryption is not supported for the linux platform (Encryption is only supported on Windows platforms.)
-        run: |
-          dotnet nuget add source ${{env.MS_NUGET_URL}} -n ms-gh -u ${{secrets.NUGET_USER}} -p ${{secrets.NUGET_PASSWORD}} --store-password-in-clear-text
-      - uses: actions/cache@v3
-        with:
-          path: ~/.nuget/packages
-          # Look to see if there is a cache hit for the corresponding requirements file
-          key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-nuget
-      - name: Install dependencies
-        run: dotnet restore
+      - name: Install
+        uses: ${{github.repository}}/.github/workflows/install-dependencies.yml@${{github.ref_name || 'main'}}
       - name: Test
         run: dotnet test --no-restore
