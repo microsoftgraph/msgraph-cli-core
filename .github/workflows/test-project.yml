@@ -1,12 +1,12 @@
 name: "Run tests in solution"
 on: [push]
 jobs:
+  install:
+    uses: ./.github/workflows/install-dependencies.yml
   test:
     runs-on: ubuntu-latest
     env:
       MS_NUGET_URL: https://nuget.pkg.github.com/microsoft/index.json
     steps:
-      - name: Install
-        uses: ./.github/workflows/install-dependencies.yml
       - name: Test
         run: dotnet test --no-restore
