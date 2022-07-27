@@ -1,5 +1,11 @@
 name: "Install project dependencies"
-on: [workflow_call]
+on:
+  workflow_call:
+    secrets:
+      user:
+        required: true
+      token:
+        required: true
 jobs:
   install:
     runs-on: ubuntu-latest
@@ -17,7 +23,7 @@ jobs:
       - name: Add NuGet kiota source
         # NOTE: Password encryption is not supported for the linux platform (Encryption is only supported on Windows platforms.)
         run: |
-          dotnet nuget add source ${{env.MS_NUGET_URL}} -n ms-gh -u ${{secrets.NUGET_USER}} -p ${{secrets.NUGET_PASSWORD}} --store-password-in-clear-text
+          dotnet nuget add source ${{env.MS_NUGET_URL}} -n ms-gh -u ${{secrets.user}} -p ${{secrets.token}} --store-password-in-clear-text
       - uses: actions/cache@v3
         with:
           path: ~/.nuget/packages
