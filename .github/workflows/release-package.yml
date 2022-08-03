@@ -5,33 +5,25 @@ on:
   push:
     branches: [ main ]
     paths: ['src/**', '.github/workflows/**']
-  pull_request:
-    paths: ['src/**', '.github/workflows/**']
 
 jobs:
+  install:
+    uses: ./.github/workflows/install-dependencies.yml
+    secrets:
+      user: ${{secrets.NUGET_USER}}
+      token: ${{secrets.NUGET_PASSWORD}}
   build:
     runs-on: ubuntu-latest
-    env:
-      MS_NUGET_URL: https://nuget.pkg.github.com/microsoft/index.json
+    needs: install
     steps:
-      - uses: actions/checkout@v3
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v2
-        with:
-          dotnet-version: 6.x
-      - name: Add NuGet kiota source
-        # NOTE: Password encryption is not supported for the linux platform (Encryption is only supported on Windows platforms.)
-        run: |
-          dotnet nuget add source ${{env.MS_NUGET_URL}} -n ms-gh -u ${{secrets.NUGET_USER}} -p ${{secrets.NUGET_PASSWORD}} --store-password-in-clear-text
+      - name: Checkout
+        uses: actions/checkout@v3
       - uses: actions/cache@v3
         with:
           path: ~/.nuget/packages
-          # Look to see if there is a cache hit for the corresponding requirements file
           key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
           restore-keys: |
             ${{ runner.os }}-nuget
-      - name: Restore dependencies
-        run: dotnet restore
       - name: Publish
         run: dotnet publish --no-restore --verbosity normal -c Release
       - name: Pack

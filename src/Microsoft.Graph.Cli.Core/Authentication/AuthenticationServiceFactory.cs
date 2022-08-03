@@ -24,6 +24,8 @@ public class AuthenticationServiceFactory
         {
             case AuthenticationStrategy.DeviceCode:
                 return await GetDeviceCodeLoginServiceAsync(tenantId, clientId, cancellationToken);
+            case AuthenticationStrategy.InteractiveBrowser:
+                return await GetInteractiveBrowserLoginServiceAsync(tenantId, clientId, cancellationToken);
             default:
                 throw new InvalidOperationException($"The authentication strategy {strategy} is not supported");
         }
@@ -36,6 +38,8 @@ public class AuthenticationServiceFactory
         {
             case AuthenticationStrategy.DeviceCode:
                 return await GetDeviceCodeCredentialAsync(tenantId, clientId, cancellationToken);
+            case AuthenticationStrategy.InteractiveBrowser:
+                return await GetInteractiveBrowserCredentialAsync(tenantId, clientId, cancellationToken);
             default:
                 throw new InvalidOperationException($"The authentication strategy {strategy} is not supported");
         }
@@ -44,6 +48,12 @@ public class AuthenticationServiceFactory
     private async Task<DeviceCodeLoginService> GetDeviceCodeLoginServiceAsync(string? tenantId, string? clientId, CancellationToken cancellationToken = default)
     {
         var credential = await GetDeviceCodeCredentialAsync(tenantId, clientId, cancellationToken);
+        return new(credential, pathUtility);
+    }
+
+    private async Task<InteractiveBrowserLoginService> GetInteractiveBrowserLoginServiceAsync(string? tenantId, string? clientId, CancellationToken cancellationToken = default)
+    {
+        var credential = await GetInteractiveBrowserCredentialAsync(tenantId, clientId, cancellationToken);
         return new(credential, pathUtility);
     }
 
@@ -58,15 +68,40 @@ public class AuthenticationServiceFactory
 
         TokenCachePersistenceOptions tokenCacheOptions = new() { Name = Constants.TokenCacheName };
         credOptions.TokenCachePersistenceOptions = tokenCacheOptions;
+        credOptions.AuthenticationRecord = await GetCachedAuthenticationRecordAsync(cancellationToken);
+
+        return new DeviceCodeCredential(credOptions);
+    }
+
+    private async Task<InteractiveBrowserCredential> GetInteractiveBrowserCredentialAsync(string? tenantId, string? clientId, CancellationToken cancellationToken = default)
+    {
+        InteractiveBrowserCredentialOptions credOptions = new()
+        {
+            ClientId = clientId ?? Constants.DefaultAppId,
+            TenantId = tenantId ?? Constants.DefaultTenant,
+            DisableAutomaticAuthentication = true,
+        };
+
+        TokenCachePersistenceOptions tokenCacheOptions = new() { Name = Constants.TokenCacheName };
+        credOptions.TokenCachePersistenceOptions = tokenCacheOptions;
+        credOptions.AuthenticationRecord = await GetCachedAuthenticationRecordAsync(cancellationToken);
+        credOptions.LoginHint = credOptions.AuthenticationRecord?.Username;
+
+        return new InteractiveBrowserCredential(credOptions);
+    }
+
+    private async Task<AuthenticationRecord?> GetCachedAuthenticationRecordAsync(CancellationToken cancellationToken = default)
+    {
         var recordPath = Path.Combine(pathUtility.GetApplicationDataDirectory(), Constants.AuthRecordPath);
+        AuthenticationRecord? record = null;
 
         if (File.Exists(recordPath))
         {
             using var authRecordStream = new FileStream(recordPath, FileMode.Open, FileAccess.Read);
             var authRecord = await AuthenticationRecord.DeserializeAsync(authRecordStream, cancellationToken);
-            credOptions.AuthenticationRecord = authRecord;
+            record = authRecord;
         }
 
-        return new DeviceCodeCredential(credOptions);
+        return record;
     }
 }
