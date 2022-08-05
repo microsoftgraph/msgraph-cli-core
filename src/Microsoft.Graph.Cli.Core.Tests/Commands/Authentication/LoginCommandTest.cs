@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Graph.Cli.Core.Authentication;
 using Microsoft.Graph.Cli.Core.Commands.Authentication;
+using Microsoft.Graph.Cli.Core.Configuration;
 using Microsoft.Graph.Cli.Core.IO;
 using Moq;
 using Xunit;
@@ -16,7 +17,7 @@ public class LoginCommandTest
     {
         // Given
         var pathUtilityMock = new Mock<IPathUtility>();
-        var authServiceFactoryMock = new Mock<AuthenticationServiceFactory>(pathUtilityMock.Object);
+        var authServiceFactoryMock = new Mock<AuthenticationServiceFactory>(pathUtilityMock.Object, new AuthenticationOptions());
         var loginCommandBuilder = new LoginCommand(authServiceFactoryMock.Object);
         var command = loginCommandBuilder.Build();
         var parser = new Parser(command);
@@ -34,7 +35,7 @@ public class LoginCommandTest
     {
         // Given
         var pathUtilityMock = new Mock<IPathUtility>();
-        var authServiceFactoryMock = new Mock<AuthenticationServiceFactory>(pathUtilityMock.Object);
+        var authServiceFactoryMock = new Mock<AuthenticationServiceFactory>(pathUtilityMock.Object, new AuthenticationOptions());
         var loginCommandBuilder = new LoginCommand(authServiceFactoryMock.Object);
         var command = loginCommandBuilder.Build();
         var parser = new Parser(command);
@@ -55,7 +56,7 @@ public class LoginCommandTest
     {
         // Given
         var pathUtilityMock = new Mock<IPathUtility>();
-        var authServiceFactoryMock = new Mock<AuthenticationServiceFactory>(pathUtilityMock.Object);
+        var authServiceFactoryMock = new Mock<AuthenticationServiceFactory>(pathUtilityMock.Object, new AuthenticationOptions());
         var loginCommandBuilder = new LoginCommand(authServiceFactoryMock.Object);
         var command = loginCommandBuilder.Build();
         var parser = new Parser(command);
