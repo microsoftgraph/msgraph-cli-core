@@ -41,7 +41,7 @@ namespace Microsoft.Graph.Cli
             AuthenticationStrategy authStrategy = authSettings?.Strategy ?? AuthenticationStrategy.DeviceCode;
 
             using AzureEventSourceListener listener = AzureEventSourceListener.CreateConsoleLogger(EventLevel.LogAlways);
-            var credential = await authServiceFactory.GetTokenCredentialAsync(authStrategy, authSettings?.TenantId, authSettings?.ClientId, authSettings?.ClientCertificateName, authSettings?.ClientCertificatePath, authSettings?.ClientCertificateThumbPrint);
+            var credential = await authServiceFactory.GetTokenCredentialAsync(authStrategy, authSettings?.TenantId, authSettings?.ClientId, authSettings?.ClientCertificateName, authSettings?.ClientCertificateThumbPrint);
             var authProvider = new AzureIdentityAuthenticationProvider(credential, new string[] { "graph.microsoft.com" });
 
             var assemblyVersion = Assembly.GetExecutingAssembly().GetName().Version;

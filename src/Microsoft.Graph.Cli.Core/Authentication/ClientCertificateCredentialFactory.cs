@@ -16,14 +16,13 @@ public static class ClientCertificateCredentialFactory
     /// <param name="tenantId">TenantId</param>
     /// <param name="clientId">ClientId</param>
     /// <param name="certificateName">Subject name of the certificate.</param>
-    /// <param name="certificatePath">Path to the certificate file.</param>
     /// <param name="certificateThumbPrint">Thumb print of the certificate.</param>
     /// <returns>A ClientCertificateCredential</returns>
-    public static ClientCertificateCredential GetClientCertificateCredential(string? tenantId, string? clientId, string? certificateName, string? certificatePath, string? certificateThumbPrint)
+    public static ClientCertificateCredential GetClientCertificateCredential(string? tenantId, string? clientId, string? certificateName, string? certificateThumbPrint)
     {
-        if (string.IsNullOrWhiteSpace(certificatePath) && string.IsNullOrWhiteSpace(certificateName))
+        if (string.IsNullOrWhiteSpace(certificateName) && string.IsNullOrWhiteSpace(certificateThumbPrint))
         {
-            throw new ArgumentException("Either a certificate path or a certificate name must be provided.");
+            throw new ArgumentException("Either a certificate name or a certificate thumb print must be provided.");
         }
 
         ClientCertificateCredentialOptions credOptions = new();
@@ -41,11 +40,7 @@ public static class ClientCertificateCredentialFactory
 
         X509Certificate2? certificate;
 
-        if (!string.IsNullOrWhiteSpace(certificatePath))
-        {
-            return new ClientCertificateCredential(tenantId, clientId, certificatePath, credOptions);
-        }
-        else if (!string.IsNullOrWhiteSpace(certificateName) && TryGetCertificateFromStore(certificateName, isThumbPrint: false, out certificate))
+        if (!string.IsNullOrWhiteSpace(certificateName) && TryGetCertificateFromStore(certificateName, isThumbPrint: false, out certificate))
         {
             return new ClientCertificateCredential(tenantId, clientId, certificate, credOptions);
         }
