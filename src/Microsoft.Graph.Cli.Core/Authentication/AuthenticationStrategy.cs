@@ -12,5 +12,10 @@ public enum AuthenticationStrategy
     /// <summary>
     /// Interactive browser strategy. Opens a user's browser.
     /// </summary>
-    InteractiveBrowser
+    InteractiveBrowser,
+    /// <summary>
+    /// Client certificate strategy. Enables authentication of a service principal in to Azure Active Directory using a X509 certificate
+    /// that is assigned to it's App Registration
+    /// </summary>
+    ClientCertificate
 }

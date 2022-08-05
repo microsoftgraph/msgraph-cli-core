@@ -1,4 +1,5 @@
-﻿using Azure.Identity;
+﻿using Azure.Core.Diagnostics;
+using Azure.Identity;
 using DevLab.JmesPath;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -10,19 +11,21 @@ using Microsoft.Graph.Cli.Core.IO;
 using Microsoft.Kiota.Authentication.Azure;
 using Microsoft.Kiota.Cli.Commons.IO;
 using Microsoft.Kiota.Http.HttpClientLibrary;
+using System;
+using System.Collections.Generic;
 using System.CommandLine;
 using System.CommandLine.Builder;
 using System.CommandLine.Hosting;
+using System.CommandLine.IO;
 using System.CommandLine.Parsing;
+using System.Diagnostics.Tracing;
 using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
-using System.Collections.Generic;
-using System;
-using System.CommandLine.IO;
 
 namespace Microsoft.Graph.Cli
 {
+
     class Program
     {
         static async Task<int> Main(string[] args)
@@ -34,10 +37,11 @@ namespace Microsoft.Graph.Cli
             var config = configBuilder.Build();
 
             var authSettings = config.GetSection(nameof(AuthenticationOptions)).Get<AuthenticationOptions>();
-            var authServiceFactory = new AuthenticationServiceFactory(new PathUtility());
+            var authServiceFactory = new AuthenticationServiceFactory(new PathUtility(), authSettings);
             AuthenticationStrategy authStrategy = authSettings?.Strategy ?? AuthenticationStrategy.DeviceCode;
 
-            var credential = await authServiceFactory.GetTokenCredentialAsync(authStrategy, authSettings?.TenantId, authSettings?.ClientId);
+            using AzureEventSourceListener listener = AzureEventSourceListener.CreateConsoleLogger(EventLevel.LogAlways);
+            var credential = await authServiceFactory.GetTokenCredentialAsync(authStrategy, authSettings?.TenantId, authSettings?.ClientId, authSettings?.ClientCertificateName, authSettings?.ClientCertificatePath, authSettings?.ClientCertificateThumbPrint);
             var authProvider = new AzureIdentityAuthenticationProvider(credential, new string[] { "graph.microsoft.com" });
 
             var assemblyVersion = Assembly.GetExecutingAssembly().GetName().Version;
@@ -48,12 +52,17 @@ namespace Microsoft.Graph.Cli
                 GraphServiceTargetVersion = "1.0"
             };
 
+            using var httpClient = GraphCliClientFactory.GetDefaultClient(options);
+            var core = new HttpClientRequestAdapter(authProvider, httpClient: httpClient);
+
             var commands = new List<Command>();
             var loginCommand = new LoginCommand(authServiceFactory);
             commands.Add(loginCommand.Build());
 
             var logoutCommand = new LogoutCommand(new LogoutService());
             commands.Add(logoutCommand.Build());
+
+            commands.Add(UsersCommandBuilder.BuildUsersCommand(core));
 
             var builder = BuildCommandLine(commands).UseDefaults().UseHost(CreateHostBuilder);
             builder.AddMiddleware((invocation) =>

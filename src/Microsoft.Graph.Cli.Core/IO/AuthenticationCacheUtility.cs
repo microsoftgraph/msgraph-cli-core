@@ -38,7 +38,7 @@ public class AuthenticationCacheUtility : IAuthenticationCacheUtility
         return configRoot.AuthenticationOptions;
     }
 
-    public async Task SaveAuthenticationIdentifiersAsync(string? clientId, string? tenantId, AuthenticationStrategy strategy, CancellationToken cancellationToken = default)
+    public async Task SaveAuthenticationIdentifiersAsync(string? clientId, string? tenantId, string? certificateName, string? certificatePath, string? certificateThumbPrint, AuthenticationStrategy strategy, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
         var path = this.GetAuthenticationCacheFilePath();
@@ -48,12 +48,19 @@ public class AuthenticationCacheUtility : IAuthenticationCacheUtility
         tenantId = tenantId ?? Constants.DefaultTenant;
 
         // Only write auth configuration if the values have changed
-        if (clientId != authOptions.ClientId || tenantId != authOptions.TenantId || strategy != authOptions.Strategy)
+        if (
+                clientId != authOptions.ClientId || tenantId != authOptions.TenantId || certificateName != authOptions.ClientCertificateName ||
+                certificatePath != authOptions.ClientCertificatePath || certificateThumbPrint != authOptions.ClientCertificateThumbPrint ||
+                strategy != authOptions.Strategy
+        )
         {
             configuration.AuthenticationOptions = new AuthenticationOptions
             {
                 ClientId = clientId,
                 TenantId = tenantId,
+                ClientCertificateName = certificateName,
+                ClientCertificatePath = certificatePath,
+                ClientCertificateThumbPrint = certificateThumbPrint,
                 Strategy = strategy,
             };
 
@@ -87,11 +94,7 @@ public class AuthenticationCacheUtility : IAuthenticationCacheUtility
     {
         try
         {
-            if (File.Exists(path))
-            {
-                File.Delete(path);
-            }
-            using FileStream fileStream = File.OpenWrite(path);
+            using FileStream fileStream = File.Open(path, FileMode.Create, FileAccess.Write);
             await JsonSerializer.SerializeAsync(fileStream, configuration, cancellationToken: cancellationToken);
         }
         catch (DirectoryNotFoundException)
