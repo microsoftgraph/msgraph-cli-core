@@ -88,19 +88,16 @@ public static class ClientCertificateCredentialFactory
         {
             // The store cannot be opened as requested.
             // findType (X509Certificate2Collection.Find) is invalid.
-            // TODO: Log error
             return false;
         }
         catch (SecurityException)
         {
             // Isufficient permissions to read the store
-            // TODO: Log error
             return false;
         }
         catch (ArgumentException)
         {
             // Store contains invalid values.
-            // TODO: Log error
             return false;
         }
         finally
