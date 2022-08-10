@@ -38,6 +38,9 @@ public class LoginCommand
         var certificateNameOption = new Option<string>("--certificate-name", "The name of your certificate. The certificate will be retrieved from the current user's certificate store.");
         loginCommand.AddOption(certificateNameOption);
 
+        var certificatePathOption = new Option<FileInfo?>("--certificate-path", "Path to an X.509 certificate file");
+        loginCommand.AddOption(certificatePathOption);
+
         var certificateThumbPrintOption = new Option<string>("--certificate-thumb-print", "The thumbprint of your certificate. The certificate will be retrieved from the current user's certificate store.");
         loginCommand.AddOption(certificateThumbPrintOption);
 
@@ -50,15 +53,16 @@ public class LoginCommand
             var clientId = context.ParseResult.GetValueForOption(clientIdOption);
             var tenantId = context.ParseResult.GetValueForOption(tenantIdOption);
             var certificateName = context.ParseResult.GetValueForOption(certificateNameOption);
+            var certificatePath = context.ParseResult.GetValueForOption(certificatePathOption)?.FullName;
             var certificateThumbPrint = context.ParseResult.GetValueForOption(certificateThumbPrintOption);
             var strategy = context.ParseResult.GetValueForOption(strategyOption);
             var host = context.BindingContext.GetRequiredService<IHost>();
             var cancellationToken = context.BindingContext.GetRequiredService<CancellationToken>();
 
             var authUtil = host.Services.GetRequiredService<IAuthenticationCacheUtility>();
-            var authService = await this.authenticationServiceFactory.GetAuthenticationServiceAsync(strategy, tenantId, clientId, certificateName, certificateThumbPrint, cancellationToken);
+            var authService = await this.authenticationServiceFactory.GetAuthenticationServiceAsync(strategy, tenantId, clientId, certificateName, certificatePath, certificateThumbPrint, cancellationToken);
             await authService.LoginAsync(scopes, cancellationToken);
-            await authUtil.SaveAuthenticationIdentifiersAsync(clientId, tenantId, certificateName, certificateThumbPrint, strategy, cancellationToken);
+            await authUtil.SaveAuthenticationIdentifiersAsync(clientId, tenantId, certificateName, certificatePath, certificateThumbPrint, strategy, cancellationToken);
         });
 
         return loginCommand;
