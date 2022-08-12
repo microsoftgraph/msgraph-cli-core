@@ -38,7 +38,7 @@ public class AuthenticationCacheUtility : IAuthenticationCacheUtility
         return configRoot.AuthenticationOptions;
     }
 
-    public async Task SaveAuthenticationIdentifiersAsync(string? clientId, string? tenantId, string? certificateName, string? certificatePath, string? certificateThumbPrint, AuthenticationStrategy strategy, CancellationToken cancellationToken = default)
+    public async Task SaveAuthenticationIdentifiersAsync(string? clientId, string? tenantId, string? certificateName, string? certificateFilePath, string? certificateThumbPrint, AuthenticationStrategy strategy, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
         var path = this.GetAuthenticationCacheFilePath();
@@ -50,7 +50,7 @@ public class AuthenticationCacheUtility : IAuthenticationCacheUtility
         // Only write auth configuration if the values have changed
         if (
                 clientId != authOptions.ClientId || tenantId != authOptions.TenantId || certificateName != authOptions.ClientCertificateName ||
-                certificatePath != authOptions.ClientCertificatePath || certificateThumbPrint != authOptions.ClientCertificateThumbPrint ||
+                certificateFilePath != authOptions.ClientCertificatePath || certificateThumbPrint != authOptions.ClientCertificateThumbPrint ||
                 strategy != authOptions.Strategy
         )
         {
@@ -59,7 +59,7 @@ public class AuthenticationCacheUtility : IAuthenticationCacheUtility
                 ClientId = clientId,
                 TenantId = tenantId,
                 ClientCertificateName = certificateName,
-                ClientCertificatePath = certificatePath,
+                ClientCertificatePath = certificateFilePath,
                 ClientCertificateThumbPrint = certificateThumbPrint,
                 Strategy = strategy,
             };

@@ -4,7 +4,9 @@ using Microsoft.Graph.Cli.Core.Authentication;
 using Microsoft.Graph.Cli.Core.IO;
 using Microsoft.Graph.Cli.Core.Utils;
 using System.CommandLine;
+using System;
 using System.IO;
+using System.Security.Cryptography;
 using System.Threading;
 
 namespace Microsoft.Graph.Cli.Core.Commands.Authentication;
@@ -53,16 +55,23 @@ public class LoginCommand
             var clientId = context.ParseResult.GetValueForOption(clientIdOption);
             var tenantId = context.ParseResult.GetValueForOption(tenantIdOption);
             var certificateName = context.ParseResult.GetValueForOption(certificateNameOption);
-            var certificatePath = context.ParseResult.GetValueForOption(certificatePathOption)?.FullName;
+            var certificateFilePath = context.ParseResult.GetValueForOption(certificatePathOption)?.FullName;
             var certificateThumbPrint = context.ParseResult.GetValueForOption(certificateThumbPrintOption);
             var strategy = context.ParseResult.GetValueForOption(strategyOption);
             var host = context.BindingContext.GetRequiredService<IHost>();
             var cancellationToken = context.BindingContext.GetRequiredService<CancellationToken>();
 
             var authUtil = host.Services.GetRequiredService<IAuthenticationCacheUtility>();
-            var authService = await this.authenticationServiceFactory.GetAuthenticationServiceAsync(strategy, tenantId, clientId, certificateName, certificatePath, certificateThumbPrint, cancellationToken);
+            string? password = null;
+            if (!string.IsNullOrWhiteSpace(certificateFilePath) && File.Exists(certificateFilePath))
+            {
+                // Get the password for the file.
+                password = await ConsoleUtilities.ReadPasswordAsync("You have provided a path to a private certificate file. Please enter a password for the file if any.", cancellationToken);
+            }
+
+            var authService = await this.authenticationServiceFactory.GetAuthenticationServiceAsync(strategy, tenantId, clientId, certificateName, certificateThumbPrint, certificateFilePath, password, cancellationToken);
             await authService.LoginAsync(scopes, cancellationToken);
-            await authUtil.SaveAuthenticationIdentifiersAsync(clientId, tenantId, certificateName, certificatePath, certificateThumbPrint, strategy, cancellationToken);
+            await authUtil.SaveAuthenticationIdentifiersAsync(clientId, tenantId, certificateName, certificateFilePath, certificateThumbPrint, strategy, cancellationToken);
         });
 
         return loginCommand;

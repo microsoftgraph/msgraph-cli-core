@@ -4,7 +4,6 @@ using System.Security;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using Azure.Identity;
-using Microsoft.Graph.Cli.Core.Utils;
 
 namespace Microsoft.Graph.Cli.Core.Authentication;
 
@@ -16,14 +15,15 @@ public static class ClientCertificateCredentialFactory
     /// <param name="tenantId">TenantId</param>
     /// <param name="clientId">ClientId</param>
     /// <param name="certificateName">Subject name of the certificate.</param>
-    /// <param name="certificatePath">Path to the certificate file.</param>
     /// <param name="certificateThumbPrint">Thumb print of the certificate.</param>
+    /// <param name="certificateFilePath">Path to the certificate file.</param>
+    /// <param name="certificateFilePassword">Password to the certificate file.</param>
     /// <returns>A ClientCertificateCredential</returns>
-    public static ClientCertificateCredential GetClientCertificateCredential(string? tenantId, string? clientId, string? certificateName, string? certificatePath, string? certificateThumbPrint)
+    public static ClientCertificateCredential GetClientCertificateCredential(string? tenantId, string? clientId, string? certificateName, string? certificateThumbPrint, string? certificateFilePath, string? certificateFilePassword)
     {
-        if (string.IsNullOrWhiteSpace(certificatePath) && string.IsNullOrWhiteSpace(certificateName))
+        if (string.IsNullOrWhiteSpace(certificateFilePath) && string.IsNullOrWhiteSpace(certificateName) && string.IsNullOrWhiteSpace(certificateThumbPrint))
         {
-            throw new ArgumentException("Either a certificate path or a certificate name must be provided.");
+            throw new ArgumentException("Either a certificate path, a certificate name or a certificate thumb print must be provided.");
         }
 
         ClientCertificateCredentialOptions credOptions = new();
@@ -41,9 +41,10 @@ public static class ClientCertificateCredentialFactory
 
         X509Certificate2? certificate;
 
-        if (!string.IsNullOrWhiteSpace(certificatePath))
+        if (!string.IsNullOrWhiteSpace(certificateFilePath))
         {
-            return new ClientCertificateCredential(tenantId, clientId, certificatePath, credOptions);
+            certificate = new X509Certificate2(certificateFilePath, certificateFilePassword);
+            return new ClientCertificateCredential(tenantId, clientId, certificate, credOptions);
         }
         else if (!string.IsNullOrWhiteSpace(certificateName) && TryGetCertificateFromStore(certificateName, isThumbPrint: false, out certificate))
         {
@@ -54,7 +55,7 @@ public static class ClientCertificateCredentialFactory
             return new ClientCertificateCredential(tenantId, clientId, certificate, credOptions);
         }
 
-        throw new ArgumentException("Could not find valid certificate.");
+        throw new ArgumentException("Could not find a valid certificate.");
     }
 
     /// <summary>

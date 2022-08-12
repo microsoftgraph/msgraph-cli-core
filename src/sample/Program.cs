@@ -8,6 +8,7 @@ using Microsoft.Graph.Cli.Core.Authentication;
 using Microsoft.Graph.Cli.Core.Commands.Authentication;
 using Microsoft.Graph.Cli.Core.Configuration;
 using Microsoft.Graph.Cli.Core.IO;
+using Microsoft.Kiota.Abstractions.Authentication;
 using Microsoft.Kiota.Authentication.Azure;
 using Microsoft.Kiota.Cli.Commons.IO;
 using Microsoft.Kiota.Http.HttpClientLibrary;
@@ -20,7 +21,9 @@ using System.CommandLine.IO;
 using System.CommandLine.Parsing;
 using System.Diagnostics.Tracing;
 using System.IO;
+using System.Linq;
 using System.Reflection;
+using System.Security.Cryptography;
 using System.Threading.Tasks;
 
 namespace Microsoft.Graph.Cli
@@ -41,8 +44,24 @@ namespace Microsoft.Graph.Cli
             AuthenticationStrategy authStrategy = authSettings?.Strategy ?? AuthenticationStrategy.DeviceCode;
 
             using AzureEventSourceListener listener = AzureEventSourceListener.CreateConsoleLogger(EventLevel.LogAlways);
-            var credential = await authServiceFactory.GetTokenCredentialAsync(authStrategy, authSettings?.TenantId, authSettings?.ClientId, authSettings?.ClientCertificateName, authSettings?.ClientCertificatePath, authSettings?.ClientCertificateThumbPrint);
-            var authProvider = new AzureIdentityAuthenticationProvider(credential, new string[] { "graph.microsoft.com" });
+            string? password = null;
+            if (!string.IsNullOrWhiteSpace(authSettings?.ClientCertificatePath) && !args.Any(a => a == "login"))
+            {
+                // Ask for password
+                password = ConsoleUtilities.ReadPassword("You have provided a path to a private certificate file. Please enter a password for the file if any.");
+            }
+
+            IAuthenticationProvider? authProvider = null;
+            try
+            {
+                var credential = await authServiceFactory.GetTokenCredentialAsync(authStrategy, authSettings?.TenantId, authSettings?.ClientId, authSettings?.ClientCertificateName, authSettings?.ClientCertificateThumbPrint, authSettings?.ClientCertificatePath, password);
+                authProvider = new AzureIdentityAuthenticationProvider(credential, new string[] { "graph.microsoft.com" });
+            }
+            catch (CryptographicException)
+            {
+                await Console.Error.WriteLineAsync("Could not initialize certificate authentication. Check that the password provided for the certificate is correct then try again.");
+                return -1;
+            }
 
             var assemblyVersion = Assembly.GetExecutingAssembly().GetName().Version;
             var options = new GraphClientOptions
@@ -52,9 +71,6 @@ namespace Microsoft.Graph.Cli
                 GraphServiceTargetVersion = "1.0"
             };
 
-            using var httpClient = GraphCliClientFactory.GetDefaultClient(options);
-            var core = new HttpClientRequestAdapter(authProvider, httpClient: httpClient);
-
             var commands = new List<Command>();
             var loginCommand = new LoginCommand(authServiceFactory);
             commands.Add(loginCommand.Build());
@@ -62,6 +78,8 @@ namespace Microsoft.Graph.Cli
             var logoutCommand = new LogoutCommand(new LogoutService());
             commands.Add(logoutCommand.Build());
 
+            using var httpClient = GraphCliClientFactory.GetDefaultClient(options);
+            var core = new HttpClientRequestAdapter(authProvider, httpClient: httpClient);
             commands.Add(UsersCommandBuilder.BuildUsersCommand(core));
 
             var builder = BuildCommandLine(commands).UseDefaults().UseHost(CreateHostBuilder);
