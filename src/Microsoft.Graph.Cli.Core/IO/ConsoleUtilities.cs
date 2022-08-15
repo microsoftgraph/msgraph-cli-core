@@ -10,39 +10,7 @@ public static class ConsoleUtilities
 {
     public static string ReadPassword(string? message = null)
     {
-        var pass = new StringBuilder();
-        Console.WriteLine(message);
-        ConsoleKeyInfo key;
-
-        do
-        {
-            key = Console.ReadKey(true);
-
-            // Backspace Should Not Work
-            if (!char.IsControl(key.KeyChar))
-            {
-                pass.Append(key.KeyChar);
-                Console.Write("*");
-            }
-            else if (key.Key == ConsoleKey.Backspace && pass.Length > 0)
-            {
-                pass.Remove(pass.Length - 1, 1);
-                Console.Write("\b \b");
-            }
-            else if (key.Key == ConsoleKey.Escape && pass.Length > 0)
-            {
-                var length = pass.Length;
-                pass.Clear();
-                while (length > 0)
-                {
-                    Console.Write("\b \b");
-                    length -= 1;
-                }
-            }
-        }
-        // Stops Receving Keys Once Enter is Pressed
-        while (key.Key != ConsoleKey.Enter);
-        return pass.ToString();
+        return ReadPasswordAsync(message).GetAwaiter().GetResult();
     }
 
     public static async Task<string> ReadPasswordAsync(string? message = null, CancellationToken cancellationToken = default)
