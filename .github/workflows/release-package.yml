@@ -3,32 +3,47 @@ name: Release solution
 on:
   workflow_dispatch:
   push:
-    branches: [ main ]
-    paths: ['src/**', '.github/workflows/**']
+    paths: ['src/**', '.github/workflows/**', 'msgraph-cli-core.sln']
 
 jobs:
-  install:
-    uses: ./.github/workflows/install-dependencies.yml
-    secrets:
-      user: ${{secrets.NUGET_USER}}
-      token: ${{secrets.NUGET_PASSWORD}}
   build:
     runs-on: ubuntu-latest
-    needs: install
+    env:
+      MS_NUGET_URL: https://nuget.pkg.github.com/microsoft/index.json
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Setup .NET Core SDK 6
+        uses: actions/setup-dotnet@v2
+        with:
+          dotnet-version: 6.x
+      - name: Add NuGet kiota source
+        # NOTE: Password encryption is not supported for the linux platform (Encryption is only supported on Windows platforms.)
+        run: |
+          dotnet nuget add source ${{env.MS_NUGET_URL}} -n ms-gh -u ${{secrets.NUGET_USER}} -p ${{secrets.NUGET_PASSWORD}} --store-password-in-clear-text
       - uses: actions/cache@v3
         with:
           path: ~/.nuget/packages
+          # Look to see if there is a cache hit for the corresponding requirements file
           key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
           restore-keys: |
             ${{ runner.os }}-nuget
-      - name: Publish
+      - name: Install dependencies
+        run: dotnet restore
+      - name: Test
+        run: dotnet test --no-restore
+      - id: publish
+        name: Publish
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
         run: dotnet publish --no-restore --verbosity normal -c Release
-      - name: Pack
+      - id: pack
+        name: Pack
+        if: ${{ steps.publish.outcome == 'success' }}
         run: dotnet pack --no-restore --no-build --verbosity normal -c Release
       - name: Upload Nuget Package
+        if: ${{ steps.pack.outcome == 'success' }}
         uses: actions/upload-artifact@v3
         with:
           name: drop
