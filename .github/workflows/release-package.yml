@@ -10,7 +10,6 @@ jobs:
     runs-on: ubuntu-latest
     env:
       MS_NUGET_URL: https://nuget.pkg.github.com/microsoft/index.json
-    needs: install
     steps:
       - name: Checkout
         uses: actions/checkout@v3
