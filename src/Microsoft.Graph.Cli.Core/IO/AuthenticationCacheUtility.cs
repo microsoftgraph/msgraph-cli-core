@@ -87,11 +87,7 @@ public class AuthenticationCacheUtility : IAuthenticationCacheUtility
     {
         try
         {
-            if (File.Exists(path))
-            {
-                File.Delete(path);
-            }
-            using FileStream fileStream = File.OpenWrite(path);
+            using FileStream fileStream = File.Open(path, FileMode.Create, FileAccess.Write);
             await JsonSerializer.SerializeAsync(fileStream, configuration, cancellationToken: cancellationToken);
         }
         catch (DirectoryNotFoundException)
