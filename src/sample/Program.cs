@@ -48,7 +48,7 @@ namespace Microsoft.Graph.Cli
             if (!string.IsNullOrWhiteSpace(authSettings?.ClientCertificatePath) && !args.Any(a => a == "login"))
             {
                 // Ask for password
-                password = ConsoleUtilities.ReadPassword("You have provided a path to a private certificate file. Please enter a password for the file if any.");
+                password = await ConsoleUtilities.ReadPasswordAsync("You have provided a path to a private certificate file. Please enter a password for the file if any.");
             }
 
             IAuthenticationProvider? authProvider = null;

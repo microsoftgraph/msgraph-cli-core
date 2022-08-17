@@ -8,11 +8,6 @@ namespace Microsoft.Graph.Cli.Core.IO;
 
 public static class ConsoleUtilities
 {
-    public static string ReadPassword(string? message = null)
-    {
-        return ReadPasswordAsync(message).GetAwaiter().GetResult();
-    }
-
     public static async Task<string> ReadPasswordAsync(string? message = null, CancellationToken cancellationToken = default)
     {
         var pass = new StringBuilder();
@@ -24,15 +19,16 @@ public static class ConsoleUtilities
             key = Console.ReadKey(true);
 
             // Backspace Should Not Work
+            var clearChars = new char[] { '\b', ' ', '\b' };
             if (!char.IsControl(key.KeyChar))
             {
                 pass.Append(key.KeyChar);
-                await Console.Out.WriteAsync(new ReadOnlyMemory<char>("*".ToCharArray()), cancellationToken);
+                await Console.Out.WriteAsync(new ReadOnlyMemory<char>(new char[] { '*' }), cancellationToken);
             }
             else if (key.Key == ConsoleKey.Backspace && pass.Length > 0)
             {
                 pass.Remove(pass.Length - 1, 1);
-                await Console.Out.WriteAsync(new ReadOnlyMemory<char>("\b \b".ToCharArray()), cancellationToken);
+                await Console.Out.WriteAsync(new ReadOnlyMemory<char>(clearChars), cancellationToken);
             }
             else if (key.Key == ConsoleKey.Escape && pass.Length > 0)
             {
@@ -40,7 +36,7 @@ public static class ConsoleUtilities
                 pass.Clear();
                 while (length > 0)
                 {
-                    await Console.Out.WriteAsync(new ReadOnlyMemory<char>("\b \b".ToCharArray()), cancellationToken);
+                    await Console.Out.WriteAsync(new ReadOnlyMemory<char>(clearChars), cancellationToken);
                     length -= 1;
                 }
             }
