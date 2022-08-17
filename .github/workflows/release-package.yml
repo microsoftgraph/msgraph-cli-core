@@ -34,14 +34,16 @@ jobs:
         run: dotnet restore
       - name: Test
         run: dotnet test --no-restore
-      - name: Publish
+      - id: publish
+        name: Publish
         if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
         run: dotnet publish --no-restore --verbosity normal -c Release
-      - name: Pack
-        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+      - id: pack
+        name: Pack
+        if: ${{ steps.publish.outcome == 'success' }}
         run: dotnet pack --no-restore --no-build --verbosity normal -c Release
       - name: Upload Nuget Package
-        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+        if: ${{ steps.pack.outcome == 'success' }}
         uses: actions/upload-artifact@v3
         with:
           name: drop
