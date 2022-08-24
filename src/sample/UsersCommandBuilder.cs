@@ -84,7 +84,10 @@ namespace Microsoft.Graph.Cli
                 var handler = new NativeResponseHandler();
                 await requestAdapter.SendNoContentAsync(requestInfo, responseHandler: handler);
                 var response = handler.Value as HttpResponseMessage;
-                Console.WriteLine(await response?.Content?.ReadAsStringAsync(cancellationToken));
+                if (response != null)
+                {
+                    Console.WriteLine(await response.Content.ReadAsStringAsync(cancellationToken));
+                }
             });
             return command;
         }

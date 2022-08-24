@@ -40,34 +40,19 @@ namespace Microsoft.Graph.Cli
             var config = configBuilder.Build();
 
             var authSettings = config.GetSection(nameof(AuthenticationOptions)).Get<AuthenticationOptions>();
-            var authServiceFactory = new AuthenticationServiceFactory(new PathUtility(), authSettings);
+            var pathUtil = new PathUtility();
+            var authServiceFactory = new AuthenticationServiceFactory(pathUtil, authSettings);
             AuthenticationStrategy authStrategy = authSettings?.Strategy ?? AuthenticationStrategy.DeviceCode;
 
             using AzureEventSourceListener listener = AzureEventSourceListener.CreateConsoleLogger(EventLevel.LogAlways);
-            string? password = null;
-            if (!string.IsNullOrWhiteSpace(authSettings?.ClientCertificatePath) && !args.Any(a => a == "login"))
-            {
-                // Ask for password
-                password = await ConsoleUtilities.ReadPasswordAsync("You have provided a path to a private certificate file. Please enter a password for the file if any.");
-            }
-
-            IAuthenticationProvider? authProvider = null;
-            try
-            {
-                var credential = await authServiceFactory.GetTokenCredentialAsync(authStrategy, authSettings?.TenantId, authSettings?.ClientId, authSettings?.ClientCertificateName, authSettings?.ClientCertificateThumbPrint, authSettings?.ClientCertificatePath, password);
-                authProvider = new AzureIdentityAuthenticationProvider(credential, new string[] { "graph.microsoft.com" });
-            }
-            catch (CryptographicException)
-            {
-                await Console.Error.WriteLineAsync("Could not initialize certificate authentication. Check that the password provided for the certificate is correct then try again.");
-                return -1;
-            }
+            var credential = await authServiceFactory.GetTokenCredentialAsync(authStrategy, authSettings?.TenantId, authSettings?.ClientId, authSettings?.ClientCertificateName, authSettings?.ClientCertificateThumbPrint);
+            IAuthenticationProvider? authProvider = new AzureIdentityAuthenticationProvider(credential, new string[] { "graph.microsoft.com" });
 
             var assemblyVersion = Assembly.GetExecutingAssembly().GetName().Version;
             var options = new GraphClientOptions
             {
                 GraphProductPrefix = "graph-cli",
-                GraphServiceLibraryClientVersion = $"{assemblyVersion.Major}.{assemblyVersion.Minor}.{assemblyVersion.Build}",
+                GraphServiceLibraryClientVersion = $"{assemblyVersion?.Major ?? 0}.{assemblyVersion?.Minor ?? 0}.{assemblyVersion?.Build ?? 0}",
                 GraphServiceTargetVersion = "1.0"
             };
 
@@ -75,7 +60,8 @@ namespace Microsoft.Graph.Cli
             var loginCommand = new LoginCommand(authServiceFactory);
             commands.Add(loginCommand.Build());
 
-            var logoutCommand = new LogoutCommand(new LogoutService());
+            var authCacheUtil = new AuthenticationCacheUtility(pathUtil);
+            var logoutCommand = new LogoutCommand(new LogoutService(authCacheUtil));
             commands.Add(logoutCommand.Build());
 
             using var httpClient = GraphCliClientFactory.GetDefaultClient(options);
@@ -107,7 +93,8 @@ namespace Microsoft.Graph.Cli
                     Console.ResetColor();
                     Console.ForegroundColor = ConsoleColor.Red;
                     context.Console.Error.WriteLine(ex.Message);
-                    context.Console.Error.WriteLine(ex.StackTrace);
+                    if (ex?.StackTrace != null)
+                        context.Console.Error.WriteLine(ex.StackTrace);
                     Console.ResetColor();
                 }
             });

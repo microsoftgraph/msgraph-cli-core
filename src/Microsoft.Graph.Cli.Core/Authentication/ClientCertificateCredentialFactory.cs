@@ -16,14 +16,12 @@ public static class ClientCertificateCredentialFactory
     /// <param name="clientId">ClientId</param>
     /// <param name="certificateName">Subject name of the certificate.</param>
     /// <param name="certificateThumbPrint">Thumb print of the certificate.</param>
-    /// <param name="certificateFilePath">Path to the certificate file.</param>
-    /// <param name="certificateFilePassword">Password to the certificate file.</param>
     /// <returns>A ClientCertificateCredential</returns>
-    public static ClientCertificateCredential GetClientCertificateCredential(string? tenantId, string? clientId, string? certificateName, string? certificateThumbPrint, string? certificateFilePath, string? certificateFilePassword)
+    public static ClientCertificateCredential GetClientCertificateCredential(string? tenantId, string? clientId, string? certificateName, string? certificateThumbPrint)
     {
-        if (string.IsNullOrWhiteSpace(certificateFilePath) && string.IsNullOrWhiteSpace(certificateName) && string.IsNullOrWhiteSpace(certificateThumbPrint))
+        if (string.IsNullOrWhiteSpace(certificateName) && string.IsNullOrWhiteSpace(certificateThumbPrint))
         {
-            throw new ArgumentException("Either a certificate path, a certificate name or a certificate thumb print must be provided.");
+            throw new ArgumentException("Either a certificate name or a certificate thumb print must be provided.");
         }
 
         ClientCertificateCredentialOptions credOptions = new();
@@ -41,12 +39,7 @@ public static class ClientCertificateCredentialFactory
 
         X509Certificate2? certificate;
 
-        if (!string.IsNullOrWhiteSpace(certificateFilePath))
-        {
-            certificate = new X509Certificate2(certificateFilePath, certificateFilePassword);
-            return new ClientCertificateCredential(tenantId, clientId, certificate, credOptions);
-        }
-        else if (!string.IsNullOrWhiteSpace(certificateName) && TryGetCertificateFromStore(certificateName, isThumbPrint: false, out certificate))
+        if (!string.IsNullOrWhiteSpace(certificateName) && TryGetCertificateFromStore(certificateName, isThumbPrint: false, out certificate))
         {
             return new ClientCertificateCredential(tenantId, clientId, certificate, credOptions);
         }

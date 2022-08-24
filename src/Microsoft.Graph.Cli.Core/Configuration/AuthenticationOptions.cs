@@ -10,8 +10,6 @@ public class AuthenticationOptions
 
     public string? ClientCertificateName { get; set; }
 
-    public string? ClientCertificatePath { get; set; }
-
     public string? ClientCertificateThumbPrint { get; set; }
 
     public AuthenticationStrategy Strategy { get; set; } = AuthenticationStrategy.DeviceCode;

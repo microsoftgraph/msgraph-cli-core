@@ -9,7 +9,11 @@ public interface IAuthenticationCacheUtility
 {
     string GetAuthenticationCacheFilePath();
 
-    Task SaveAuthenticationIdentifiersAsync(string? clientId, string? tenantId, string? certificateName, string? certificateFilePath, string? certificateThumbPrint, AuthenticationStrategy strategy, CancellationToken cancellationToken = default);
+    Task SaveAuthenticationIdentifiersAsync(string? clientId, string? tenantId, string? certificateName, string? certificateThumbPrint, AuthenticationStrategy strategy, CancellationToken cancellationToken = default);
 
     Task<AuthenticationOptions> ReadAuthenticationIdentifiersAsync(CancellationToken cancellationToken = default);
+
+    void DeleteAuthenticationIdentifiers();
+
+    void DeleteAuthenticationRecord();
 }
