@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Azure.Core;
 using Azure.Identity;
+using Microsoft.Graph.Cli.Core.Configuration;
 using Microsoft.Graph.Cli.Core.IO;
 using Microsoft.Graph.Cli.Core.Utils;
 
@@ -13,12 +14,15 @@ public class AuthenticationServiceFactory
 {
     private readonly IPathUtility pathUtility;
 
-    public AuthenticationServiceFactory(IPathUtility pathUtility)
+    private readonly AuthenticationOptions? authenticationOptions;
+
+    public AuthenticationServiceFactory(IPathUtility pathUtility, AuthenticationOptions? authOptions)
     {
         this.pathUtility = pathUtility;
+        this.authenticationOptions = authOptions;
     }
 
-    public virtual async Task<ILoginService> GetAuthenticationServiceAsync(AuthenticationStrategy strategy, string? tenantId, string? clientId, CancellationToken cancellationToken = default)
+    public virtual async Task<ILoginService> GetAuthenticationServiceAsync(AuthenticationStrategy strategy, string? tenantId, string? clientId, string? certificateName, string? certificateThumbPrint, CancellationToken cancellationToken = default)
     {
         switch (strategy)
         {
@@ -26,13 +30,15 @@ public class AuthenticationServiceFactory
                 return await GetDeviceCodeLoginServiceAsync(tenantId, clientId, cancellationToken);
             case AuthenticationStrategy.InteractiveBrowser:
                 return await GetInteractiveBrowserLoginServiceAsync(tenantId, clientId, cancellationToken);
+            case AuthenticationStrategy.ClientCertificate:
+                return GetClientCertificateLoginService(tenantId, clientId, certificateName, certificateThumbPrint);
             default:
                 throw new InvalidOperationException($"The authentication strategy {strategy} is not supported");
         }
 
     }
 
-    public virtual async Task<TokenCredential> GetTokenCredentialAsync(AuthenticationStrategy strategy, string? tenantId, string? clientId, CancellationToken cancellationToken = default)
+    public virtual async Task<TokenCredential> GetTokenCredentialAsync(AuthenticationStrategy strategy, string? tenantId, string? clientId, string? certificateName, string? certificateThumbPrint, CancellationToken cancellationToken = default)
     {
         switch (strategy)
         {
@@ -40,6 +46,8 @@ public class AuthenticationServiceFactory
                 return await GetDeviceCodeCredentialAsync(tenantId, clientId, cancellationToken);
             case AuthenticationStrategy.InteractiveBrowser:
                 return await GetInteractiveBrowserCredentialAsync(tenantId, clientId, cancellationToken);
+            case AuthenticationStrategy.ClientCertificate:
+                return GetClientCertificateCredential(tenantId, clientId, certificateName, certificateThumbPrint);
             default:
                 throw new InvalidOperationException($"The authentication strategy {strategy} is not supported");
         }
@@ -54,6 +62,12 @@ public class AuthenticationServiceFactory
     private async Task<InteractiveBrowserLoginService> GetInteractiveBrowserLoginServiceAsync(string? tenantId, string? clientId, CancellationToken cancellationToken = default)
     {
         var credential = await GetInteractiveBrowserCredentialAsync(tenantId, clientId, cancellationToken);
+        return new(credential, pathUtility);
+    }
+
+    private ClientCertificateLoginService GetClientCertificateLoginService(string? tenantId, string? clientId, string? certificateName, string? certificateThumbPrint)
+    {
+        var credential = GetClientCertificateCredential(tenantId, clientId, certificateName, certificateThumbPrint);
         return new(credential, pathUtility);
     }
 
@@ -88,6 +102,11 @@ public class AuthenticationServiceFactory
         credOptions.LoginHint = credOptions.AuthenticationRecord?.Username;
 
         return new InteractiveBrowserCredential(credOptions);
+    }
+
+    private ClientCertificateCredential GetClientCertificateCredential(string? tenantId, string? clientId, string? certificateName, string? certificateThumbPrint)
+    {
+        return ClientCertificateCredentialFactory.GetClientCertificateCredential(tenantId ?? Constants.DefaultTenant, clientId ?? Constants.DefaultAppId, certificateName, certificateThumbPrint);
     }
 
     private async Task<AuthenticationRecord?> GetCachedAuthenticationRecordAsync(CancellationToken cancellationToken = default)

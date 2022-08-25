@@ -38,7 +38,7 @@ public class AuthenticationCacheUtility : IAuthenticationCacheUtility
         return configRoot.AuthenticationOptions;
     }
 
-    public async Task SaveAuthenticationIdentifiersAsync(string? clientId, string? tenantId, AuthenticationStrategy strategy, CancellationToken cancellationToken = default)
+    public async Task SaveAuthenticationIdentifiersAsync(string? clientId, string? tenantId, string? certificateName, string? certificateThumbPrint, AuthenticationStrategy strategy, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
         var path = this.GetAuthenticationCacheFilePath();
@@ -48,16 +48,39 @@ public class AuthenticationCacheUtility : IAuthenticationCacheUtility
         tenantId = tenantId ?? Constants.DefaultTenant;
 
         // Only write auth configuration if the values have changed
-        if (clientId != authOptions.ClientId || tenantId != authOptions.TenantId || strategy != authOptions.Strategy)
+        if (
+                clientId != authOptions.ClientId || tenantId != authOptions.TenantId || certificateName != authOptions.ClientCertificateName ||
+                certificateThumbPrint != authOptions.ClientCertificateThumbPrint || strategy != authOptions.Strategy
+        )
         {
             configuration.AuthenticationOptions = new AuthenticationOptions
             {
                 ClientId = clientId,
                 TenantId = tenantId,
+                ClientCertificateName = certificateName,
+                ClientCertificateThumbPrint = certificateThumbPrint,
                 Strategy = strategy,
             };
 
             await WriteConfigurationAsync(path, configuration, cancellationToken);
+        }
+    }
+
+    public void DeleteAuthenticationIdentifiers()
+    {
+        var authIdentifierPath = GetAuthenticationCacheFilePath();
+        if (File.Exists(authIdentifierPath))
+        {
+            File.Delete(authIdentifierPath);
+        }
+    }
+
+    public void DeleteAuthenticationRecord()
+    {
+        var authRecordPath = Path.Combine(pathUtility.GetApplicationDataDirectory(), Constants.AuthRecordPath);
+        if (File.Exists(authRecordPath))
+        {
+            File.Delete(authRecordPath);
         }
     }
 

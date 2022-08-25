@@ -15,7 +15,7 @@ public class InteractiveBrowserLoginService : LoginServiceBase
         this.credential = credential;
     }
 
-    protected override async Task<AuthenticationRecord> DoLoginAsync(string[] scopes, CancellationToken cancellationToken = default)
+    protected override async Task<AuthenticationRecord?> DoLoginAsync(string[] scopes, CancellationToken cancellationToken = default)
     {
         return await credential.AuthenticateAsync(new TokenRequestContext(scopes), cancellationToken);
     }
