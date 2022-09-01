@@ -8,7 +8,7 @@ namespace Microsoft.Graph.Cli.Core.Http;
 
 public class LoggingHandler : DelegatingHandler
 {
-    private ILogger<LoggingHandler> logger;
+    private ILogger<LoggingHandler>? logger;
 
     protected override async Task<HttpResponseMessage> SendAsync(
         HttpRequestMessage request, System.Threading.CancellationToken cancellationToken)
@@ -31,7 +31,7 @@ public class LoggingHandler : DelegatingHandler
         {
             logger?.LogDebug("{0}\t{1}\t{2}", request.RequestUri,
                 (int)response.StatusCode, response.Headers.Date);
-            logger?.LogDebug("{0}", await response.Content?.ReadAsStringAsync());
+            logger?.LogDebug("{0}", await response.Content.ReadAsStringAsync());
         }
         return response;
     }
