@@ -1,7 +1,6 @@
 using System.Linq;
 using System.Collections.Generic;
 using System.Net.Http;
-using Microsoft.Kiota.Http.HttpClientLibrary;
 
 namespace Microsoft.Graph.Cli.Core.IO;
 
@@ -9,14 +8,20 @@ public class GraphCliClientFactory
 {
     public static IEnumerable<DelegatingHandler> GetDefaultMiddlewaresWithOptions(GraphClientOptions options) => GraphClientFactory.CreateDefaultHandlers(options);
 
-    public static HttpClient GetDefaultClient(GraphClientOptions options, string nationalCloud = GraphClientFactory.Global_Cloud, params DelegatingHandler[] middlewares)
+    public static HttpClient GetDefaultClient(GraphClientOptions? options = null, string nationalCloud = GraphClientFactory.Global_Cloud, HttpMessageHandler? finalHandler = null, DelegatingHandler[]? lowestPriorityMiddlewares = null, params DelegatingHandler[] middlewares)
     {
-        IEnumerable<DelegatingHandler> m = middlewares;
-        if (!middlewares.Any())
+        var m = new List<DelegatingHandler>();
+        if (lowestPriorityMiddlewares?.Any() == true)
+            m.AddRange(lowestPriorityMiddlewares);
+
+        if (options is not null)
         {
-            m = GetDefaultMiddlewaresWithOptions(options);
+            var defaultMiddlewares = GetDefaultMiddlewaresWithOptions(options);
+            m.AddRange(defaultMiddlewares);
         }
-        var finalHandler = KiotaClientFactory.ChainHandlersCollectionAndGetFirstLink(KiotaClientFactory.GetDefaultHttpMessageHandler(), middlewares);
-        return GraphClientFactory.Create(graphClientOptions: options, nationalCloud: nationalCloud, finalHandler: finalHandler);
+
+        m.AddRange(middlewares);
+
+        return GraphClientFactory.Create(nationalCloud: nationalCloud, finalHandler: finalHandler, handlers: m);
     }
 }
