@@ -18,6 +18,28 @@
             "stopAtEntry": false
         },
         {
+            "name": "login certificate name (sample)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build sample",
+            "program": "${workspaceFolder}/src/sample/bin/Debug/net6.0/sample.dll",
+            "args": ["login", "--strategy", "ClientCertificate", "--tenant-id", "39aafea4-2975-4790-9c07-e616c1c35d99", "--client-id", "e49807f2-94cc-4f59-9e14-be2a37eab7c2", "--certificate-name", "CN=TestCertificate"],
+            "cwd": "${workspaceFolder}/src/sample",
+            "console": "internalConsole",
+            "stopAtEntry": false
+        },
+        {
+            "name": "users list (sample)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build sample",
+            "program": "${workspaceFolder}/src/sample/bin/Debug/net6.0/sample.dll",
+            "args": ["users", "--debug"],
+            "cwd": "${workspaceFolder}/src/sample",
+            "console": "integratedTerminal",
+            "stopAtEntry": false
+        },
+        {
             "name": ".NET Core Attach",
             "type": "coreclr",
             "request": "attach"
