@@ -4,9 +4,11 @@ using DevLab.JmesPath;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Microsoft.Graph.Cli.Core.Authentication;
 using Microsoft.Graph.Cli.Core.Commands.Authentication;
 using Microsoft.Graph.Cli.Core.Configuration;
+using Microsoft.Graph.Cli.Core.Http;
 using Microsoft.Graph.Cli.Core.IO;
 using Microsoft.Kiota.Abstractions.Authentication;
 using Microsoft.Kiota.Authentication.Azure;
@@ -64,7 +66,8 @@ namespace Microsoft.Graph.Cli
             var logoutCommand = new LogoutCommand(new LogoutService(authCacheUtil));
             commands.Add(logoutCommand.Build());
 
-            using var httpClient = GraphCliClientFactory.GetDefaultClient(options);
+            var loggingHandler = new LoggingHandler();
+            using var httpClient = GraphCliClientFactory.GetDefaultClient(options, lowestPriorityMiddlewares: new[] { loggingHandler });
             var core = new HttpClientRequestAdapter(authProvider, httpClient: httpClient);
             commands.Add(UsersCommandBuilder.BuildUsersCommand(core));
 
@@ -72,6 +75,16 @@ namespace Microsoft.Graph.Cli
             builder.AddMiddleware((invocation) =>
             {
                 var host = invocation.GetHost();
+                var debug = invocation.Parser.Configuration.RootCommand.Options.SingleOrDefault(o => o.Name == "debug") as Option<bool>;
+                var isDebug = debug != null ? invocation.ParseResult.GetValueForOption(debug) : false;
+                if (isDebug == true)
+                {
+                    loggingHandler.Logger = host.Services.GetService<ILogger<LoggingHandler>>();
+                }
+                else
+                {
+                    loggingHandler.Logger = null;
+                }
                 var outputFilter = host.Services.GetRequiredService<IOutputFilter>();
                 var outputFormatterFactory = host.Services.GetRequiredService<IOutputFormatterFactory>();
                 var pagingService = host.Services.GetRequiredService<IPagingService>();
@@ -93,8 +106,6 @@ namespace Microsoft.Graph.Cli
                     Console.ResetColor();
                     Console.ForegroundColor = ConsoleColor.Red;
                     context.Console.Error.WriteLine(ex.Message);
-                    if (ex?.StackTrace != null)
-                        context.Console.Error.WriteLine(ex.StackTrace);
                     Console.ResetColor();
                 }
             });
@@ -113,6 +124,9 @@ namespace Microsoft.Graph.Cli
             {
                 rootCommand.AddCommand(command);
             }
+
+            var debug = new Option<bool>("--debug", "Turn on debug logging.");
+            rootCommand.AddGlobalOption(debug);
 
             return new CommandLineBuilder(rootCommand);
         }

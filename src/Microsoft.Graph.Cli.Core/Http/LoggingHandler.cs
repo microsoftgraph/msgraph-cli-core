@@ -8,12 +8,12 @@ namespace Microsoft.Graph.Cli.Core.Http;
 
 public class LoggingHandler : DelegatingHandler
 {
-    private ILogger<LoggingHandler>? logger;
+    public ILogger<LoggingHandler>? Logger { private get; set; }
 
     protected override async Task<HttpResponseMessage> SendAsync(
         HttpRequestMessage request, System.Threading.CancellationToken cancellationToken)
     {
-        if (logger is null) return await base.SendAsync(request, cancellationToken);
+        if (Logger is null) return await base.SendAsync(request, cancellationToken);
 
         var headers = request.Headers.Select((h) =>
         {
@@ -24,21 +24,16 @@ public class LoggingHandler : DelegatingHandler
             }
             return string.Format("H:{0}={1}", h.Key, value);
         }).Aggregate((a, b) => string.Join("\n\t", a, b));
-        logger?.LogDebug("Calling:\n{0} {1}\n\t{2}", request.Method, request.RequestUri, headers);
+        Logger?.LogDebug("Calling:\n{0} {1}\n\t{2}", request.Method, request.RequestUri, headers);
         var response = await base.SendAsync(request, cancellationToken);
 
         if (!response.IsSuccessStatusCode)
         {
-            logger?.LogDebug("{0}\t{1}\t{2}", request.RequestUri,
+            Logger?.LogDebug("{0}\t{1}\t{2}", request.RequestUri,
                 (int)response.StatusCode, response.Headers.Date);
-            logger?.LogDebug("{0}", await response.Content.ReadAsStringAsync());
+            Logger?.LogDebug("{0}", await response.Content.ReadAsStringAsync());
         }
         return response;
-    }
-
-    public void SetLogger(ILogger<LoggingHandler> logger)
-    {
-        this.logger = logger;
     }
 
     protected override void Dispose(bool disposing)
