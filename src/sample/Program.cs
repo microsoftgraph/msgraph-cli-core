@@ -75,8 +75,8 @@ namespace Microsoft.Graph.Cli
             builder.AddMiddleware((invocation) =>
             {
                 var host = invocation.GetHost();
-                var debug = invocation.Parser.Configuration.RootCommand.Options.SingleOrDefault(o => o.Name == "debug") as Option<bool>;
-                var isDebug = debug != null ? invocation.ParseResult.GetValueForOption(debug) : false;
+                var isDebug = invocation.Parser.Configuration.RootCommand.Options.SingleOrDefault(static o => "debug".Equals(o.Name, StringComparison.Ordinal)) is Option<bool> debug ?
+                                    invocation.ParseResult.GetValueForOption(debug) : false;
                 if (isDebug == true)
                 {
                     loggingHandler.Logger = host.Services.GetService<ILogger<LoggingHandler>>();
