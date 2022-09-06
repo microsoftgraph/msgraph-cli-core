@@ -21,7 +21,7 @@
     <PackageReference Include="Azure.Identity" Version="1.6.1" />
     <PackageReference Include="JmesPath.Net" Version="1.0.205" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="6.0.1" />
-    <PackageReference Include="Microsoft.Graph.Core" Version="3.0.0-preview.12" />
+    <PackageReference Include="Microsoft.Graph.Core" Version="3.0.0-preview.13" />
     <PackageReference Include="Microsoft.Kiota.Abstractions" Version="1.0.0-preview.11" />
     <PackageReference Include="Microsoft.Kiota.Cli.Commons" Version="0.1.10-preview.1" />
     <PackageReference Include="Microsoft.Kiota.Http.HttpClientLibrary" Version="1.0.0-preview.8" />
