@@ -14,7 +14,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
       - name: Setup .NET Core SDK 6
-        uses: actions/setup-dotnet@v3.0.1
+        uses: actions/setup-dotnet@v3.0.2
         with:
           dotnet-version: 6.x
       - name: Add NuGet kiota source
@@ -53,7 +53,7 @@ jobs:
     needs: [build]
     steps:
       - name: Setup .NET
-        uses: actions/setup-dotnet@v3.0.1
+        uses: actions/setup-dotnet@v3.0.2
         with:
           dotnet-version: 6.x
       - uses: actions/download-artifact@v3
