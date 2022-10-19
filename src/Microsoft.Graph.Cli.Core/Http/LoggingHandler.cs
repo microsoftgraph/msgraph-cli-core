@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 
@@ -15,29 +16,42 @@ public class LoggingHandler : DelegatingHandler
     {
         if (Logger is null) return await base.SendAsync(request, cancellationToken);
 
-        var headers = request.Headers.Select((h) =>
-        {
-            var value = string.Join(",", h.Value);
-            if (h.Key == "Authorization")
-            {
-                value = "[PROTECTED]";
-            }
-            return string.Format("H:{0}={1}", h.Key, value);
-        }).Aggregate((a, b) => string.Join("\n\t", a, b));
-        Logger?.LogDebug("Calling:\n{0} {1}\n\t{2}", request.Method, request.RequestUri, headers);
+        Logger?.LogDebug("\nRequest:\n\n{0} {1} HTTP/{2}\n{3}\n{4}\n",
+            request.Method, request.RequestUri, request.Version,
+            HeadersToString(request.Headers),
+            await (request.Content?.ReadAsStringAsync() ?? Task.FromResult<string>(string.Empty))
+        );
+
         var response = await base.SendAsync(request, cancellationToken);
 
-        if (!response.IsSuccessStatusCode)
-        {
-            Logger?.LogDebug("{0}\t{1}\t{2}", request.RequestUri,
-                (int)response.StatusCode, response.Headers.Date);
-            Logger?.LogDebug("{0}", await response.Content.ReadAsStringAsync());
-        }
+        // If the response has a content length > 0 and is not a stream, get the content. Otherwise get the content length
+        var responseContent = response.Content.Headers.ContentLength > 0 && response.Content.Headers.ContentType?.MediaType?.Contains("stream") == true ?
+                    (response.Content.Headers.ContentLength ?? 0).ToString() :
+                    await response.Content.ReadAsStringAsync();
+
+        Logger?.LogDebug("\nResponse:\n\nHTTP/{0} {1} {2}\n{3}\n{4}\n",
+            response.Version, (int)response.StatusCode, response.ReasonPhrase,
+            HeadersToString(request.Headers),
+            responseContent
+        );
         return response;
     }
 
     protected override void Dispose(bool disposing)
     {
         base.Dispose(disposing);
+    }
+
+    private string HeadersToString(in HttpHeaders headers)
+    {
+        return headers.Select((h) =>
+        {
+            var value = string.Join(",", h.Value);
+            if (h.Key.Contains("Authorization", StringComparison.OrdinalIgnoreCase))
+            {
+                value = "[PROTECTED]";
+            }
+            return string.Format("{0}: {1}\n", h.Key, value);
+        }).Aggregate((a, b) => string.Join(string.Empty, a, b));
     }
 }
