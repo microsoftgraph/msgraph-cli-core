@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -18,20 +19,33 @@ public class LoggingHandler : DelegatingHandler
 
         Logger?.LogDebug("\nRequest:\n\n{0} {1} HTTP/{2}\n{3}\n{4}\n",
             request.Method, request.RequestUri, request.Version,
-            HeadersToString(request.Headers),
+            HeadersToString(request.Headers, request.Content?.Headers),
             await (request.Content?.ReadAsStringAsync() ?? Task.FromResult<string>(string.Empty))
         );
 
         var response = await base.SendAsync(request, cancellationToken);
 
         // If the response has a content length > 0 and is not a stream, get the content. Otherwise get the content length
-        var responseContent = response.Content.Headers.ContentLength > 0 && response.Content.Headers.ContentType?.MediaType?.Contains("stream") == true ?
-                    (response.Content.Headers.ContentLength ?? 0).ToString() :
-                    await response.Content.ReadAsStringAsync();
+        var responseContent = string.Empty;
+        var isStream = response.Content.Headers.ContentType?.MediaType?.Contains("stream") == true;
+        if (response.Content.Headers.ContentLength > 0 && !isStream)
+        {
+            responseContent = await response.Content.ReadAsStringAsync();
+        }
+        else if (isStream)
+        {
+            string size = string.Empty;
+            if (response.Content.Headers.ContentLength > 0)
+            {
+                size = $"{response.Content.Headers.ContentLength} byte ";
+            }
+
+            responseContent = $"[...<{size}data stream>...]";
+        }
 
         Logger?.LogDebug("\nResponse:\n\nHTTP/{0} {1} {2}\n{3}\n{4}\n",
             response.Version, (int)response.StatusCode, response.ReasonPhrase,
-            HeadersToString(request.Headers),
+            HeadersToString(response.Headers, response.Content?.Headers),
             responseContent
         );
         return response;
@@ -42,9 +56,10 @@ public class LoggingHandler : DelegatingHandler
         base.Dispose(disposing);
     }
 
-    private string HeadersToString(in HttpHeaders headers)
+    private string HeadersToString(in HttpHeaders headers, in HttpHeaders? contentHeaders)
     {
-        return headers.Select((h) =>
+        if (!headers.Any() && contentHeaders?.Any() == false) return string.Empty;
+        Func<KeyValuePair<string, IEnumerable<string>>, string> selector = (h) =>
         {
             var value = string.Join(",", h.Value);
             if (h.Key.Contains("Authorization", StringComparison.OrdinalIgnoreCase))
@@ -52,6 +67,16 @@ public class LoggingHandler : DelegatingHandler
                 value = "[PROTECTED]";
             }
             return string.Format("{0}: {1}\n", h.Key, value);
-        }).Aggregate((a, b) => string.Join(string.Empty, a, b));
+        };
+
+        Func<string, string, string> aggregator = (a, b) => string.Join(string.Empty, a, b);
+
+        var h = headers.Select(selector).Aggregate("", aggregator);
+        if (contentHeaders != null)
+        {
+            h += contentHeaders.Select(selector).Aggregate("", aggregator);
+        }
+
+        return h;
     }
 }
