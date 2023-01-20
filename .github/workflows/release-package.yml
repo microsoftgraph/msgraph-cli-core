@@ -16,11 +16,7 @@ jobs:
       - name: Setup .NET Core SDK 6
         uses: actions/setup-dotnet@v3.0.3
         with:
-          dotnet-version: 6.x
-      - name: Add NuGet kiota source
-        # NOTE: Password encryption is not supported for the linux platform (Encryption is only supported on Windows platforms.)
-        run: |
-          dotnet nuget add source ${{env.MS_NUGET_URL}} -n ms-gh -u ${{secrets.NUGET_USER}} -p ${{secrets.NUGET_PASSWORD}} --store-password-in-clear-text
+          dotnet-version: 7.x
       - uses: actions/cache@v3
         with:
           path: ~/.nuget/packages
@@ -55,7 +51,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v3.0.3
         with:
-          dotnet-version: 6.x
+          dotnet-version: 7.x
       - uses: actions/download-artifact@v3
         with:
           name: drop
