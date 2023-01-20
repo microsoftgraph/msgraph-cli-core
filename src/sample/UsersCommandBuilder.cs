@@ -75,7 +75,7 @@ namespace Microsoft.Graph.Cli
                     PathParameters = new Dictionary<string, object>(),
                 };
                 requestInfo.Headers.Add("Accept", "application/json");
-                requestInfo.Headers["ConsistencyLevel"] = consistencyLevel;
+                requestInfo.Headers.Add("ConsistencyLevel", consistencyLevel);
                 var response = await requestAdapter.SendPrimitiveAsync<Stream>(requestInfo);
                 if (response != null)
                 {
