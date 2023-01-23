@@ -118,59 +118,26 @@ public class AuthenticationCacheUtility : IAuthenticationCacheUtility
             authority = $"{authority}/{tenantId}";
         }
 
-        var cacheHelper = await GetProtectedCacheHelperAsync(Constants.TokenCacheName);
-        if (isPrivate)
+        // MSAL doesn't have an API to clear the token cache on confidential clients.
+        // See https://learn.microsoft.com/en-us/azure/active-directory/develop/msal-net-clear-token-cache#web-api-and-daemon-apps
+        if (!isPrivate)
         {
-            var appBuilder = ConfidentialClientApplicationBuilder.Create(clientId).WithTenantId(tenantId);
-            if (!string.IsNullOrEmpty(authority)) {
-                appBuilder.WithAuthority(authority);
-            }
-            if (options?.Strategy == AuthenticationStrategy.ClientCertificate)
-            {
-                X509Certificate2? cert;
-                string? certOrThumb = options.ClientCertificateName ?? options.ClientCertificateThumbPrint;
-                bool isThumbPrint = string.IsNullOrWhiteSpace(options.ClientCertificateName);
-                if (!string.IsNullOrWhiteSpace(certOrThumb) && ClientCertificateCredentialFactory.TryGetCertificateFromStore(certOrThumb, isThumbPrint, out cert))
-                {
-                    appBuilder.WithCertificate(cert);
-                }
-            }
-            appBuilder.WithExperimentalFeatures().WithLogging(new IdentityLogger(), true);
-            app = appBuilder.Build();
-        }
-        else
-        {
+            var cacheHelper = await GetProtectedCacheHelperAsync(Constants.TokenCacheName);
             var appBuilder = PublicClientApplicationBuilder.Create(clientId);
             app = appBuilder.Build();
-        }
-        
-        cacheHelper.RegisterCache(app.UserTokenCache);
-        if (app is IConfidentialClientApplication cca) cacheHelper.RegisterCache(cca.AppTokenCache);
 
-        var accounts = await app.GetAccountsAsync();
-        var accountsIter = accounts.GetEnumerator();
-        while (accountsIter.MoveNext())
-        {
-            await app.RemoveAsync(accountsIter.Current);
+            cacheHelper.RegisterCache(app.UserTokenCache);
+
+            var accounts = await app.GetAccountsAsync();
+            var accountsIter = accounts.GetEnumerator();
+            while (accountsIter.MoveNext())
+            {
+                await app.RemoveAsync(accountsIter.Current);
+            }
+
+            cacheHelper.UnregisterCache(app.UserTokenCache);
         }
 
-        cacheHelper.UnregisterCache(app.UserTokenCache);
-        if (app is IConfidentialClientApplication cca1 && options?.Strategy == AuthenticationStrategy.ClientCertificate)
-        {
-            // IEnumerable<string> scopes = new string[] {Constants.DefaultCertificateScope};
-            // var tokenResp =  await cca1
-            //    .AcquireTokenForClient(scopes)
-            //    .ExecuteAsync();
-            
-            // if (tokenResp?.AuthenticationResultMetadata?.TokenSource == TokenSource.Cache) {
-            //     // Delete from cache.
-            //     // How?
-            //     // var resp = await cca1.AcquireTokenSilent(scopes, tokenResp!.Account).ExecuteAsync();
-            //     var account = await cca1.GetAccountAsync($"{clientId}_{tenantId}_AppTokenCache");
-            //     await cca1.RemoveAsync(tokenResp?.Account);
-            // }
-            cacheHelper.UnregisterCache(cca1.AppTokenCache);
-        }
         DeleteAuthenticationIdentifiers();
         DeleteAuthenticationRecord();
     }
