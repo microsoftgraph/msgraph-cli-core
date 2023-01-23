@@ -14,7 +14,7 @@
     <Deterministic>true</Deterministic>
     <!-- Recommended: Embed symbols containing Source Link in the main file (exe/dll) -->
     <DebugType>embedded</DebugType>
-    <Version>0.1.4-preview.6</Version>
+    <Version>0.1.5-preview.1</Version>
   </PropertyGroup>
 
   <ItemGroup>
@@ -22,7 +22,7 @@
     <PackageReference Include="JmesPath.Net" Version="1.0.205" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="6.0.1" />
     <PackageReference Include="Microsoft.Graph.Core" Version="3.0.0-rc.3" />
-    <PackageReference Include="Microsoft.Kiota.Cli.Commons" Version="0.1.11-preview.1" />
+    <PackageReference Include="Microsoft.Kiota.Cli.Commons" Version="0.1.12-preview.1" />
     <PackageReference Include="Microsoft.Kiota.Http.HttpClientLibrary" Version="1.0.0-rc.4" />
     <PackageReference Include="Spectre.Console" Version="0.46.0" />
     <PackageReference Include="System.CommandLine" Version="2.0.0-beta4.22272.1" />
