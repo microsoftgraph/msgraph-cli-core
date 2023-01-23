@@ -34,7 +34,8 @@ public static class ClientCertificateCredentialFactory
         // //         at Microsoft.Identity.Client.TokenCache.Microsoft.Identity.Client.ITokenCacheSerializer.DeserializeMsalV3(Byte[] msalV3State, Boolean shouldClearExistingCache)
         // //         at Microsoft.Identity.Client.Extensions.Msal.MsalCacheHelper.BeforeAccessNotification(TokenCacheNotificationArgs args)
         // //      MsalCacheHelperSingleton Error: 0 : [MSAL.Extension][2022 - 08 - 05T12: 28:16.5681763Z] No data found in the store, clearing the cache in memory.
-        // TokenCachePersistenceOptions tokenCacheOptions = new() { Name = Constants.TokenCacheName };
+        // TODO: Investigate how to clear confidential client cache. What accountId is used with the GetAccountAsync & RemoveAsync functions?
+        // TokenCachePersistenceOptions tokenCacheOptions = new() { Name = Microsoft.Graph.Cli.Core.Utils.Constants.TokenCacheName };
         // credOptions.TokenCachePersistenceOptions = tokenCacheOptions;
 
         X509Certificate2? certificate;
@@ -57,7 +58,7 @@ public static class ClientCertificateCredentialFactory
     /// <param name="certificateNameOrThumbPrint">Subject name or thumb print of the certificate to get.</param>
     /// <param name="isThumbPrint">If true, try to find the certificate by the thumb print.</param>
     /// <returns>A matching unexpired certificate.</returns>
-    private static bool TryGetCertificateFromStore(string certNameOrThumbPrint, bool isThumbPrint, out X509Certificate2? certificate)
+    internal static bool TryGetCertificateFromStore(string certNameOrThumbPrint, bool isThumbPrint, out X509Certificate2? certificate)
     {
         certificate = null;
         // Get the certificate store for the current user.

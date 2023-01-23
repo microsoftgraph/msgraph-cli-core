@@ -43,7 +43,8 @@ namespace Microsoft.Graph.Cli
 
             var authSettings = config.GetSection(nameof(AuthenticationOptions)).Get<AuthenticationOptions>();
             var pathUtil = new PathUtility();
-            var authServiceFactory = new AuthenticationServiceFactory(pathUtil, authSettings);
+            var cacheUtility = new AuthenticationCacheUtility(pathUtil);
+            var authServiceFactory = new AuthenticationServiceFactory(pathUtil, cacheUtility, authSettings);
             AuthenticationStrategy authStrategy = authSettings?.Strategy ?? AuthenticationStrategy.DeviceCode;
 
             using AzureEventSourceListener listener = AzureEventSourceListener.CreateConsoleLogger(EventLevel.LogAlways);
@@ -108,11 +109,14 @@ namespace Microsoft.Graph.Cli
                     context.Console.Error.WriteLine(ex.Message);
                     Console.ResetColor();
                 }
+
+                context.ExitCode = -1;
             });
 
             var parser = builder.Build();
 
-            return await parser.InvokeAsync(args);
+            var exitCode = await parser.InvokeAsync(args);
+            return exitCode;
         }
 
         static CommandLineBuilder BuildCommandLine(IEnumerable<Command> commands)

@@ -1,5 +1,6 @@
 using System.Threading;
 using System.Threading.Tasks;
+using Azure.Identity;
 using Microsoft.Graph.Cli.Core.Authentication;
 using Microsoft.Graph.Cli.Core.Configuration;
 
@@ -13,7 +14,7 @@ public interface IAuthenticationCacheUtility
 
     Task<AuthenticationOptions> ReadAuthenticationIdentifiersAsync(CancellationToken cancellationToken = default);
 
-    void DeleteAuthenticationIdentifiers();
+    Task<AuthenticationRecord?> ReadAuthenticationRecordAsync(CancellationToken cancellationToken = default);
 
-    void DeleteAuthenticationRecord();
+    Task ClearTokenCache(CancellationToken cancellationToken = default);
 }

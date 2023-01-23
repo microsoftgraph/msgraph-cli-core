@@ -1,6 +1,6 @@
-using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Graph.Cli.Core.IO;
-using Microsoft.Graph.Cli.Core.Utils;
 
 namespace Microsoft.Graph.Cli.Core.Authentication;
 
@@ -13,9 +13,8 @@ public class LogoutService
         this.authCacheUtility = authCacheUtility;
     }
 
-    public void Logout()
+    public async Task Logout(CancellationToken cancellationToken = default)
     {
-        authCacheUtility.DeleteAuthenticationIdentifiers();
-        authCacheUtility.DeleteAuthenticationRecord();
+        await authCacheUtility.ClearTokenCache(cancellationToken);
     }
 }
