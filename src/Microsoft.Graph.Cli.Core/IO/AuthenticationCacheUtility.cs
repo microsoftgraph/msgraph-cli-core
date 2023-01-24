@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Security.Cryptography.X509Certificates;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -11,7 +10,6 @@ using Microsoft.Graph.Cli.Core.Configuration;
 using Microsoft.Graph.Cli.Core.Utils;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Extensions.Msal;
-using Microsoft.IdentityModel.Abstractions;
 
 namespace Microsoft.Graph.Cli.Core.IO;
 
@@ -107,17 +105,6 @@ public class AuthenticationCacheUtility : IAuthenticationCacheUtility
         var isPrivate = IsPrivateClient(options.Strategy);
 
         IClientApplicationBase app;
-        var authority = options?.Authority?.Trim();
-        if (!string.IsNullOrEmpty(authority))
-        {
-            if (!authority.StartsWith("http"))
-            {
-                authority = $"https://{authority}";
-            }
-
-            authority = $"{authority}/{tenantId}";
-        }
-
         // MSAL doesn't have an API to clear the token cache on confidential clients.
         // See https://learn.microsoft.com/en-us/azure/active-directory/develop/msal-net-clear-token-cache#web-api-and-daemon-apps
         if (!isPrivate)
@@ -236,27 +223,6 @@ public class AuthenticationCacheUtility : IAuthenticationCacheUtility
 
         public AuthenticationIdentifierException(string? message, Exception? innerException) : base(message, innerException)
         {
-        }
-    }
-
-    class IdentityLogger : IIdentityLogger
-    {
-        public EventLogLevel MinLogLevel { get; }
-
-        public IdentityLogger()
-        {
-            MinLogLevel = EventLogLevel.LogAlways;
-        }
-
-        public bool IsEnabled(EventLogLevel eventLogLevel)
-        {
-            return eventLogLevel <= MinLogLevel;
-        }
-
-        public void Log(LogEntry entry)
-        {
-            //Log Message here:
-            Console.WriteLine(entry.Message);
         }
     }
 }
