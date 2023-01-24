@@ -102,12 +102,10 @@ public class AuthenticationCacheUtility : IAuthenticationCacheUtility
             return;
         }
 
-        var isPrivate = IsPrivateClient(options.Strategy);
-
         IClientApplicationBase app;
         // MSAL doesn't have an API to clear the token cache on confidential clients.
         // See https://learn.microsoft.com/en-us/azure/active-directory/develop/msal-net-clear-token-cache#web-api-and-daemon-apps
-        if (!isPrivate)
+        if (!options.Strategy.IsPrivateClient())
         {
             var cacheHelper = await GetProtectedCacheHelperAsync(Constants.TokenCacheName, cancellationToken);
             var appBuilder = PublicClientApplicationBuilder.Create(clientId);
@@ -127,16 +125,6 @@ public class AuthenticationCacheUtility : IAuthenticationCacheUtility
 
         DeleteAuthenticationIdentifiers();
         DeleteAuthenticationRecord();
-    }
-
-    private bool IsPrivateClient(AuthenticationStrategy strategy)
-    {
-        return strategy switch
-        {
-            AuthenticationStrategy.DeviceCode or AuthenticationStrategy.InteractiveBrowser => false,
-            AuthenticationStrategy.ClientCertificate => true,
-            _ => throw new ArgumentOutOfRangeException(nameof(strategy), strategy, "The authentication strategy is invalid")
-        };
     }
 
     private void DeleteAuthenticationIdentifiers()

@@ -19,3 +19,15 @@ public enum AuthenticationStrategy
     /// </summary>
     ClientCertificate
 }
+
+public static class AuthenticationStrategyExtensions {
+    public static bool IsPrivateClient(this AuthenticationStrategy strategy)
+    {
+        return strategy switch
+        {
+            AuthenticationStrategy.DeviceCode or AuthenticationStrategy.InteractiveBrowser => false,
+            AuthenticationStrategy.ClientCertificate => true,
+            _ => throw new System.ArgumentOutOfRangeException(nameof(strategy), strategy, "The authentication strategy is invalid")
+        };
+    }
+}

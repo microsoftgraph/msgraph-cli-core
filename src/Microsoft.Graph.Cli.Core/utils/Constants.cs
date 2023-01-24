@@ -18,8 +18,6 @@ namespace Microsoft.Graph.Cli.Core.Utils
 
         public const string DefaultAuthority = "https://login.microsoftonline.com";
 
-        public const string DefaultCertificateScope = "https://graph.microsoft.com/.default";
-
         public const AuthenticationStrategy defaultAuthStrategy = AuthenticationStrategy.DeviceCode;
     }
 }
