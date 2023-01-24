@@ -109,7 +109,7 @@ public class AuthenticationCacheUtility : IAuthenticationCacheUtility
         // See https://learn.microsoft.com/en-us/azure/active-directory/develop/msal-net-clear-token-cache#web-api-and-daemon-apps
         if (!isPrivate)
         {
-            var cacheHelper = await GetProtectedCacheHelperAsync(Constants.TokenCacheName);
+            var cacheHelper = await GetProtectedCacheHelperAsync(Constants.TokenCacheName, cancellationToken);
             var appBuilder = PublicClientApplicationBuilder.Create(clientId);
             app = appBuilder.Build();
 
@@ -194,7 +194,7 @@ public class AuthenticationCacheUtility : IAuthenticationCacheUtility
         }
     }
 
-    private async Task<MsalCacheHelper> GetProtectedCacheHelperAsync(string name)
+    private async Task<MsalCacheHelper> GetProtectedCacheHelperAsync(string name, CancellationToken cancellationToken = default)
     {
         // https://github.com/Azure/azure-sdk-for-net/blob/4b2579556b7271587d2fb122163e23090a043597/sdk/identity/Azure.Identity/src/Constants.cs
         string cacheDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), ".IdentityService");

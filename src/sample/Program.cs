@@ -115,8 +115,7 @@ namespace Microsoft.Graph.Cli
 
             var parser = builder.Build();
 
-            var exitCode = await parser.InvokeAsync(args);
-            return exitCode;
+            return await parser.InvokeAsync(args);
         }
 
         static CommandLineBuilder BuildCommandLine(IEnumerable<Command> commands)
