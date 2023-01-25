@@ -1,7 +1,7 @@
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Graph.Cli.Core.Authentication;
-using Microsoft.Graph.Cli.Core.Utils;
 using System.CommandLine;
-using System.CommandLine.Invocation;
+using System.Threading;
 
 namespace Microsoft.Graph.Cli.Core.Commands.Authentication;
 
@@ -15,9 +15,10 @@ public class LogoutCommand
 
     public Command Build() {
         var logoutCommand = new Command("logout", "Logout by deleting the stored session used in commands");
-        logoutCommand.SetHandler(() =>
+        logoutCommand.SetHandler(async (context) =>
         {
-            this.logoutService.Logout();
+            var cancellationToken = context.BindingContext.GetRequiredService<CancellationToken>();
+            await this.logoutService.Logout(cancellationToken);
         });
 
         return logoutCommand;

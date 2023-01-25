@@ -1,5 +1,4 @@
 using System;
-using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using Azure.Core;
@@ -14,12 +13,15 @@ public class AuthenticationServiceFactory
 {
     private readonly IPathUtility pathUtility;
 
+    private readonly IAuthenticationCacheUtility authenticationCacheUtil;
+
     private readonly AuthenticationOptions? authenticationOptions;
 
-    public AuthenticationServiceFactory(IPathUtility pathUtility, AuthenticationOptions? authOptions)
+    public AuthenticationServiceFactory(IPathUtility pathUtility, IAuthenticationCacheUtility authenticationCacheUtil, AuthenticationOptions? authOptions)
     {
         this.pathUtility = pathUtility;
         this.authenticationOptions = authOptions;
+        this.authenticationCacheUtil = authenticationCacheUtil;
     }
 
     public virtual async Task<ILoginService> GetAuthenticationServiceAsync(AuthenticationStrategy strategy, string? tenantId, string? clientId, string? certificateName, string? certificateThumbPrint, CancellationToken cancellationToken = default)
@@ -82,7 +84,7 @@ public class AuthenticationServiceFactory
 
         TokenCachePersistenceOptions tokenCacheOptions = new() { Name = Constants.TokenCacheName };
         credOptions.TokenCachePersistenceOptions = tokenCacheOptions;
-        credOptions.AuthenticationRecord = await GetCachedAuthenticationRecordAsync(cancellationToken);
+        credOptions.AuthenticationRecord = await authenticationCacheUtil.ReadAuthenticationRecordAsync(cancellationToken);
 
         return new DeviceCodeCredential(credOptions);
     }
@@ -98,7 +100,7 @@ public class AuthenticationServiceFactory
 
         TokenCachePersistenceOptions tokenCacheOptions = new() { Name = Constants.TokenCacheName };
         credOptions.TokenCachePersistenceOptions = tokenCacheOptions;
-        credOptions.AuthenticationRecord = await GetCachedAuthenticationRecordAsync(cancellationToken);
+        credOptions.AuthenticationRecord = await authenticationCacheUtil.ReadAuthenticationRecordAsync(cancellationToken);
         credOptions.LoginHint = credOptions.AuthenticationRecord?.Username;
 
         return new InteractiveBrowserCredential(credOptions);
@@ -107,20 +109,5 @@ public class AuthenticationServiceFactory
     private ClientCertificateCredential GetClientCertificateCredential(string? tenantId, string? clientId, string? certificateName, string? certificateThumbPrint)
     {
         return ClientCertificateCredentialFactory.GetClientCertificateCredential(tenantId ?? Constants.DefaultTenant, clientId ?? Constants.DefaultAppId, certificateName, certificateThumbPrint);
-    }
-
-    private async Task<AuthenticationRecord?> GetCachedAuthenticationRecordAsync(CancellationToken cancellationToken = default)
-    {
-        var recordPath = Path.Combine(pathUtility.GetApplicationDataDirectory(), Constants.AuthRecordPath);
-        AuthenticationRecord? record = null;
-
-        if (File.Exists(recordPath))
-        {
-            using var authRecordStream = new FileStream(recordPath, FileMode.Open, FileAccess.Read);
-            var authRecord = await AuthenticationRecord.DeserializeAsync(authRecordStream, cancellationToken);
-            record = authRecord;
-        }
-
-        return record;
     }
 }

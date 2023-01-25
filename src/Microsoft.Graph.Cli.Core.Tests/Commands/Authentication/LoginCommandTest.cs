@@ -17,7 +17,8 @@ public class LoginCommandTest
     {
         // Given
         var pathUtilityMock = new Mock<IPathUtility>();
-        var authServiceFactoryMock = new Mock<AuthenticationServiceFactory>(pathUtilityMock.Object, new AuthenticationOptions());
+        var cacheUtilityMock = new Mock<IAuthenticationCacheUtility>();
+        var authServiceFactoryMock = new Mock<AuthenticationServiceFactory>(pathUtilityMock.Object, cacheUtilityMock.Object, new AuthenticationOptions());
         var loginCommandBuilder = new LoginCommand(authServiceFactoryMock.Object);
         var command = loginCommandBuilder.Build();
         var parser = new Parser(command);
@@ -35,7 +36,8 @@ public class LoginCommandTest
     {
         // Given
         var pathUtilityMock = new Mock<IPathUtility>();
-        var authServiceFactoryMock = new Mock<AuthenticationServiceFactory>(pathUtilityMock.Object, new AuthenticationOptions());
+        var cacheUtilityMock = new Mock<IAuthenticationCacheUtility>();
+        var authServiceFactoryMock = new Mock<AuthenticationServiceFactory>(pathUtilityMock.Object, cacheUtilityMock.Object, new AuthenticationOptions());
         var loginCommandBuilder = new LoginCommand(authServiceFactoryMock.Object);
         var command = loginCommandBuilder.Build();
         var parser = new Parser(command);
@@ -56,7 +58,8 @@ public class LoginCommandTest
     {
         // Given
         var pathUtilityMock = new Mock<IPathUtility>();
-        var authServiceFactoryMock = new Mock<AuthenticationServiceFactory>(pathUtilityMock.Object, new AuthenticationOptions());
+        var cacheUtilityMock = new Mock<IAuthenticationCacheUtility>();
+        var authServiceFactoryMock = new Mock<AuthenticationServiceFactory>(pathUtilityMock.Object, cacheUtilityMock.Object, new AuthenticationOptions());
         var loginCommandBuilder = new LoginCommand(authServiceFactoryMock.Object);
         var command = loginCommandBuilder.Build();
         var parser = new Parser(command);

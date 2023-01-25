@@ -16,6 +16,8 @@ namespace Microsoft.Graph.Cli.Core.Utils
         
         public const string DefaultTenant = "common";
 
+        public const string DefaultAuthority = "https://login.microsoftonline.com";
+
         public const AuthenticationStrategy defaultAuthStrategy = AuthenticationStrategy.DeviceCode;
     }
 }
