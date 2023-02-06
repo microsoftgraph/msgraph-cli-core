@@ -43,7 +43,7 @@ namespace Microsoft.Graph.Cli
             var config = configBuilder.Build();
 
             var authSettings = config.GetSection(nameof(AuthenticationOptions)).Get<AuthenticationOptions>();
-            var extraOpt = new CommandArgumentsExtensions {
+            var extraOpt = new ExtraOptions {
                 DebugEnabled = config.GetValue<bool>("Debug")
             };
             var pathUtil = new PathUtility();
@@ -145,7 +145,7 @@ namespace Microsoft.Graph.Cli
             {
                 var authSection = ctx.Configuration.GetSection(nameof(AuthenticationOptions));
                 services.Configure<AuthenticationOptions>(authSection);
-                services.Configure<CommandArgumentsExtensions>(op => {
+                services.Configure<ExtraOptions>(op => {
                     op.DebugEnabled = ctx.Configuration.GetValue<bool>("Debug");
                 });
                 services.AddSingleton<IPathUtility, PathUtility>();

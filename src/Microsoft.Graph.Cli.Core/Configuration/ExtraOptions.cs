@@ -1,5 +1,5 @@
 namespace Microsoft.Graph.Cli.Core.Configuration;
 
-public class CommandArgumentsExtensions {
+public class ExtraOptions {
     public bool DebugEnabled { get; set; }
 }
