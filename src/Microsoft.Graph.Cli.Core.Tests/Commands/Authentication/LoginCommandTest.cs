@@ -47,6 +47,7 @@ public class LoginCommandTest
         var scopes = result.FindResultFor(command.Options[0])?.Tokens.Select(t => t.Value);
 
         // Then
+        Assert.NotNull(scopes);
         Assert.NotEmpty(scopes);
         Assert.Contains("User.Read", scopes);
     }
@@ -69,6 +70,7 @@ public class LoginCommandTest
         var scopes = result.FindResultFor(command.Options[0])?.Tokens.Select(t => t.Value);
 
         // Then
+        Assert.NotNull(scopes);
         Assert.NotEmpty(scopes);
         Assert.Contains("User.Read", scopes);
         Assert.Contains("Mail.Read", scopes);
