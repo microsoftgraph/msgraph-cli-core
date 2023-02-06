@@ -38,16 +38,19 @@ namespace Microsoft.Graph.Cli
             // We don't have access to a built host yet. Get configuration settings using a configuration builder.
             // Required to set initial token credentials.
             var configBuilder = new ConfigurationBuilder();
-            ConfigureAppConfiguration(configBuilder);
+            ConfigureAppConfiguration(configBuilder, args);
             var config = configBuilder.Build();
 
             var authSettings = config.GetSection(nameof(AuthenticationOptions)).Get<AuthenticationOptions>();
+            var extraOpt = new CommandArgumentsExtensions {
+                DebugEnabled = config.GetValue<bool>("Debug")
+            };
             var pathUtil = new PathUtility();
             var cacheUtility = new AuthenticationCacheUtility(pathUtil);
             var authServiceFactory = new AuthenticationServiceFactory(pathUtil, cacheUtility, authSettings);
             AuthenticationStrategy authStrategy = authSettings?.Strategy ?? AuthenticationStrategy.DeviceCode;
 
-            using AzureEventSourceListener listener = AzureEventSourceListener.CreateConsoleLogger(EventLevel.LogAlways);
+            using AzureEventSourceListener listener = AzureEventSourceListener.CreateConsoleLogger(extraOpt.DebugEnabled ? EventLevel.LogAlways : EventLevel.Warning);
             var credential = await authServiceFactory.GetTokenCredentialAsync(authStrategy, authSettings?.TenantId, authSettings?.ClientId, authSettings?.ClientCertificateName, authSettings?.ClientCertificateThumbPrint);
             IAuthenticationProvider? authProvider = new AzureIdentityAuthenticationProvider(credential, new string[] { "graph.microsoft.com" });
 
@@ -76,16 +79,11 @@ namespace Microsoft.Graph.Cli
             builder.AddMiddleware((invocation) =>
             {
                 var host = invocation.GetHost();
-                var isDebug = invocation.Parser.Configuration.RootCommand.Options.SingleOrDefault(static o => "debug".Equals(o.Name, StringComparison.Ordinal)) is Option<bool> debug ?
-                                    invocation.ParseResult.GetValueForOption(debug) : false;
-                if (isDebug == true)
-                {
+                
+                if (extraOpt?.DebugEnabled == true) {
                     loggingHandler.Logger = host.Services.GetService<ILogger<LoggingHandler>>();
                 }
-                else
-                {
-                    loggingHandler.Logger = null;
-                }
+
                 var outputFilter = host.Services.GetRequiredService<IOutputFilter>();
                 var outputFormatterFactory = host.Services.GetRequiredService<IOutputFormatterFactory>();
                 var pagingService = host.Services.GetRequiredService<IPagingService>();
@@ -122,14 +120,15 @@ namespace Microsoft.Graph.Cli
         {
             var rootCommand = new RootCommand();
             rootCommand.Description = "Microsoft Graph CLI Core Sample";
+            // Support specifying additional arguments as configuration arguments
+            // When there's a conflict, both the configuration and the command line
+            // option will be set.
+            rootCommand.TreatUnmatchedTokensAsErrors = false;
 
             foreach (var command in commands)
             {
                 rootCommand.AddCommand(command);
             }
-
-            var debug = new Option<bool>("--debug", "Turn on debug logging.");
-            rootCommand.AddGlobalOption(debug);
 
             return new CommandLineBuilder(rootCommand);
         }
@@ -140,11 +139,14 @@ namespace Microsoft.Graph.Cli
                 configHost.SetBasePath(Directory.GetCurrentDirectory());
             }).ConfigureAppConfiguration((ctx, config) =>
             {
-                ConfigureAppConfiguration(config);
+                ConfigureAppConfiguration(config, args);
             }).ConfigureServices((ctx, services) =>
             {
                 var authSection = ctx.Configuration.GetSection(nameof(AuthenticationOptions));
                 services.Configure<AuthenticationOptions>(authSection);
+                services.Configure<CommandArgumentsExtensions>(op => {
+                    op.DebugEnabled = ctx.Configuration.GetValue<bool>("Debug");
+                });
                 services.AddSingleton<IPathUtility, PathUtility>();
                 services.AddSingleton<IAuthenticationCacheUtility, AuthenticationCacheUtility>();
                 services.AddSingleton<IOutputFilter, JmesPathOutputFilter>();
@@ -153,7 +155,7 @@ namespace Microsoft.Graph.Cli
                 services.AddSingleton<IPagingService, GraphODataPagingService>();
             });
 
-        static void ConfigureAppConfiguration(IConfigurationBuilder builder)
+        static void ConfigureAppConfiguration(IConfigurationBuilder builder, string[] args)
         {
             builder.Sources.Clear();
             builder.AddJsonFile(Path.Combine(System.AppContext.BaseDirectory, "app-settings.json"), optional: true);
@@ -164,6 +166,28 @@ namespace Microsoft.Graph.Cli
             builder.AddJsonFile(userConfigPath, optional: true);
             builder.AddJsonFile(authCache.GetAuthenticationCacheFilePath(), optional: true, reloadOnChange: true);
             builder.AddEnvironmentVariables(prefix: "MGC_");
+            builder.AddCommandLine(GetExpandedCommandFlags(args));
+        }
+
+        static string[] GetExpandedCommandFlags(in string[] args) {
+            // Supports providing bool options as flags. e.g. '--debug' instead of '--debug true'
+            var argsSanitized = new List<string>();
+            for (int i = 0; i < args.Length; ++i)
+            {
+                var curr = args[i];
+                argsSanitized.Add(curr);
+                if (!curr.StartsWith('-')) continue;
+                string? next = null;
+                if (i < args.Length - 1) {
+                    next = args[i + 1];
+                }
+
+                if (curr.StartsWith('-') && (next?.StartsWith('-') == true || i == args.Length - 1)) {
+                    argsSanitized.Add("true");
+                }
+            }
+
+            return argsSanitized.ToArray();
         }
     }
 }
