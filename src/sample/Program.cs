@@ -8,6 +8,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Graph.Cli.Core.Authentication;
 using Microsoft.Graph.Cli.Core.Commands.Authentication;
 using Microsoft.Graph.Cli.Core.Configuration;
+using Microsoft.Graph.Cli.Core.Configuration.Extensions;
 using Microsoft.Graph.Cli.Core.Http;
 using Microsoft.Graph.Cli.Core.IO;
 using Microsoft.Kiota.Abstractions.Authentication;
@@ -166,28 +167,7 @@ namespace Microsoft.Graph.Cli
             builder.AddJsonFile(userConfigPath, optional: true);
             builder.AddJsonFile(authCache.GetAuthenticationCacheFilePath(), optional: true, reloadOnChange: true);
             builder.AddEnvironmentVariables(prefix: "MGC_");
-            builder.AddCommandLine(GetExpandedCommandFlags(args));
-        }
-
-        static string[] GetExpandedCommandFlags(in string[] args) {
-            // Supports providing bool options as flags. e.g. '--debug' instead of '--debug true'
-            var argsSanitized = new List<string>();
-            for (int i = 0; i < args.Length; ++i)
-            {
-                var curr = args[i];
-                argsSanitized.Add(curr);
-                if (!curr.StartsWith('-')) continue;
-                string? next = null;
-                if (i < args.Length - 1) {
-                    next = args[i + 1];
-                }
-
-                if (curr.StartsWith('-') && (next?.StartsWith('-') == true || i == args.Length - 1)) {
-                    argsSanitized.Add("true");
-                }
-            }
-
-            return argsSanitized.ToArray();
+            builder.AddCommandLine(args.ExpandFlagsForConfiguration());
         }
     }
 }
