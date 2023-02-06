@@ -22,14 +22,14 @@ public class LoggingHandlerTests
         string? request = null;
         string? response = null;
         var logger = new Mock<ILogger<LoggingHandler>>();
-        var handler = new LoggingHandler();
         var calls = 0;
-        handler.Logger = SetUpLoggerWithCallBack<LoggingHandler>((s) =>
+        var loggerObj = SetUpLoggerWithCallBack<LoggingHandler>((s) =>
         {
             if (calls == 0) request = s;
             else if (calls == 1) response = s;
             calls++;
         });
+        var handler = new LoggingHandler(loggerObj);
         var mockHandler = new Mock<HttpMessageHandler>();
         var responseMsg = new HttpResponseMessage()
         {
@@ -57,14 +57,14 @@ public class LoggingHandlerTests
         string? request = null;
         string? response = null;
         var logger = new Mock<ILogger<LoggingHandler>>();
-        var handler = new LoggingHandler();
         var calls = 0;
-        handler.Logger = SetUpLoggerWithCallBack<LoggingHandler>((s) =>
+        var loggerObj = SetUpLoggerWithCallBack<LoggingHandler>((s) =>
         {
             if (calls == 0) request = s;
             else if (calls == 1) response = s;
             calls++;
         });
+        var handler = new LoggingHandler(loggerObj);
         var mockHandler = new Mock<HttpMessageHandler>();
         const string resp = "Response from server";
         var responseMsg = new HttpResponseMessage()
@@ -93,14 +93,14 @@ public class LoggingHandlerTests
         string? request = null;
         string? response = null;
         var logger = new Mock<ILogger<LoggingHandler>>();
-        var handler = new LoggingHandler();
         var calls = 0;
-        handler.Logger = SetUpLoggerWithCallBack<LoggingHandler>((s) =>
+        var loggerObj = SetUpLoggerWithCallBack<LoggingHandler>((s) =>
         {
             if (calls == 0) request = s;
             else if (calls == 1) response = s;
             calls++;
         });
+        var handler = new LoggingHandler(loggerObj);
         var mockHandler = new Mock<HttpMessageHandler>();
         var responseMsg = new HttpResponseMessage()
         {
@@ -129,14 +129,14 @@ public class LoggingHandlerTests
         string? request = null;
         string? response = null;
         var logger = new Mock<ILogger<LoggingHandler>>();
-        var handler = new LoggingHandler();
         var calls = 0;
-        handler.Logger = SetUpLoggerWithCallBack<LoggingHandler>((s) =>
+        var loggerObj = SetUpLoggerWithCallBack<LoggingHandler>((s) =>
         {
             if (calls == 0) request = s;
             else if (calls == 1) response = s;
             calls++;
         });
+        var handler = new LoggingHandler(loggerObj);
         var mockHandler = new Mock<HttpMessageHandler>();
         using var ms = new MemoryStream(Encoding.UTF8.GetBytes("Test message"));
         var responseMsg = new HttpResponseMessage()
@@ -166,14 +166,14 @@ public class LoggingHandlerTests
         string? request = null;
         string? response = null;
         var logger = new Mock<ILogger<LoggingHandler>>();
-        var handler = new LoggingHandler();
         var calls = 0;
-        handler.Logger = SetUpLoggerWithCallBack<LoggingHandler>((s) =>
+        var loggerObj = SetUpLoggerWithCallBack<LoggingHandler>((s) =>
         {
             if (calls == 0) request = s;
             else if (calls == 1) response = s;
             calls++;
         });
+        var handler = new LoggingHandler(loggerObj);
         var mockHandler = new Mock<HttpMessageHandler>();
         const string resp = "Response from server";
         var responseMsg = new HttpResponseMessage()
