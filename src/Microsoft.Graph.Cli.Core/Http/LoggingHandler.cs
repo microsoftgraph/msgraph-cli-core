@@ -10,7 +10,7 @@ namespace Microsoft.Graph.Cli.Core.Http;
 
 public class LoggingHandler : DelegatingHandler
 {
-    private ILogger<LoggingHandler> _log;
+    private readonly ILogger<LoggingHandler> _log;
 
     public LoggingHandler(ILogger<LoggingHandler> logger)
     {

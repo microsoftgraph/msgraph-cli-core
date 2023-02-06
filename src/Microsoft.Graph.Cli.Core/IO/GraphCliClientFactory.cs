@@ -10,7 +10,7 @@ namespace Microsoft.Graph.Cli.Core.IO;
 public class GraphCliClientFactory
 {
     /// Microsoft Graph service national cloud endpoints
-    private static readonly Dictionary<string, string> cloudList = new Dictionary<string, string>
+    private static readonly Dictionary<string, string> cloudList = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             { GraphClientFactory.Global_Cloud, "https://graph.microsoft.com" },
             { GraphClientFactory.USGOV_Cloud, "https://graph.microsoft.us" },

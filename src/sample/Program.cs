@@ -1,5 +1,4 @@
 ﻿using Azure.Identity;
-using DevLab.JmesPath;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -14,7 +13,7 @@ using Microsoft.Graph.Cli.Core.IO;
 using Microsoft.Kiota.Abstractions;
 using Microsoft.Kiota.Abstractions.Authentication;
 using Microsoft.Kiota.Authentication.Azure;
-using Microsoft.Kiota.Cli.Commons.IO;
+using Microsoft.Kiota.Cli.Commons.Extensions;
 using Microsoft.Kiota.Http.HttpClientLibrary;
 using System;
 using System.Collections.Generic;
@@ -22,7 +21,6 @@ using System.CommandLine;
 using System.CommandLine.Binding;
 using System.CommandLine.Builder;
 using System.CommandLine.Hosting;
-using System.CommandLine.Invocation;
 using System.CommandLine.IO;
 using System.CommandLine.Parsing;
 using System.IO;
@@ -41,24 +39,6 @@ namespace Microsoft.Graph.Cli
         }
     }
 
-    public static class Extensions {
-        public static CommandLineBuilder UseRequestAdapter(this CommandLineBuilder builder, Func<InvocationContext, IRequestAdapter> builderFactory) {
-            builder.AddMiddleware(async (context, next) => {
-                var requestAdapter = builderFactory.Invoke(context);
-                if (requestAdapter != null) {
-                    context.BindingContext.AddService(typeof(IRequestAdapter), p => requestAdapter);
-                }
-                
-                // Log warning in case registration failed.
-                await next(context);
-            });
-            return builder;
-        }
-
-        public static IRequestAdapter GetRequestAdapter(this BindingContext context) => context.GetService(typeof(IRequestAdapter)) as IRequestAdapter ??
-                        throw new InvalidOperationException("IRequest adapter not found. Register a request adapter instance");
-    }
-
     class Program
     {
         static async Task<int> Main(string[] args)
@@ -75,18 +55,11 @@ namespace Microsoft.Graph.Cli
             var builder = BuildCommandLine(commands).UseDefaults().UseHost(CreateHostBuilder).UseRequestAdapter(ic => {
                 var host = ic.GetHost();
                 return host.Services.GetRequiredService<IRequestAdapter>();
-            });
+            }).RegisterCommonServices();
             builder.AddMiddleware((invocation) =>
             {
                 var host = invocation.GetHost();
 
-                var outputFilter = host.Services.GetRequiredService<IOutputFilter>();
-                var outputFormatterFactory = host.Services.GetRequiredService<IOutputFormatterFactory>();
-                var pagingService = host.Services.GetRequiredService<IPagingService>();
-                
-                invocation.BindingContext.AddService(_ => outputFilter);
-                invocation.BindingContext.AddService(_ => outputFormatterFactory);
-                invocation.BindingContext.AddService(_ => pagingService);
                 invocation.BindingContext.AddService(_ => host.Services.GetRequiredService<IAuthenticationCacheUtility>());
                 invocation.BindingContext.AddService(_ => host.Services.GetRequiredService<AuthenticationServiceFactory>());
             });
@@ -183,10 +156,6 @@ namespace Microsoft.Graph.Cli
                     var cacheUtil = p.GetRequiredService<IAuthenticationCacheUtility>();
                     return new AuthenticationServiceFactory(pathUtil, cacheUtil, authSettings);
                 });
-                services.AddSingleton<IOutputFilter, JmesPathOutputFilter>();
-                services.AddSingleton<JmesPath>();
-                services.AddSingleton<IOutputFormatterFactory, OutputFormatterFactory>();
-                services.AddSingleton<IPagingService, GraphODataPagingService>();
             }).ConfigureLogging((ctx, logBuilder) =>
             {
                 logBuilder.SetMinimumLevel(LogLevel.Warning);
