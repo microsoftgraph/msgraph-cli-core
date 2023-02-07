@@ -1,10 +1,9 @@
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Kiota.Abstractions;
+using Microsoft.Kiota.Cli.Commons.Extensions;
 using System;
 using System.Collections.Generic;
 using System.CommandLine;
 using System.IO;
-using System.Net.Http;
 
 namespace Microsoft.Graph.Cli
 {
@@ -79,11 +78,11 @@ namespace Microsoft.Graph.Cli
                 var expand = invocationContext.ParseResult.GetValueForOption(expandOption);
                 var query = invocationContext.ParseResult.GetValueForOption(queryOption);
                 var cancellationToken = invocationContext.GetCancellationToken();
-                var requestAdapter = invocationContext.BindingContext.GetRequestAdapter();
+                var requestAdapter = invocationContext.GetRequestAdapter();
                 var requestInfo = new RequestInformation
                 {
                     HttpMethod = Method.GET,
-                    UrlTemplate = "https://graph.microsoft.com/v1.0/users{?%24top,%24skip,%24search,%24filter,%24count,%24orderby,%24select,%24expand}",
+                    UrlTemplate = "{+baseurl}/users{?%24top,%24skip,%24search,%24filter,%24count,%24orderby,%24select,%24expand}",
                     PathParameters = new Dictionary<string, object>(),
                 };
                 requestInfo.Headers.Add("Accept", "application/json");

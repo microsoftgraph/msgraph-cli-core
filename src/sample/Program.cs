@@ -1,9 +1,11 @@
-﻿using Azure.Identity;
+﻿using Azure.Core.Diagnostics;
+using Azure.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Microsoft.Graph.Authentication;
 using Microsoft.Graph.Cli.Core.Authentication;
 using Microsoft.Graph.Cli.Core.Commands.Authentication;
 using Microsoft.Graph.Cli.Core.Configuration;
@@ -12,7 +14,6 @@ using Microsoft.Graph.Cli.Core.Http;
 using Microsoft.Graph.Cli.Core.IO;
 using Microsoft.Kiota.Abstractions;
 using Microsoft.Kiota.Abstractions.Authentication;
-using Microsoft.Kiota.Authentication.Azure;
 using Microsoft.Kiota.Cli.Commons.Extensions;
 using Microsoft.Kiota.Http.HttpClientLibrary;
 using System;
@@ -23,22 +24,14 @@ using System.CommandLine.Builder;
 using System.CommandLine.Hosting;
 using System.CommandLine.IO;
 using System.CommandLine.Parsing;
+using System.Diagnostics.Tracing;
 using System.IO;
+using System.Net.Http;
 using System.Reflection;
 using System.Threading.Tasks;
 
 namespace Microsoft.Graph.Cli
 {
-    class ServiceBinder<T> : BinderBase<T?> where T: class
-    {
-        protected override T? GetBoundValue(BindingContext ctx)
-        {
-            var host = ctx.GetRequiredService(typeof(IHost)) as IHost;
-
-            return (ctx.GetService(typeof(T)) ?? host?.Services.GetService(typeof(T))) as T;
-        }
-    }
-
     class Program
     {
         static async Task<int> Main(string[] args)
@@ -52,31 +45,51 @@ namespace Microsoft.Graph.Cli
             var logoutCommand = new LogoutCommand();
             commands.Add(logoutCommand.Build());
             commands.Add(UsersCommandBuilder.BuildUsersCommand());
-            var builder = BuildCommandLine(commands).UseDefaults().UseHost(CreateHostBuilder).UseRequestAdapter(ic => {
-                var host = ic.GetHost();
-                return host.Services.GetRequiredService<IRequestAdapter>();
-            }).RegisterCommonServices();
-            builder.AddMiddleware((invocation) =>
+            var builder = BuildCommandLine(commands)
+                .UseDefaults()
+                .UseHost(a =>
+                {
+                    // Pass all the args to avoid system.commandline swallowing them up
+                    return CreateHostBuilder(args);
+                }).UseRequestAdapter(ic =>
+                {
+                    var host = ic.GetHost();
+                    var adapter = host.Services.GetRequiredService<IRequestAdapter>();
+                    var client = host.Services.GetRequiredService<HttpClient>();
+                    if (string.IsNullOrEmpty(adapter.BaseUrl))
+                    {
+                        adapter.BaseUrl = client.BaseAddress?.ToString();
+                    }
+                    return adapter;
+                }).RegisterCommonServices();
+            builder.AddMiddleware(async (ic, next) =>
             {
-                var host = invocation.GetHost();
+                var op = ic.GetHost().Services.GetService<IOptions<ExtraOptions>>();
+                using AzureEventSourceListener? listener = AzureEventSourceListener.CreateConsoleLogger(op?.Value?.DebugEnabled == true ? EventLevel.LogAlways : EventLevel.Warning);
+                await next(ic);
+            });
+            builder.AddMiddleware(async (ic, next) =>
+            {
+                var host = ic.GetHost();
 
-                invocation.BindingContext.AddService(_ => host.Services.GetRequiredService<IAuthenticationCacheUtility>());
-                invocation.BindingContext.AddService(_ => host.Services.GetRequiredService<AuthenticationServiceFactory>());
+                ic.BindingContext.AddService(_ => host.Services.GetRequiredService<IAuthenticationCacheUtility>());
+                ic.BindingContext.AddService(_ => host.Services.GetRequiredService<AuthenticationServiceFactory>());
+                await next(ic);
             });
             builder.UseExceptionHandler((ex, context) =>
             {
-                if (ex is AuthenticationRequiredException)
+                var message = ex switch
+                {
+                    _ when ex is AuthenticationRequiredException => "Token acquisition failed. Run mgc login command first to get an access token.",
+                    _ when ex is TaskCanceledException => string.Empty,
+                    _ => ex.Message
+                };
+
+                if (!string.IsNullOrEmpty(message))
                 {
                     Console.ResetColor();
                     Console.ForegroundColor = ConsoleColor.Red;
-                    context.Console.Error.WriteLine("Token acquisition failed. Run mgc login command first to get an access token.");
-                    Console.ResetColor();
-                }
-                else
-                {
-                    Console.ResetColor();
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    context.Console.Error.WriteLine(ex.Message);
+                    context.Console.Error.WriteLine(message);
                     Console.ResetColor();
                 }
 
@@ -93,8 +106,9 @@ namespace Microsoft.Graph.Cli
             var rootCommand = new RootCommand();
             rootCommand.Description = "Microsoft Graph CLI Core Sample";
             // Support specifying additional arguments as configuration arguments
-            // When there's a conflict, both the configuration and the command line
-            // option will be set.
+            // System.CommandLine might swallow valid config tokens sometimes.
+            // e.g. if a command has an option --debug and we also want to use
+            // --debug for configs.
             rootCommand.TreatUnmatchedTokensAsErrors = false;
 
             foreach (var command in commands)
@@ -120,37 +134,39 @@ namespace Microsoft.Graph.Cli
                 {
                     op.DebugEnabled = ctx.Configuration.GetValue<bool>("Debug");
                 });
-                services.AddSingleton<GraphClientOptions>(p =>
+                services.AddTransient<LoggingHandler>();
+                services.AddSingleton<HttpClient>(p =>
                 {
                     var assemblyVersion = Assembly.GetExecutingAssembly().GetName().Version;
-                    return new GraphClientOptions
+                    var options = new GraphClientOptions
                     {
                         GraphProductPrefix = "graph-cli",
                         GraphServiceLibraryClientVersion = $"{assemblyVersion?.Major ?? 0}.{assemblyVersion?.Minor ?? 0}.{assemblyVersion?.Build ?? 0}",
                         GraphServiceTargetVersion = "1.0"
                     };
+                    var loggingHandler = p.GetRequiredService<LoggingHandler>();
+                    return GraphCliClientFactory.GetDefaultClient(options, lowestPriorityMiddlewares: new[] { loggingHandler });
                 });
-                services.AddSingleton<IAuthenticationProvider>(p => {
+                services.AddSingleton<IAuthenticationProvider>(p =>
+                {
                     var authSettings = p.GetRequiredService<IOptions<AuthenticationOptions>>()?.Value;
                     var serviceFactory = p.GetRequiredService<AuthenticationServiceFactory>();
                     AuthenticationStrategy authStrategy = authSettings?.Strategy ?? AuthenticationStrategy.DeviceCode;
                     var credential = serviceFactory.GetTokenCredentialAsync(authStrategy, authSettings?.TenantId, authSettings?.ClientId, authSettings?.ClientCertificateName, authSettings?.ClientCertificateThumbPrint);
                     credential.Wait();
-                    return new AzureIdentityAuthenticationProvider(credential.Result, new string[] { "graph.microsoft.com" });
+                    var client = p.GetRequiredService<HttpClient>();
+                    return new AzureIdentityAuthenticationProvider(credential.Result);
                 });
-                services.AddHttpClient<IRequestAdapter, HttpClientRequestAdapter>((c, p) => {
-                    GraphCliClientFactory.ConfigureClient(c);
+                services.AddSingleton<IRequestAdapter>(p =>
+                {
                     var authProvider = p.GetRequiredService<IAuthenticationProvider>();
-                    return new HttpClientRequestAdapter(authProvider, httpClient: c);
-                }).ConfigurePrimaryHttpMessageHandler((p) => {
-                    var options = p.GetRequiredService<GraphClientOptions>();
-                    var logHandler = p.GetRequiredService<LoggingHandler>();
-                    return GraphCliClientFactory.GetDefaultGraphHandler(options, lowestPriorityMiddlewares: new[] { logHandler });
+                    var client = p.GetRequiredService<HttpClient>();
+                    return new HttpClientRequestAdapter(authProvider, httpClient: client);
                 });
                 services.AddSingleton<IPathUtility, PathUtility>();
-                services.AddTransient<LoggingHandler>();
                 services.AddSingleton<IAuthenticationCacheUtility, AuthenticationCacheUtility>();
-                services.AddSingleton<AuthenticationServiceFactory>(p => {
+                services.AddSingleton<AuthenticationServiceFactory>(p =>
+                {
                     var authSettings = p.GetRequiredService<IOptions<AuthenticationOptions>>()?.Value;
                     var pathUtil = p.GetRequiredService<IPathUtility>();
                     var cacheUtil = p.GetRequiredService<IAuthenticationCacheUtility>();
@@ -159,8 +175,9 @@ namespace Microsoft.Graph.Cli
             }).ConfigureLogging((ctx, logBuilder) =>
             {
                 logBuilder.SetMinimumLevel(LogLevel.Warning);
-                var options = ctx.GetInvocationContext().BindingContext.GetService<IOptions<ExtraOptions>>();
-                if (options?.Value?.DebugEnabled == true)
+                // If a config is unavailable, troubleshoot using (ctx.Configuration as IConfigurationRoot)?.GetDebugView();
+                var options = ctx.GetInvocationContext().BindingContext.GetService<IOptions<ExtraOptions>>()?.Value;
+                if (options?.DebugEnabled == true)
                 {
                     logBuilder.AddFilter("Microsoft.Graph.Cli", LogLevel.Debug);
                 }
