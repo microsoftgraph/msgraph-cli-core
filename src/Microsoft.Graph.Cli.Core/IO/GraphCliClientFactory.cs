@@ -6,7 +6,7 @@ namespace Microsoft.Graph.Cli.Core.IO;
 
 public class GraphCliClientFactory
 {
-    public static IEnumerable<DelegatingHandler> GetDefaultMiddlewaresWithOptions(GraphClientOptions options) => GraphClientFactory.CreateDefaultHandlers(options);
+    public static IEnumerable<DelegatingHandler> GetDefaultMiddlewaresWithOptions(GraphClientOptions? options) => GraphClientFactory.CreateDefaultHandlers(options);
 
     public static HttpClient GetDefaultClient(GraphClientOptions? options = null, string nationalCloud = GraphClientFactory.Global_Cloud, HttpMessageHandler? finalHandler = null, DelegatingHandler[]? lowestPriorityMiddlewares = null, params DelegatingHandler[] middlewares)
     {

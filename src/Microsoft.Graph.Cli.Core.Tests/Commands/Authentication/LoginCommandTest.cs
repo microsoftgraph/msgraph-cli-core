@@ -1,6 +1,5 @@
 using System.CommandLine.Parsing;
 using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.Graph.Cli.Core.Authentication;
 using Microsoft.Graph.Cli.Core.Commands.Authentication;
 using Microsoft.Graph.Cli.Core.Configuration;
@@ -16,10 +15,7 @@ public class LoginCommandTest
     public void Parses_No_Scopes()
     {
         // Given
-        var pathUtilityMock = new Mock<IPathUtility>();
-        var cacheUtilityMock = new Mock<IAuthenticationCacheUtility>();
-        var authServiceFactoryMock = new Mock<AuthenticationServiceFactory>(pathUtilityMock.Object, cacheUtilityMock.Object, new AuthenticationOptions());
-        var loginCommandBuilder = new LoginCommand(authServiceFactoryMock.Object);
+        var loginCommandBuilder = new LoginCommand();
         var command = loginCommandBuilder.Build();
         var parser = new Parser(command);
 
@@ -35,10 +31,7 @@ public class LoginCommandTest
     public void Parses_Single_Scope()
     {
         // Given
-        var pathUtilityMock = new Mock<IPathUtility>();
-        var cacheUtilityMock = new Mock<IAuthenticationCacheUtility>();
-        var authServiceFactoryMock = new Mock<AuthenticationServiceFactory>(pathUtilityMock.Object, cacheUtilityMock.Object, new AuthenticationOptions());
-        var loginCommandBuilder = new LoginCommand(authServiceFactoryMock.Object);
+        var loginCommandBuilder = new LoginCommand();
         var command = loginCommandBuilder.Build();
         var parser = new Parser(command);
 
@@ -58,10 +51,7 @@ public class LoginCommandTest
     public void Parses_Multiple_Scopes(string commandString)
     {
         // Given
-        var pathUtilityMock = new Mock<IPathUtility>();
-        var cacheUtilityMock = new Mock<IAuthenticationCacheUtility>();
-        var authServiceFactoryMock = new Mock<AuthenticationServiceFactory>(pathUtilityMock.Object, cacheUtilityMock.Object, new AuthenticationOptions());
-        var loginCommandBuilder = new LoginCommand(authServiceFactoryMock.Object);
+        var loginCommandBuilder = new LoginCommand();
         var command = loginCommandBuilder.Build();
         var parser = new Parser(command);
 

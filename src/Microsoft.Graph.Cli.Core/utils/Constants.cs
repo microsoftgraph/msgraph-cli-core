@@ -11,9 +11,9 @@ namespace Microsoft.Graph.Cli.Core.Utils
         public const string AuthenticationIdCachePath = "authentication-id-cache.json";
 
         public const string TokenCacheName = "MicrosoftGraph";
-        
+
         public const string DefaultAppId = "14d82eec-204b-4c2f-b7e8-296a70dab67e";
-        
+
         public const string DefaultTenant = "common";
 
         public const string DefaultAuthority = "https://login.microsoftonline.com";

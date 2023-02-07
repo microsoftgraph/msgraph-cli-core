@@ -20,7 +20,8 @@ public enum AuthenticationStrategy
     ClientCertificate
 }
 
-public static class AuthenticationStrategyExtensions {
+public static class AuthenticationStrategyExtensions
+{
     public static bool IsPrivateClient(this AuthenticationStrategy strategy)
     {
         return strategy switch
