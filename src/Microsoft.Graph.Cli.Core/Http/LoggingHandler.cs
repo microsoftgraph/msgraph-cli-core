@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 
@@ -10,40 +11,32 @@ namespace Microsoft.Graph.Cli.Core.Http;
 
 public class LoggingHandler : DelegatingHandler
 {
-    public ILogger<LoggingHandler>? Logger { private get; set; }
+    private readonly ILogger<LoggingHandler> log;
+
+    public LoggingHandler(ILogger<LoggingHandler> logger)
+    {
+        log = logger;
+    }
 
     protected override async Task<HttpResponseMessage> SendAsync(
         HttpRequestMessage request, System.Threading.CancellationToken cancellationToken)
     {
-        if (Logger is null) return await base.SendAsync(request, cancellationToken);
+        if (!log.IsEnabled(LogLevel.Debug)) return await base.SendAsync(request, cancellationToken);
 
-        Logger?.LogDebug("\nRequest:\n\n{0} {1} HTTP/{2}\n{3}\n{4}\n",
+        var requestContent = await ContentToStringAsync(request.Content, cancellationToken);
+
+        log.LogDebug("\nRequest:\n\n{0} {1} HTTP/{2}\n{3}\n{4}\n",
             request.Method, request.RequestUri, request.Version,
             HeadersToString(request.Headers, request.Content?.Headers),
-            await (request.Content?.ReadAsStringAsync() ?? Task.FromResult<string>(string.Empty))
+            requestContent
         );
 
         var response = await base.SendAsync(request, cancellationToken);
 
         // If the response has a content length > 0 and is not a stream, get the content. Otherwise get the content length
-        var responseContent = string.Empty;
-        var isStream = response.Content.Headers.ContentType?.MediaType?.Contains("stream") == true;
-        if (response.Content.Headers.ContentLength > 0 && !isStream)
-        {
-            responseContent = await response.Content.ReadAsStringAsync();
-        }
-        else if (isStream)
-        {
-            string size = string.Empty;
-            if (response.Content.Headers.ContentLength > 0)
-            {
-                size = $"{response.Content.Headers.ContentLength} byte ";
-            }
+        var responseContent = await ContentToStringAsync(response.Content, cancellationToken);
 
-            responseContent = $"[...<{size}data stream>...]";
-        }
-
-        Logger?.LogDebug("\nResponse:\n\nHTTP/{0} {1} {2}\n{3}\n{4}\n",
+        log.LogDebug("\nResponse:\n\nHTTP/{0} {1} {2}\n{3}\n{4}\n",
             response.Version, (int)response.StatusCode, response.ReasonPhrase,
             HeadersToString(response.Headers, response.Content?.Headers),
             responseContent
@@ -78,5 +71,26 @@ public class LoggingHandler : DelegatingHandler
         }
 
         return h;
+    }
+
+    private async Task<string> ContentToStringAsync(HttpContent? content, CancellationToken cancellationToken = default)
+    {
+        if (content is null) return string.Empty;
+        var responseContent = string.Empty;
+        var isStream = content.Headers.ContentType?.MediaType?.Contains("stream", StringComparison.OrdinalIgnoreCase) == true;
+        if (!isStream)
+        {
+            return await content.ReadAsStringAsync(cancellationToken);
+        }
+        else
+        {
+            string size = string.Empty;
+            if (content.Headers.ContentLength > 0)
+            {
+                size = $"{content.Headers.ContentLength} byte ";
+            }
+
+            return $"[...<{size}data stream>...]";
+        }
     }
 }

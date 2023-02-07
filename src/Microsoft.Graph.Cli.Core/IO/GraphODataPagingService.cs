@@ -1,4 +1,4 @@
-﻿using Microsoft.Kiota.Cli.Commons.IO;
+using Microsoft.Kiota.Cli.Commons.IO;
 
 namespace Microsoft.Graph.Cli.Core.IO;
 
