@@ -7,7 +7,8 @@ namespace Microsoft.Graph.Cli.Core.Commands.Authentication;
 
 public class LogoutCommand
 {
-    public Command Build() {
+    public Command Build()
+    {
         var logoutCommand = new Command("logout", "Logout by deleting the stored session used in commands");
         logoutCommand.SetHandler(async (context) =>
         {

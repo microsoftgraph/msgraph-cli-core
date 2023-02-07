@@ -73,7 +73,8 @@ public class LoggingHandler : DelegatingHandler
         return h;
     }
 
-    private async Task<string> ContentToStringAsync(HttpContent? content, CancellationToken cancellationToken = default) {
+    private async Task<string> ContentToStringAsync(HttpContent? content, CancellationToken cancellationToken = default)
+    {
         if (content is null) return string.Empty;
         var responseContent = string.Empty;
         var isStream = content.Headers.ContentType?.MediaType?.Contains("stream") == true;
