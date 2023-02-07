@@ -13,13 +13,10 @@ public static class CommandArgumentsExtensions
             var curr = args[i];
             argsSanitized.Add(curr);
             if (!curr.StartsWith('-')) continue;
-            string? next = null;
-            if (i < args.Length - 1)
-            {
-                next = args[i + 1];
-            }
+            // If the current option is a flag and it's the last flag, we give it a value of true
+            var addTrueFlagValue = i == args.Length - 1 ? true : args[i + 1].StartsWith('-');
 
-            if (curr.StartsWith('-') && (next?.StartsWith('-') == true || i == args.Length - 1))
+            if (addTrueFlagValue)
             {
                 argsSanitized.Add("true");
             }
