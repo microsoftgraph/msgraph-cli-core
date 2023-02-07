@@ -1,4 +1,4 @@
-﻿using Azure.Core.Diagnostics;
+using Azure.Core.Diagnostics;
 using Azure.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
