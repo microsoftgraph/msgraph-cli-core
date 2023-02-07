@@ -45,9 +45,9 @@ public class LoginCommand
             var cancellationToken = context.GetCancellationToken();
 
             var authUtil = context.BindingContext.GetRequiredService<IAuthenticationCacheUtility>();
-            var authenticationSvcFactory = context.BindingContext.GetRequiredService<AuthenticationServiceFactory>();
+            var authSvcFactory = context.BindingContext.GetRequiredService<AuthenticationServiceFactory>();
 
-            var authService = await authenticationSvcFactory.GetAuthenticationServiceAsync(strategy, tenantId, clientId, certificateName, certificateThumbPrint, cancellationToken);
+            var authService = await authSvcFactory.GetAuthenticationServiceAsync(strategy, tenantId, clientId, certificateName, certificateThumbPrint, cancellationToken);
             await authService.LoginAsync(scopes, cancellationToken);
             await authUtil.SaveAuthenticationIdentifiersAsync(clientId, tenantId, certificateName, certificateThumbPrint, strategy, cancellationToken);
         });
