@@ -10,19 +10,17 @@ namespace Microsoft.Graph.Cli.Core.Http;
 
 public class LoggingHandler : DelegatingHandler
 {
-    private readonly ILogger<LoggingHandler> _log;
+    private readonly ILogger<LoggingHandler> log;
 
     public LoggingHandler(ILogger<LoggingHandler> logger)
     {
-        _log = logger;
+        log = logger;
     }
 
     protected override async Task<HttpResponseMessage> SendAsync(
         HttpRequestMessage request, System.Threading.CancellationToken cancellationToken)
     {
-        if (_log is null) return await base.SendAsync(request, cancellationToken);
-
-        _log?.LogDebug("\nRequest:\n\n{0} {1} HTTP/{2}\n{3}\n{4}\n",
+        log?.LogDebug("\nRequest:\n\n{0} {1} HTTP/{2}\n{3}\n{4}\n",
             request.Method, request.RequestUri, request.Version,
             HeadersToString(request.Headers, request.Content?.Headers),
             await (request.Content?.ReadAsStringAsync() ?? Task.FromResult<string>(string.Empty))
@@ -48,7 +46,7 @@ public class LoggingHandler : DelegatingHandler
             responseContent = $"[...<{size}data stream>...]";
         }
 
-        _log?.LogDebug("\nResponse:\n\nHTTP/{0} {1} {2}\n{3}\n{4}\n",
+        log?.LogDebug("\nResponse:\n\nHTTP/{0} {1} {2}\n{3}\n{4}\n",
             response.Version, (int)response.StatusCode, response.ReasonPhrase,
             HeadersToString(response.Headers, response.Content?.Headers),
             responseContent
