@@ -77,12 +77,12 @@ public class LoggingHandler : DelegatingHandler
     {
         if (content is null) return string.Empty;
         var responseContent = string.Empty;
-        var isStream = content.Headers.ContentType?.MediaType?.Contains("stream") == true;
+        var isStream = content.Headers.ContentType?.MediaType?.Contains("stream", StringComparison.OrdinalIgnoreCase) == true;
         if (!isStream)
         {
-            responseContent = await content.ReadAsStringAsync(cancellationToken);
+            return await content.ReadAsStringAsync(cancellationToken);
         }
-        else if (isStream)
+        else
         {
             string size = string.Empty;
             if (content.Headers.ContentLength > 0)
@@ -90,9 +90,7 @@ public class LoggingHandler : DelegatingHandler
                 size = $"{content.Headers.ContentLength} byte ";
             }
 
-            responseContent = $"[...<{size}data stream>...]";
+            return $"[...<{size}data stream>...]";
         }
-
-        return responseContent;
     }
 }
