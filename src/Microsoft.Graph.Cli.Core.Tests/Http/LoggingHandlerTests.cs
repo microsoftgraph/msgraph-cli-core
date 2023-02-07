@@ -21,7 +21,6 @@ public class LoggingHandlerTests
     {
         string? request = null;
         string? response = null;
-        var logger = new Mock<ILogger<LoggingHandler>>();
         var calls = 0;
         var loggerObj = SetUpLoggerWithCallBack<LoggingHandler>((s) =>
         {
@@ -56,7 +55,6 @@ public class LoggingHandlerTests
     {
         string? request = null;
         string? response = null;
-        var logger = new Mock<ILogger<LoggingHandler>>();
         var calls = 0;
         var loggerObj = SetUpLoggerWithCallBack<LoggingHandler>((s) =>
         {
@@ -92,7 +90,6 @@ public class LoggingHandlerTests
     {
         string? request = null;
         string? response = null;
-        var logger = new Mock<ILogger<LoggingHandler>>();
         var calls = 0;
         var loggerObj = SetUpLoggerWithCallBack<LoggingHandler>((s) =>
         {
@@ -128,7 +125,6 @@ public class LoggingHandlerTests
     {
         string? request = null;
         string? response = null;
-        var logger = new Mock<ILogger<LoggingHandler>>();
         var calls = 0;
         var loggerObj = SetUpLoggerWithCallBack<LoggingHandler>((s) =>
         {
@@ -165,7 +161,6 @@ public class LoggingHandlerTests
     {
         string? request = null;
         string? response = null;
-        var logger = new Mock<ILogger<LoggingHandler>>();
         var calls = 0;
         var loggerObj = SetUpLoggerWithCallBack<LoggingHandler>((s) =>
         {
@@ -197,11 +192,42 @@ public class LoggingHandlerTests
         Assert.DoesNotContain("Secret Content", request);
     }
 
-    private ILogger<T> SetUpLoggerWithCallBack<T>(Action<string> callback)
+    [Fact]
+    public async Task Skips_Logging_If_Log_Level_Is_Disabled()
+    {
+        string? request = null;
+        string? response = null;
+        var calls = 0;
+        var loggerObj = SetUpLoggerWithCallBack<LoggingHandler>((s) =>
+        {
+            if (calls == 0) request = s;
+            else if (calls == 1) response = s;
+            calls++;
+        }, LogLevel.None);
+
+        var handler = new LoggingHandler(loggerObj);
+        var mockHandler = new Mock<HttpMessageHandler>();
+        mockHandler.Protected()
+                .Setup<Task<HttpResponseMessage>>("SendAsync", ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>())
+                .ReturnsAsync(new HttpResponseMessage());
+        handler.InnerHandler = mockHandler.Object;
+        var client = new HttpClient(handler);
+        var message = new HttpRequestMessage(HttpMethod.Get, "http://example.com");
+
+        var responseMessage = await client.SendAsync(message);
+
+        Assert.Null(request);
+        Assert.Null(response);
+        Assert.Equal(0, calls);
+    }
+
+    private ILogger<T> SetUpLoggerWithCallBack<T>(Action<string> callback, LogLevel logLevel = LogLevel.Trace)
     {
         var logger = new Mock<ILogger<T>>();
+        logger.Setup(l => l.IsEnabled(It.IsAny<LogLevel>())).Returns<LogLevel>(ll => ll >= logLevel);
+
         logger.Setup(l => l.Log(
-                    LogLevel.Debug,
+                    It.IsAny<LogLevel>(),
                     It.IsAny<EventId>(),
                     It.IsAny<It.IsAnyType>(),
                     It.IsAny<Exception>(),
