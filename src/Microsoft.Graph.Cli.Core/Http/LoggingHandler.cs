@@ -25,7 +25,7 @@ public class LoggingHandler : DelegatingHandler
 
         var requestContent = await ContentToStringAsync(request.Content, cancellationToken);
 
-        log?.LogDebug("\nRequest:\n\n{0} {1} HTTP/{2}\n{3}\n{4}\n",
+        log.LogDebug("\nRequest:\n\n{0} {1} HTTP/{2}\n{3}\n{4}\n",
             request.Method, request.RequestUri, request.Version,
             HeadersToString(request.Headers, request.Content?.Headers),
             requestContent
@@ -36,7 +36,7 @@ public class LoggingHandler : DelegatingHandler
         // If the response has a content length > 0 and is not a stream, get the content. Otherwise get the content length
         var responseContent = await ContentToStringAsync(response.Content, cancellationToken);
 
-        log?.LogDebug("\nResponse:\n\nHTTP/{0} {1} {2}\n{3}\n{4}\n",
+        log.LogDebug("\nResponse:\n\nHTTP/{0} {1} {2}\n{3}\n{4}\n",
             response.Version, (int)response.StatusCode, response.ReasonPhrase,
             HeadersToString(response.Headers, response.Content?.Headers),
             responseContent
