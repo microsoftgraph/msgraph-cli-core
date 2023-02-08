@@ -1,4 +1,4 @@
-using Azure.Core.Diagnostics;
+﻿using Azure.Core.Diagnostics;
 using Azure.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -73,6 +73,7 @@ namespace Microsoft.Graph.Cli
 
                 ic.BindingContext.AddService(_ => host.Services.GetRequiredService<IAuthenticationCacheUtility>());
                 ic.BindingContext.AddService(_ => host.Services.GetRequiredService<AuthenticationServiceFactory>());
+                ic.BindingContext.AddService(_ => host.Services.GetRequiredService<LogoutService>());
                 await next(ic);
             });
             builder.UseExceptionHandler((ex, context) =>
@@ -164,6 +165,7 @@ namespace Microsoft.Graph.Cli
                 });
                 services.AddSingleton<IPathUtility, PathUtility>();
                 services.AddSingleton<IAuthenticationCacheUtility, AuthenticationCacheUtility>();
+                services.AddSingleton<LogoutService>();
                 services.AddSingleton<AuthenticationServiceFactory>(p =>
                 {
                     var authSettings = p.GetRequiredService<IOptions<AuthenticationOptions>>()?.Value;
