@@ -114,10 +114,6 @@ namespace Microsoft.Graph.Cli
             // --debug for configs.
             rootCommand.TreatUnmatchedTokensAsErrors = false;
 
-            ApiClientBuilder.RegisterDefaultDeserializer<JsonParseNodeFactory>();
-            ApiClientBuilder.RegisterDefaultDeserializer<TextParseNodeFactory>();
-            ApiClientBuilder.RegisterDefaultDeserializer<FormParseNodeFactory>();
-
             foreach (var command in commands)
             {
                 rootCommand.AddCommand(command);
@@ -168,6 +164,14 @@ namespace Microsoft.Graph.Cli
                 {
                     var authProvider = p.GetRequiredService<IAuthenticationProvider>();
                     var client = p.GetRequiredService<HttpClient>();
+
+                    ApiClientBuilder.RegisterDefaultSerializer<JsonSerializationWriterFactory>();
+                    ApiClientBuilder.RegisterDefaultSerializer<TextSerializationWriterFactory>();
+                    ApiClientBuilder.RegisterDefaultSerializer<FormSerializationWriterFactory>();
+                    ApiClientBuilder.RegisterDefaultDeserializer<JsonParseNodeFactory>();
+                    ApiClientBuilder.RegisterDefaultDeserializer<TextParseNodeFactory>();
+                    ApiClientBuilder.RegisterDefaultDeserializer<FormParseNodeFactory>();
+
                     return new HttpClientRequestAdapter(authProvider, httpClient: client);
                 });
                 services.AddSingleton<IPathUtility, PathUtility>();
