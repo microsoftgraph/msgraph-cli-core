@@ -1,4 +1,16 @@
-﻿using Azure.Core.Diagnostics;
+﻿using System;
+using System.Collections.Generic;
+using System.CommandLine;
+using System.CommandLine.Builder;
+using System.CommandLine.Hosting;
+using System.CommandLine.IO;
+using System.CommandLine.Parsing;
+using System.Diagnostics.Tracing;
+using System.IO;
+using System.Net.Http;
+using System.Reflection;
+using System.Threading.Tasks;
+using Azure.Core.Diagnostics;
 using Azure.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -16,18 +28,9 @@ using Microsoft.Kiota.Abstractions;
 using Microsoft.Kiota.Abstractions.Authentication;
 using Microsoft.Kiota.Cli.Commons.Extensions;
 using Microsoft.Kiota.Http.HttpClientLibrary;
-using System;
-using System.Collections.Generic;
-using System.CommandLine;
-using System.CommandLine.Builder;
-using System.CommandLine.Hosting;
-using System.CommandLine.IO;
-using System.CommandLine.Parsing;
-using System.Diagnostics.Tracing;
-using System.IO;
-using System.Net.Http;
-using System.Reflection;
-using System.Threading.Tasks;
+using Microsoft.Kiota.Serialization.Form;
+using Microsoft.Kiota.Serialization.Json;
+using Microsoft.Kiota.Serialization.Text;
 
 namespace Microsoft.Graph.Cli
 {
@@ -110,6 +113,10 @@ namespace Microsoft.Graph.Cli
             // e.g. if a command has an option --debug and we also want to use
             // --debug for configs.
             rootCommand.TreatUnmatchedTokensAsErrors = false;
+
+            ApiClientBuilder.RegisterDefaultDeserializer<JsonParseNodeFactory>();
+            ApiClientBuilder.RegisterDefaultDeserializer<TextParseNodeFactory>();
+            ApiClientBuilder.RegisterDefaultDeserializer<FormParseNodeFactory>();
 
             foreach (var command in commands)
             {
