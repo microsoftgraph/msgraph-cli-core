@@ -1,3 +1,15 @@
+﻿using System;
+using System.Collections.Generic;
+using System.CommandLine;
+using System.CommandLine.Builder;
+using System.CommandLine.Hosting;
+using System.CommandLine.IO;
+using System.CommandLine.Parsing;
+using System.Diagnostics.Tracing;
+using System.IO;
+using System.Net.Http;
+using System.Reflection;
+using System.Threading.Tasks;
 using Azure.Core.Diagnostics;
 using Azure.Identity;
 using Microsoft.Extensions.Configuration;
@@ -16,18 +28,9 @@ using Microsoft.Kiota.Abstractions;
 using Microsoft.Kiota.Abstractions.Authentication;
 using Microsoft.Kiota.Cli.Commons.Extensions;
 using Microsoft.Kiota.Http.HttpClientLibrary;
-using System;
-using System.Collections.Generic;
-using System.CommandLine;
-using System.CommandLine.Builder;
-using System.CommandLine.Hosting;
-using System.CommandLine.IO;
-using System.CommandLine.Parsing;
-using System.Diagnostics.Tracing;
-using System.IO;
-using System.Net.Http;
-using System.Reflection;
-using System.Threading.Tasks;
+using Microsoft.Kiota.Serialization.Form;
+using Microsoft.Kiota.Serialization.Json;
+using Microsoft.Kiota.Serialization.Text;
 
 namespace Microsoft.Graph.Cli
 {
@@ -73,6 +76,7 @@ namespace Microsoft.Graph.Cli
 
                 ic.BindingContext.AddService(_ => host.Services.GetRequiredService<IAuthenticationCacheUtility>());
                 ic.BindingContext.AddService(_ => host.Services.GetRequiredService<AuthenticationServiceFactory>());
+                ic.BindingContext.AddService(_ => host.Services.GetRequiredService<LogoutService>());
                 await next(ic);
             });
             builder.UseExceptionHandler((ex, context) =>
@@ -160,10 +164,19 @@ namespace Microsoft.Graph.Cli
                 {
                     var authProvider = p.GetRequiredService<IAuthenticationProvider>();
                     var client = p.GetRequiredService<HttpClient>();
+
+                    ApiClientBuilder.RegisterDefaultSerializer<JsonSerializationWriterFactory>();
+                    ApiClientBuilder.RegisterDefaultSerializer<TextSerializationWriterFactory>();
+                    ApiClientBuilder.RegisterDefaultSerializer<FormSerializationWriterFactory>();
+                    ApiClientBuilder.RegisterDefaultDeserializer<JsonParseNodeFactory>();
+                    ApiClientBuilder.RegisterDefaultDeserializer<TextParseNodeFactory>();
+                    ApiClientBuilder.RegisterDefaultDeserializer<FormParseNodeFactory>();
+
                     return new HttpClientRequestAdapter(authProvider, httpClient: client);
                 });
                 services.AddSingleton<IPathUtility, PathUtility>();
                 services.AddSingleton<IAuthenticationCacheUtility, AuthenticationCacheUtility>();
+                services.AddSingleton<LogoutService>();
                 services.AddSingleton<AuthenticationServiceFactory>(p =>
                 {
                     var authSettings = p.GetRequiredService<IOptions<AuthenticationOptions>>()?.Value;
