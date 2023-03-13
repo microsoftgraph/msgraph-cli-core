@@ -53,7 +53,7 @@ public static class ClientCertificateCredentialFactory
     }
 
     /// <summary>
-    /// Gets unexpired certificate from the current user in My store by a subject name or thumb print.
+    /// Gets unexpired certificate from the current user store by a subject name or thumb print.
     /// </summary>
     /// <param name="certificateNameOrThumbPrint">Subject name or thumb print of the certificate to get.</param>
     /// <param name="isThumbPrint">If true, try to find the certificate by the thumb print.</param>
@@ -98,6 +98,32 @@ public static class ClientCertificateCredentialFactory
         finally
         {
             store.Close();
+        }
+    }
+
+    /// <summary>
+    /// Opens a certificate file.
+    /// </summary>
+    /// <param name="path">The path to a certificate file.</param>
+    /// <param name="password">The optional password for the certificate file.</param>
+    /// <param name="certificate">The certificate. Will be null if the certificate failed to open or if the certificate has no pricate key. A certificate with no private key cannot be used to authenticate.</param>
+    /// <returns>returns true if the certificate was fetched successfully.</returns>
+    internal static bool TryGetCertificateFromFile(string path, string? password, out X509Certificate2? certificate)
+    {
+        certificate = null;
+        try
+        {
+            certificate = new X509Certificate2(path, password);
+            if (certificate?.HasPrivateKey != true)
+            {
+                certificate = null;
+                return false;
+            }
+            return true;
+        }
+        catch (CryptographicException)
+        {
+            return false;
         }
     }
 }

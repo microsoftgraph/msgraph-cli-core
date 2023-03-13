@@ -18,6 +18,16 @@ namespace Microsoft.Graph.Cli.Core.Utils
 
         public const string DefaultAuthority = "https://login.microsoftonline.com";
 
+        public static class Environment
+        {
+            public static string TenantId = "AZURE_TENANT_ID";
+            public static string ClientId = "AZURE_CLIENT_ID";
+            public static string ClientSecret = "AZURE_CLIENT_SECRET";
+            public static string ClientCertificatePath = "AZURE_CLIENT_CERTIFICATE_PATH";
+            public static string ClientCertificatePassword = "AZURE_CLIENT_CERTIFICATE_PASSWORD";
+            public static string ClientSendCertificateChain = "AZURE_CLIENT_SEND_CERTIFICATE_CHAIN";
+        }
+
         public const AuthenticationStrategy defaultAuthStrategy = AuthenticationStrategy.DeviceCode;
     }
 }

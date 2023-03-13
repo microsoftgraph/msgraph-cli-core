@@ -17,7 +17,11 @@ public enum AuthenticationStrategy
     /// Client certificate strategy. Enables authentication of a service principal in to Azure Active Directory using a X509 certificate
     /// that is assigned to it's App Registration
     /// </summary>
-    ClientCertificate
+    ClientCertificate,
+    /// <summary>
+    /// Environment strategy. Enables authentication using environment variables. Supports certificate file & client secret login
+    /// </summary>
+    Environment
 }
 
 public static class AuthenticationStrategyExtensions
@@ -27,7 +31,7 @@ public static class AuthenticationStrategyExtensions
         return strategy switch
         {
             AuthenticationStrategy.DeviceCode or AuthenticationStrategy.InteractiveBrowser => false,
-            AuthenticationStrategy.ClientCertificate => true,
+            AuthenticationStrategy.ClientCertificate or AuthenticationStrategy.Environment => true,
             _ => throw new System.ArgumentOutOfRangeException(nameof(strategy), strategy, "The authentication strategy is invalid")
         };
     }

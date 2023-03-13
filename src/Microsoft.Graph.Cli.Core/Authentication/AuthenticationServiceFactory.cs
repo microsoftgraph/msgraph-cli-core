@@ -9,35 +9,47 @@ using Microsoft.Graph.Cli.Core.Utils;
 
 namespace Microsoft.Graph.Cli.Core.Authentication;
 
+/// <summary>
+/// Creates authentication services based on a strategy.
+/// </summary>
 public class AuthenticationServiceFactory
 {
     private readonly IPathUtility pathUtility;
 
-    private readonly IAuthenticationCacheUtility authenticationCacheUtil;
+    private readonly IAuthenticationCacheManager authenticationCacheManager;
 
     private readonly AuthenticationOptions? authenticationOptions;
 
-    public AuthenticationServiceFactory(IPathUtility pathUtility, IAuthenticationCacheUtility authenticationCacheUtil, AuthenticationOptions? authOptions)
+    public AuthenticationServiceFactory(IPathUtility pathUtility, IAuthenticationCacheManager authenticationCacheManager, AuthenticationOptions? authOptions)
     {
         this.pathUtility = pathUtility;
         this.authenticationOptions = authOptions;
-        this.authenticationCacheUtil = authenticationCacheUtil;
+        this.authenticationCacheManager = authenticationCacheManager;
     }
 
-    public virtual async Task<ILoginService> GetAuthenticationServiceAsync(AuthenticationStrategy strategy, string? tenantId, string? clientId, string? certificateName, string? certificateThumbPrint, CancellationToken cancellationToken = default)
+    public virtual async Task<LoginServiceBase> GetAuthenticationServiceAsync(AuthenticationStrategy strategy, string? tenantId, string? clientId, string? certificateName, string? certificateThumbPrint, CancellationToken cancellationToken = default)
     {
-        switch (strategy)
+        var credential = await GetTokenCredentialAsync(strategy, tenantId, clientId, certificateName, certificateThumbPrint, cancellationToken);
+        if (strategy == AuthenticationStrategy.DeviceCode && credential is DeviceCodeCredential deviceCred)
         {
-            case AuthenticationStrategy.DeviceCode:
-                return await GetDeviceCodeLoginServiceAsync(tenantId, clientId, cancellationToken);
-            case AuthenticationStrategy.InteractiveBrowser:
-                return await GetInteractiveBrowserLoginServiceAsync(tenantId, clientId, cancellationToken);
-            case AuthenticationStrategy.ClientCertificate:
-                return GetClientCertificateLoginService(tenantId, clientId, certificateName, certificateThumbPrint);
-            default:
-                throw new InvalidOperationException($"The authentication strategy {strategy} is not supported");
+            return new InteractiveLoginService<DeviceCodeCredential>(deviceCred, pathUtility);
         }
-
+        else if (strategy == AuthenticationStrategy.InteractiveBrowser && credential is InteractiveBrowserCredential browserCred)
+        {
+            return new InteractiveLoginService<InteractiveBrowserCredential>(browserCred, pathUtility);
+        }
+        else if (strategy == AuthenticationStrategy.ClientCertificate && credential is ClientCertificateCredential certCred)
+        {
+            return new AppOnlyLoginService<ClientCertificateCredential>(GetClientCertificateCredential(tenantId, clientId, certificateName, certificateThumbPrint), pathUtility);
+        }
+        else if (strategy == AuthenticationStrategy.Environment && credential is EnvironmentCredential envCred)
+        {
+            return new AppOnlyLoginService<EnvironmentCredential>(envCred, pathUtility);
+        }
+        else
+        {
+            throw new InvalidOperationException($"The authentication strategy {strategy} is not supported");
+        }
     }
 
     public virtual async Task<TokenCredential> GetTokenCredentialAsync(AuthenticationStrategy strategy, string? tenantId, string? clientId, string? certificateName, string? certificateThumbPrint, CancellationToken cancellationToken = default)
@@ -50,27 +62,11 @@ public class AuthenticationServiceFactory
                 return await GetInteractiveBrowserCredentialAsync(tenantId, clientId, cancellationToken);
             case AuthenticationStrategy.ClientCertificate:
                 return GetClientCertificateCredential(tenantId, clientId, certificateName, certificateThumbPrint);
+            case AuthenticationStrategy.Environment:
+                return new EnvironmentCredential(tenantId, clientId);
             default:
                 throw new InvalidOperationException($"The authentication strategy {strategy} is not supported");
         }
-    }
-
-    private async Task<DeviceCodeLoginService> GetDeviceCodeLoginServiceAsync(string? tenantId, string? clientId, CancellationToken cancellationToken = default)
-    {
-        var credential = await GetDeviceCodeCredentialAsync(tenantId, clientId, cancellationToken);
-        return new(credential, pathUtility);
-    }
-
-    private async Task<InteractiveBrowserLoginService> GetInteractiveBrowserLoginServiceAsync(string? tenantId, string? clientId, CancellationToken cancellationToken = default)
-    {
-        var credential = await GetInteractiveBrowserCredentialAsync(tenantId, clientId, cancellationToken);
-        return new(credential, pathUtility);
-    }
-
-    private ClientCertificateLoginService GetClientCertificateLoginService(string? tenantId, string? clientId, string? certificateName, string? certificateThumbPrint)
-    {
-        var credential = GetClientCertificateCredential(tenantId, clientId, certificateName, certificateThumbPrint);
-        return new(credential, pathUtility);
     }
 
     private async Task<DeviceCodeCredential> GetDeviceCodeCredentialAsync(string? tenantId, string? clientId, CancellationToken cancellationToken = default)
@@ -84,7 +80,7 @@ public class AuthenticationServiceFactory
 
         TokenCachePersistenceOptions tokenCacheOptions = new() { Name = Constants.TokenCacheName };
         credOptions.TokenCachePersistenceOptions = tokenCacheOptions;
-        credOptions.AuthenticationRecord = await authenticationCacheUtil.ReadAuthenticationRecordAsync(cancellationToken);
+        credOptions.AuthenticationRecord = await authenticationCacheManager.ReadAuthenticationRecordAsync(cancellationToken);
 
         return new DeviceCodeCredential(credOptions);
     }
@@ -100,7 +96,7 @@ public class AuthenticationServiceFactory
 
         TokenCachePersistenceOptions tokenCacheOptions = new() { Name = Constants.TokenCacheName };
         credOptions.TokenCachePersistenceOptions = tokenCacheOptions;
-        credOptions.AuthenticationRecord = await authenticationCacheUtil.ReadAuthenticationRecordAsync(cancellationToken);
+        credOptions.AuthenticationRecord = await authenticationCacheManager.ReadAuthenticationRecordAsync(cancellationToken);
         credOptions.LoginHint = credOptions.AuthenticationRecord?.Username;
 
         return new InteractiveBrowserCredential(credOptions);
