@@ -79,7 +79,7 @@ public static class ClientCertificateCredentialFactory
             else
             {
                 // Return the first certificate in the collection, has the right name and is current.
-                certificate = signingCerts.OrderByDescending(c => c.NotBefore).FirstOrDefault();
+                certificate = signingCerts.OrderByDescending(static c => c.NotBefore).FirstOrDefault();
                 result = true;
             }
         }

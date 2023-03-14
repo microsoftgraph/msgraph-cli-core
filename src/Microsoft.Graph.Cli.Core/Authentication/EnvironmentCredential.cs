@@ -53,7 +53,6 @@ namespace Microsoft.Graph.Cli.Core.Authentication
             string? clientCertificatePassword = Environment.GetEnvironmentVariable(Utils.Constants.Environment.ClientCertificatePassword);
             string? clientSendCertificateChain = Environment.GetEnvironmentVariable(Utils.Constants.Environment.ClientSendCertificateChain);
 
-
             if (!string.IsNullOrEmpty(tenantId) && !string.IsNullOrEmpty(clientId))
             {
                 if (!string.IsNullOrEmpty(clientSecret))
@@ -95,7 +94,7 @@ namespace Microsoft.Graph.Cli.Core.Authentication
         /// <returns>An <see cref="AccessToken"/> which can be used to authenticate service client calls.</returns>
         public override AccessToken GetToken(TokenRequestContext requestContext, CancellationToken cancellationToken = default)
         {
-            return GetTokenImplAsync(false, requestContext, cancellationToken).GetAwaiter().GetResult();
+            return GetCredentialOrFail().GetToken(requestContext, cancellationToken);
         }
 
         /// <summary>
@@ -112,21 +111,12 @@ namespace Microsoft.Graph.Cli.Core.Authentication
         /// <returns>An <see cref="AccessToken"/> which can be used to authenticate service client calls, or a default <see cref="AccessToken"/>.</returns>
         public override async ValueTask<AccessToken> GetTokenAsync(TokenRequestContext requestContext, CancellationToken cancellationToken = default)
         {
-            return await GetTokenImplAsync(true, requestContext, cancellationToken).ConfigureAwait(false);
+            return await GetCredentialOrFail().GetTokenAsync(requestContext, cancellationToken).ConfigureAwait(false);
         }
 
-        private async ValueTask<AccessToken> GetTokenImplAsync(bool async, TokenRequestContext requestContext, CancellationToken cancellationToken)
+        private TokenCredential GetCredentialOrFail()
         {
-            if (Credential is null)
-            {
-                throw new CredentialUnavailableException(UnavailableErrorMessage);
-            }
-
-            AccessToken token = async
-                    ? await Credential.GetTokenAsync(requestContext, cancellationToken).ConfigureAwait(false)
-                    : Credential.GetToken(requestContext, cancellationToken);
-
-            return token;
+            return Credential ?? throw new CredentialUnavailableException(UnavailableErrorMessage);
         }
     }
 }
