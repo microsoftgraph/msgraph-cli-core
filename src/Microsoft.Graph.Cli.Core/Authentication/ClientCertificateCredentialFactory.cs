@@ -53,13 +53,14 @@ public static class ClientCertificateCredentialFactory
     }
 
     /// <summary>
-    /// Gets unexpired certificate from the current user in My store by a subject name or thumb print.
+    /// Gets unexpired certificate from the current user store by a subject name or thumb print.
     /// </summary>
     /// <param name="certificateNameOrThumbPrint">Subject name or thumb print of the certificate to get.</param>
     /// <param name="isThumbPrint">If true, try to find the certificate by the thumb print.</param>
     /// <returns>A matching unexpired certificate.</returns>
     internal static bool TryGetCertificateFromStore(string certNameOrThumbPrint, bool isThumbPrint, out X509Certificate2? certificate)
     {
+        bool result = false;
         certificate = null;
         // Get the certificate store for the current user.
         X509Store store = new X509Store(StoreLocation.CurrentUser);
@@ -73,31 +74,73 @@ public static class ClientCertificateCredentialFactory
                 .Find(isThumbPrint ? X509FindType.FindByThumbprint : X509FindType.FindBySubjectDistinguishedName, certNameOrThumbPrint, false);
             if (signingCerts.Count == 0)
             {
-                return false;
+                result = false;
             }
-            // Return the first certificate in the collection, has the right name and is current.
-            certificate = signingCerts.OrderByDescending(c => c.NotBefore).FirstOrDefault();
-            return true;
+            else
+            {
+                // Return the first certificate in the collection, has the right name and is current.
+                certificate = signingCerts.OrderByDescending(static c => c.NotBefore).FirstOrDefault();
+                result = true;
+            }
         }
         catch (CryptographicException)
         {
             // The store cannot be opened as requested.
             // findType (X509Certificate2Collection.Find) is invalid.
-            return false;
+            result = false;
         }
         catch (SecurityException)
         {
             // Isufficient permissions to read the store
-            return false;
+            result = false;
         }
         catch (ArgumentException)
         {
             // Store contains invalid values.
-            return false;
+            result = false;
         }
         finally
         {
+            if (!result && certificate is not null)
+            {
+                certificate.Dispose();
+                certificate = null;
+            }
             store.Close();
         }
+
+        return result;
+    }
+
+    /// <summary>
+    /// Opens a certificate file.
+    /// </summary>
+    /// <param name="path">The path to a certificate file.</param>
+    /// <param name="password">The optional password for the certificate file.</param>
+    /// <param name="certificate">The certificate. Will be null if the certificate failed to open or if the certificate has no pricate key. A certificate with no private key cannot be used to authenticate.</param>
+    /// <returns>returns true if the certificate was fetched successfully.</returns>
+    internal static bool TryGetCertificateFromFile(string path, string? password, out X509Certificate2? certificate)
+    {
+        bool result = false;
+        certificate = null;
+        try
+        {
+            certificate = new X509Certificate2(path, password);
+            result = certificate?.HasPrivateKey == true;
+        }
+        catch (CryptographicException)
+        {
+            result = false;
+        }
+        finally
+        {
+            if (!result && certificate is not null)
+            {
+                certificate.Dispose();
+                certificate = null;
+            }
+        }
+
+        return result;
     }
 }

@@ -13,11 +13,11 @@ using Microsoft.Identity.Client.Extensions.Msal;
 
 namespace Microsoft.Graph.Cli.Core.IO;
 
-public class AuthenticationCacheUtility : IAuthenticationCacheUtility
+public class AuthenticationCacheManager : IAuthenticationCacheManager
 {
     private readonly IPathUtility pathUtility;
 
-    public AuthenticationCacheUtility(IPathUtility pathUtility)
+    public AuthenticationCacheManager(IPathUtility pathUtility)
     {
         this.pathUtility = pathUtility;
     }
@@ -51,8 +51,6 @@ public class AuthenticationCacheUtility : IAuthenticationCacheUtility
         var adAuthority = Constants.DefaultAuthority;
         clientId = clientId ?? Constants.DefaultAppId;
         tenantId = tenantId ?? Constants.DefaultTenant;
-
-        // TODO: Verify the auth record matches the auth options supplied.
 
         // Only write auth configuration if the values have changed
         if (

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.CommandLine;
 using System.CommandLine.Builder;
 using System.CommandLine.Hosting;
@@ -38,16 +37,7 @@ namespace Microsoft.Graph.Cli
     {
         static async Task<int> Main(string[] args)
         {
-            // We don't have access to a built host yet. Get configuration settings using a configuration builder.
-            // Required to set initial token credentials.
-            var commands = new List<Command>();
-            var loginCommand = new LoginCommand();
-            commands.Add(loginCommand.Build());
-
-            var logoutCommand = new LogoutCommand();
-            commands.Add(logoutCommand.Build());
-            commands.Add(UsersCommandBuilder.BuildUsersCommand());
-            var builder = BuildCommandLine(commands)
+            var builder = BuildCommandLine()
                 .UseDefaults()
                 .UseHost(a =>
                 {
@@ -74,7 +64,7 @@ namespace Microsoft.Graph.Cli
             {
                 var host = ic.GetHost();
 
-                ic.BindingContext.AddService(_ => host.Services.GetRequiredService<IAuthenticationCacheUtility>());
+                ic.BindingContext.AddService(_ => host.Services.GetRequiredService<IAuthenticationCacheManager>());
                 ic.BindingContext.AddService(_ => host.Services.GetRequiredService<AuthenticationServiceFactory>());
                 ic.BindingContext.AddService(_ => host.Services.GetRequiredService<LogoutService>());
                 await next(ic);
@@ -104,7 +94,7 @@ namespace Microsoft.Graph.Cli
             return await parser.InvokeAsync(args);
         }
 
-        static CommandLineBuilder BuildCommandLine(IEnumerable<Command> commands)
+        static CommandLineBuilder BuildCommandLine()
         {
             var rootCommand = new RootCommand();
             rootCommand.Description = "Microsoft Graph CLI Core Sample";
@@ -114,12 +104,13 @@ namespace Microsoft.Graph.Cli
             // --debug for configs.
             rootCommand.TreatUnmatchedTokensAsErrors = false;
 
-            foreach (var command in commands)
-            {
-                rootCommand.AddCommand(command);
-            }
+            var builder = new CommandLineBuilder(rootCommand);
 
-            return new CommandLineBuilder(rootCommand);
+            rootCommand.Add(new LogoutCommand());
+            rootCommand.Add(UsersCommandBuilder.BuildUsersCommand());
+            rootCommand.Add(new LoginCommand(builder));
+
+            return builder;
         }
 
         static IHostBuilder CreateHostBuilder(string[] args) =>
@@ -175,13 +166,13 @@ namespace Microsoft.Graph.Cli
                     return new HttpClientRequestAdapter(authProvider, httpClient: client);
                 });
                 services.AddSingleton<IPathUtility, PathUtility>();
-                services.AddSingleton<IAuthenticationCacheUtility, AuthenticationCacheUtility>();
+                services.AddSingleton<IAuthenticationCacheManager, AuthenticationCacheManager>();
                 services.AddSingleton<LogoutService>();
                 services.AddSingleton<AuthenticationServiceFactory>(p =>
                 {
                     var authSettings = p.GetRequiredService<IOptions<AuthenticationOptions>>()?.Value;
                     var pathUtil = p.GetRequiredService<IPathUtility>();
-                    var cacheUtil = p.GetRequiredService<IAuthenticationCacheUtility>();
+                    var cacheUtil = p.GetRequiredService<IAuthenticationCacheManager>();
                     return new AuthenticationServiceFactory(pathUtil, cacheUtil, authSettings);
                 });
             }).ConfigureLogging((ctx, logBuilder) =>
@@ -200,7 +191,7 @@ namespace Microsoft.Graph.Cli
             builder.Sources.Clear();
             builder.AddJsonFile(Path.Combine(System.AppContext.BaseDirectory, "app-settings.json"), optional: true);
             var pathUtil = new PathUtility();
-            var authCache = new AuthenticationCacheUtility(pathUtil);
+            var authCache = new AuthenticationCacheManager(pathUtil);
             var dataDir = pathUtil.GetApplicationDataDirectory();
             var userConfigPath = Path.Combine(dataDir, "settings.json");
             builder.AddJsonFile(userConfigPath, optional: true);

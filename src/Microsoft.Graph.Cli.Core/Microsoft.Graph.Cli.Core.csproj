@@ -1,7 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <Description>Microsoft Graph CLI Core Library implements the core functionality used by Microsoft Graph CLI.</Description>
+    <Description>Microsoft Graph CLI Core Library implements the core functionality used by
+      Microsoft Graph CLI.</Description>
     <Copyright>© Microsoft Corporation. All rights reserved.</Copyright>
     <AssemblyTitle>Microsoft Graph CLI Core Library</AssemblyTitle>
     <Authors>Microsoft</Authors>
@@ -14,7 +15,7 @@
     <Deterministic>true</Deterministic>
     <!-- Recommended: Embed symbols containing Source Link in the main file (exe/dll) -->
     <DebugType>embedded</DebugType>
-    <Version>0.1.8-preview.1</Version>
+    <Version>0.2.0-preview.1</Version>
   </PropertyGroup>
 
   <ItemGroup>
@@ -29,4 +30,7 @@
     <PackageReference Include="System.CommandLine" Version="2.0.0-beta4.22272.1" />
   </ItemGroup>
 
+  <ItemGroup>
+    <InternalsVisibleTo Include="Microsoft.Graph.Cli.Core.Tests" />
+  </ItemGroup>
 </Project>

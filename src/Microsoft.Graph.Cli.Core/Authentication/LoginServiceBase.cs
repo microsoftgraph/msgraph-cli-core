@@ -7,7 +7,10 @@ using Microsoft.Graph.Cli.Core.Utils;
 
 namespace Microsoft.Graph.Cli.Core.Authentication;
 
-public abstract class LoginServiceBase : ILoginService
+/// <summary>
+/// Used by the login command to perform interactive login if necessary.
+/// </summary>
+public abstract class LoginServiceBase
 {
     private readonly IPathUtility pathUtility;
 
@@ -22,8 +25,15 @@ public abstract class LoginServiceBase : ILoginService
         await this.SaveSessionAsync(record, cancellationToken);
     }
 
+    /// <summary>
+    /// Subclasses should implement this method and perform interactive login using it. If the login strategy isn't interactive,
+    /// subclasses can return a null authentication record.
+    /// </summary>
     protected abstract Task<AuthenticationRecord?> DoLoginAsync(string[] scopes, CancellationToken cancellationToken = default);
 
+    /// <summary>
+    /// Stores an authentication record on disk for use later. If the authentication record is null, this function is a noop.
+    /// </summary>
     public async Task SaveSessionAsync(AuthenticationRecord? record = null, CancellationToken cancellationToken = default(CancellationToken))
     {
         if (record is null) return;

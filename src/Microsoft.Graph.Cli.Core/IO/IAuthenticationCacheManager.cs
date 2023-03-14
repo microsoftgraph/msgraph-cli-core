@@ -6,7 +6,7 @@ using Microsoft.Graph.Cli.Core.Configuration;
 
 namespace Microsoft.Graph.Cli.Core.IO;
 
-public interface IAuthenticationCacheUtility
+public interface IAuthenticationCacheManager
 {
     string GetAuthenticationCacheFilePath();
 

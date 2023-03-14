@@ -1,15 +1,16 @@
 using System.Threading;
 using System.Threading.Tasks;
+using Azure.Core;
 using Azure.Identity;
 using Microsoft.Graph.Cli.Core.IO;
 
 namespace Microsoft.Graph.Cli.Core.Authentication;
 
-public class ClientCertificateLoginService : LoginServiceBase
+public class AppOnlyLoginService<T> : LoginServiceBase where T : TokenCredential
 {
-    private ClientCertificateCredential credential;
+    private T credential;
 
-    public ClientCertificateLoginService(ClientCertificateCredential credential, IPathUtility pathUtility) : base(pathUtility)
+    public AppOnlyLoginService(T credential, IPathUtility pathUtility) : base(pathUtility)
     {
         this.credential = credential;
     }

@@ -15,8 +15,7 @@ public class LoginCommandTest
     public void Parses_No_Scopes()
     {
         // Given
-        var loginCommandBuilder = new LoginCommand();
-        var command = loginCommandBuilder.Build();
+        var command = new LoginCommand();
         var parser = new Parser(command);
 
         // When
@@ -31,8 +30,7 @@ public class LoginCommandTest
     public void Parses_Single_Scope()
     {
         // Given
-        var loginCommandBuilder = new LoginCommand();
-        var command = loginCommandBuilder.Build();
+        var command = new LoginCommand();
         var parser = new Parser(command);
 
         // When
@@ -51,8 +49,7 @@ public class LoginCommandTest
     public void Parses_Multiple_Scopes(string commandString)
     {
         // Given
-        var loginCommandBuilder = new LoginCommand();
-        var command = loginCommandBuilder.Build();
+        var command = new LoginCommand();
         var parser = new Parser(command);
 
         // When
