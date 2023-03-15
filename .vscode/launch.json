@@ -93,6 +93,7 @@
             "program": "${workspaceFolder}/src/sample/bin/Debug/net7.0/sample.dll",
             "args": [
                 "users",
+                "list",
                 "--debug"
             ],
             "cwd": "${workspaceFolder}/src/sample",

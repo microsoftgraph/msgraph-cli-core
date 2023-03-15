@@ -9,6 +9,7 @@ using System.IO;
 using System.Net.Http;
 using System.Reflection;
 using System.Threading.Tasks;
+using ApiSdk;
 using Azure.Core.Diagnostics;
 using Azure.Identity;
 using Microsoft.Extensions.Configuration;
@@ -96,7 +97,7 @@ namespace Microsoft.Graph.Cli
 
         static CommandLineBuilder BuildCommandLine()
         {
-            var rootCommand = new RootCommand();
+            var rootCommand = new ApiClient().BuildRootCommand();;
             rootCommand.Description = "Microsoft Graph CLI Core Sample";
             // Support specifying additional arguments as configuration arguments
             // System.CommandLine might swallow valid config tokens sometimes.
@@ -107,7 +108,6 @@ namespace Microsoft.Graph.Cli
             var builder = new CommandLineBuilder(rootCommand);
 
             rootCommand.Add(new LogoutCommand());
-            rootCommand.Add(UsersCommandBuilder.BuildUsersCommand());
             rootCommand.Add(new LoginCommand(builder));
 
             return builder;
