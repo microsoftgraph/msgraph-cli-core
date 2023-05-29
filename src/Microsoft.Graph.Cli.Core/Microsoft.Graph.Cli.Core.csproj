@@ -44,6 +44,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Include="../../LICENSE" Pack="true" PackagePath="" />
+  </ItemGroup>
+  <ItemGroup>
     <InternalsVisibleTo Include="Microsoft.Graph.Cli.Core.Tests" />
   </ItemGroup>
 </Project>
