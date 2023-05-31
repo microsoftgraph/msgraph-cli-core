@@ -1,21 +1,34 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+    <RootNamespace>Microsoft.Graph.Cli.Core</RootNamespace>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <!-- Recommended: Embed symbols containing Source Link in the main file (exe/dll) -->
+    <DebugType>embedded</DebugType>
+    <Version>0.3.0-preview.1</Version>
+  </PropertyGroup>
+
+  <PropertyGroup>
     <Description>Microsoft Graph CLI Core Library implements the core functionality used by
       Microsoft Graph CLI.</Description>
     <Copyright>© Microsoft Corporation. All rights reserved.</Copyright>
     <AssemblyTitle>Microsoft Graph CLI Core Library</AssemblyTitle>
     <Authors>Microsoft</Authors>
-    <TargetFramework>net7.0</TargetFramework>
-    <RootNamespace>Microsoft.Graph.Cli.Core</RootNamespace>
-    <ImplicitUsings>disable</ImplicitUsings>
-    <Nullable>enable</Nullable>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <RepositoryUrl>https://github.com/microsoftgraph/msgraph-cli-core</RepositoryUrl>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
     <Deterministic>true</Deterministic>
-    <!-- Recommended: Embed symbols containing Source Link in the main file (exe/dll) -->
-    <DebugType>embedded</DebugType>
-    <Version>0.2.1-preview.1</Version>
+    <AssemblyOriginatorKeyFile>../35MSSharedLib1024.snk</AssemblyOriginatorKeyFile>
+    <SignAssembly>false</SignAssembly>
+    <DelaySign>false</DelaySign>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <PackageReleaseNotes>
+    </PackageReleaseNotes>
+    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
   </PropertyGroup>
 
   <ItemGroup>
@@ -30,6 +43,9 @@
     <PackageReference Include="System.CommandLine" Version="2.0.0-beta4.22272.1" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Include="../../LICENSE" Pack="true" PackagePath="" />
+  </ItemGroup>
   <ItemGroup>
     <InternalsVisibleTo Include="Microsoft.Graph.Cli.Core.Tests" />
   </ItemGroup>
