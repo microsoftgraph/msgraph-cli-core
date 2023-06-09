@@ -265,4 +265,4 @@ stages:
                                   command: push
                                   packagesToPush: "$(Pipeline.Workspace)/Nugets/Microsoft.Graph.Cli.Core.*.nupkg"
                                   nuGetFeedType: external
-                                  publishFeedCredentials: "Kiota Nuget Connection"
+                                  publishFeedCredentials: "microsoftgraph NuGet connection"
