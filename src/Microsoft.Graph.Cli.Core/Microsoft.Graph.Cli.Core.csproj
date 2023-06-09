@@ -7,7 +7,8 @@
     <Nullable>enable</Nullable>
     <!-- Recommended: Embed symbols containing Source Link in the main file (exe/dll) -->
     <DebugType>embedded</DebugType>
-    <Version>0.3.0-preview.1</Version>
+    <VersionPrefix>0.3.0</VersionPrefix>
+    <VersionSuffix>preview.1</VersionSuffix>
   </PropertyGroup>
 
   <PropertyGroup>
