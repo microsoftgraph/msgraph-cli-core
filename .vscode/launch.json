@@ -19,8 +19,7 @@
             "cwd": "${workspaceFolder}/src/sample",
             // For more information about the 'console' field, see https://aka.ms/VSCode-CS-LaunchJson-Console
             "console": "internalConsole",
-            "stopAtEntry": false,
-            "envFile": "${workspaceFolder}/.env"
+            "stopAtEntry": false
         },
         {
             // Use IntelliSense to find out which attributes exist for C# debugging
@@ -40,8 +39,7 @@
             "cwd": "${workspaceFolder}/src/sample",
             // For more information about the 'console' field, see https://aka.ms/VSCode-CS-LaunchJson-Console
             "console": "internalConsole",
-            "stopAtEntry": false,
-            "envFile": "${workspaceFolder}/.env"
+            "stopAtEntry": false
         },
         {
             "name": "login certificate name (sample)",
@@ -62,8 +60,7 @@
             ],
             "cwd": "${workspaceFolder}/src/sample",
             "console": "internalConsole",
-            "stopAtEntry": false,
-            "envFile": "${workspaceFolder}/.env"
+            "stopAtEntry": false
         },
         {
             "name": "login environment variables (sample)",
@@ -82,8 +79,7 @@
             ],
             "cwd": "${workspaceFolder}/src/sample",
             "console": "internalConsole",
-            "stopAtEntry": false,
-            "envFile": "${workspaceFolder}/.env"
+            "stopAtEntry": false
         },
         {
             "name": "users list (sample)",
@@ -98,8 +94,7 @@
             ],
             "cwd": "${workspaceFolder}/src/sample",
             "console": "integratedTerminal",
-            "stopAtEntry": false,
-            "envFile": "${workspaceFolder}/.env"
+            "stopAtEntry": false
         },
         {
             "name": "logout (sample)",
@@ -113,8 +108,7 @@
             ],
             "cwd": "${workspaceFolder}/src/sample",
             "console": "integratedTerminal",
-            "stopAtEntry": false,
-            "envFile": "${workspaceFolder}/.env"
+            "stopAtEntry": false
         },
         {
             "name": "help (sample)",
@@ -128,8 +122,7 @@
             ],
             "cwd": "${workspaceFolder}/src/sample",
             "console": "integratedTerminal",
-            "stopAtEntry": false,
-            "envFile": "${workspaceFolder}/.env"
+            "stopAtEntry": false
         },
         {
             "name": ".NET Core Attach",

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.CommandLine;
 using System.CommandLine.Builder;
 using System.CommandLine.Hosting;
@@ -21,7 +21,6 @@ using Microsoft.Graph.Authentication;
 using Microsoft.Graph.Cli.Core.Authentication;
 using Microsoft.Graph.Cli.Core.Commands.Authentication;
 using Microsoft.Graph.Cli.Core.Configuration;
-using Microsoft.Graph.Cli.Core.Configuration.Extensions;
 using Microsoft.Graph.Cli.Core.Http;
 using Microsoft.Graph.Cli.Core.IO;
 using Microsoft.Kiota.Abstractions;
@@ -36,15 +35,15 @@ namespace Microsoft.Graph.Cli
 {
     class Program
     {
+        private static bool debugEnabled = false;
+        private static AzureEventSourceListener? listener = null;
+
         static async Task<int> Main(string[] args)
         {
             var builder = BuildCommandLine()
                 .UseDefaults()
-                .UseHost(a =>
-                {
-                    // Pass all the args to avoid system.commandline swallowing them up
-                    return CreateHostBuilder(args);
-                }).UseRequestAdapter(ic =>
+                .UseHost(CreateHostBuilder)
+                .UseRequestAdapter(ic =>
                 {
                     var host = ic.GetHost();
                     var adapter = host.Services.GetRequiredService<IRequestAdapter>();
@@ -55,12 +54,6 @@ namespace Microsoft.Graph.Cli
                     }
                     return adapter;
                 }).RegisterCommonServices();
-            builder.AddMiddleware(async (ic, next) =>
-            {
-                var op = ic.GetHost().Services.GetService<IOptions<ExtraOptions>>();
-                using AzureEventSourceListener? listener = AzureEventSourceListener.CreateConsoleLogger(op?.Value?.DebugEnabled == true ? EventLevel.LogAlways : EventLevel.Warning);
-                await next(ic);
-            });
             builder.AddMiddleware(async (ic, next) =>
             {
                 var host = ic.GetHost();
@@ -90,25 +83,42 @@ namespace Microsoft.Graph.Cli
                 context.ExitCode = -1;
             });
 
-            var parser = builder.Build();
-
-            return await parser.InvokeAsync(args);
+            try
+            {
+                var parser = builder.Build();
+                return await parser.InvokeAsync(args);
+            }
+            finally
+            {
+                listener?.Dispose();
+            }
         }
 
         static CommandLineBuilder BuildCommandLine()
         {
-            var rootCommand = new ApiClient().BuildRootCommand();;
+            var rootCommand = new ApiClient().BuildRootCommand();
             rootCommand.Description = "Microsoft Graph CLI Core Sample";
-            // Support specifying additional arguments as configuration arguments
-            // System.CommandLine might swallow valid config tokens sometimes.
-            // e.g. if a command has an option --debug and we also want to use
-            // --debug for configs.
-            rootCommand.TreatUnmatchedTokensAsErrors = false;
 
             var builder = new CommandLineBuilder(rootCommand);
+            var debugOption = new Option<bool>("--debug", "Enable debug output");
+
+            builder.AddMiddleware(async (ic, next) =>
+            {
+                debugEnabled = ic.ParseResult.GetValueForOption<bool>(debugOption);
+                if (debugEnabled)
+                {
+                    listener = AzureEventSourceListener.CreateConsoleLogger(EventLevel.LogAlways);
+                }
+                else
+                {
+                    listener = AzureEventSourceListener.CreateConsoleLogger(EventLevel.Warning);
+                }
+                await next(ic);
+            });
 
             rootCommand.Add(new LogoutCommand());
             rootCommand.Add(new LoginCommand(builder));
+            rootCommand.AddGlobalOption(debugOption);
 
             return builder;
         }
@@ -124,10 +134,6 @@ namespace Microsoft.Graph.Cli
             {
                 var authSection = ctx.Configuration.GetSection(nameof(AuthenticationOptions));
                 services.Configure<AuthenticationOptions>(authSection);
-                services.Configure<ExtraOptions>(op =>
-                {
-                    op.DebugEnabled = ctx.Configuration.GetValue<bool>("Debug");
-                });
                 services.AddTransient<LoggingHandler>();
                 services.AddSingleton<HttpClient>(p =>
                 {
@@ -178,12 +184,7 @@ namespace Microsoft.Graph.Cli
             }).ConfigureLogging((ctx, logBuilder) =>
             {
                 logBuilder.SetMinimumLevel(LogLevel.Warning);
-                // If a config is unavailable, troubleshoot using (ctx.Configuration as IConfigurationRoot)?.GetDebugView();
-                var options = ctx.GetInvocationContext().BindingContext.GetService<IOptions<ExtraOptions>>()?.Value;
-                if (options?.DebugEnabled == true)
-                {
-                    logBuilder.AddFilter("Microsoft.Graph.Cli", LogLevel.Debug);
-                }
+                logBuilder.AddFilter("Microsoft.Graph.Cli", level => level >= (debugEnabled ? LogLevel.Debug : LogLevel.Warning));
             });
 
         static void ConfigureAppConfiguration(IConfigurationBuilder builder, string[] args)
@@ -197,7 +198,6 @@ namespace Microsoft.Graph.Cli
             builder.AddJsonFile(userConfigPath, optional: true);
             builder.AddJsonFile(authCache.GetAuthenticationCacheFilePath(), optional: true, reloadOnChange: true);
             builder.AddEnvironmentVariables(prefix: "MGC_");
-            builder.AddCommandLine(args.ExpandFlagsForConfiguration());
         }
     }
 }

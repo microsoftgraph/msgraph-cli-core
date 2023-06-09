@@ -14,7 +14,7 @@ jobs:
             - name: Checkout
               uses: actions/checkout@v3
             - name: Setup .NET Core SDK 6
-              uses: actions/setup-dotnet@v3.0.3
+              uses: actions/setup-dotnet@v3.2.0
               with:
                   dotnet-version: 7.x
             - uses: actions/cache@v3
@@ -49,7 +49,7 @@ jobs:
         needs: [build]
         steps:
             - name: Setup .NET
-              uses: actions/setup-dotnet@v3.0.3
+              uses: actions/setup-dotnet@v3.2.0
               with:
                   dotnet-version: 7.x
             - uses: actions/download-artifact@v3
