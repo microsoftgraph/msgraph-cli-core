@@ -19,6 +19,7 @@
     <Authors>Microsoft</Authors>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <RepositoryUrl>https://github.com/microsoftgraph/msgraph-cli-core</RepositoryUrl>
+    <PackageProjectUrl>https://developer.microsoft.com/graph</PackageProjectUrl>
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
     <Deterministic>true</Deterministic>
     <AssemblyOriginatorKeyFile>../35MSSharedLib1024.snk</AssemblyOriginatorKeyFile>
