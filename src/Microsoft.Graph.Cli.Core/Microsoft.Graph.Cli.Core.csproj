@@ -30,6 +30,7 @@
     </PackageReleaseNotes>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
 
   <ItemGroup>
@@ -46,6 +47,7 @@
 
   <ItemGroup>
     <None Include="../../LICENSE" Pack="true" PackagePath="" />
+    <None Include="../../README.md" Pack="true" PackagePath=""/>
   </ItemGroup>
   <ItemGroup>
     <InternalsVisibleTo Include="Microsoft.Graph.Cli.Core.Tests" />
