@@ -90,7 +90,9 @@
             "args": [
                 "users",
                 "list",
-                "--debug"
+                "--debug",
+                "--top",
+                "2"
             ],
             "cwd": "${workspaceFolder}/src/sample",
             "console": "integratedTerminal",
