@@ -52,6 +52,7 @@ namespace Microsoft.Graph.Cli
                     {
                         adapter.BaseUrl = client.BaseAddress?.ToString();
                     }
+                    adapter.BaseUrl = adapter.BaseUrl?.TrimEnd('/');
                     return adapter;
                 }).RegisterCommonServices();
             builder.AddMiddleware(async (ic, next) =>
@@ -144,8 +145,8 @@ namespace Microsoft.Graph.Cli
                         GraphServiceLibraryClientVersion = $"{assemblyVersion?.Major ?? 0}.{assemblyVersion?.Minor ?? 0}.{assemblyVersion?.Build ?? 0}",
                         GraphServiceTargetVersion = "1.0"
                     };
-                    var loggingHandler = p.GetRequiredService<LoggingHandler>();
-                    return GraphCliClientFactory.GetDefaultClient(options, lowestPriorityMiddlewares: new[] { loggingHandler });
+
+                    return GraphCliClientFactory.GetDefaultClient(options, loggingHandler: p.GetRequiredService<LoggingHandler>());
                 });
                 services.AddSingleton<IAuthenticationProvider>(p =>
                 {
