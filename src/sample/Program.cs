@@ -8,6 +8,7 @@ using System.Diagnostics.Tracing;
 using System.IO;
 using System.Net.Http;
 using System.Reflection;
+using System.Text;
 using System.Threading.Tasks;
 using ApiSdk;
 using Azure.Core.Diagnostics;
@@ -40,6 +41,8 @@ namespace Microsoft.Graph.Cli
 
         static async Task<int> Main(string[] args)
         {
+            Console.InputEncoding = Encoding.Unicode;
+            Console.OutputEncoding = Encoding.Unicode;
             var builder = BuildCommandLine()
                 .UseDefaults()
                 .UseHost(CreateHostBuilder)
@@ -102,18 +105,39 @@ namespace Microsoft.Graph.Cli
 
             var builder = new CommandLineBuilder(rootCommand);
             var debugOption = new Option<bool>("--debug", "Enable debug output");
+            var headersOption = new Option<string[]>("--headers", "Add custom request headers to the request. Can be used multiple times to add many headers. e.g. --headers key1=value1 --headers key2=value2");
+            headersOption.Arity = ArgumentArity.ZeroOrMore;
+
+            static void AddOptionToCommandIf(ref Command command, in Option option, Func<Command, bool> predicate) {
+                if (predicate(command)) {
+                    command.AddOption(option);
+                }
+
+                foreach (var sym in command.Children)
+                {
+                    if (sym is Command cmd)
+                    {
+                        AddOptionToCommandIf(ref cmd, option, predicate);
+                    }
+                }
+            }
+
+            AddOptionToCommandIf(ref rootCommand, headersOption, cmd => cmd.Handler is not null);
+
+            builder.AddMiddleware(async (ic, next) =>
+            {
+                if (ic.ParseResult.GetValueForOption(headersOption) is { } options)
+                {
+                    HeadersStore.Instance.SetHeadersFromStrings(options);
+                }
+
+                await next(ic);
+            });
 
             builder.AddMiddleware(async (ic, next) =>
             {
                 debugEnabled = ic.ParseResult.GetValueForOption<bool>(debugOption);
-                if (debugEnabled)
-                {
-                    listener = AzureEventSourceListener.CreateConsoleLogger(EventLevel.LogAlways);
-                }
-                else
-                {
-                    listener = AzureEventSourceListener.CreateConsoleLogger(EventLevel.Warning);
-                }
+                listener = AzureEventSourceListener.CreateConsoleLogger(debugEnabled ? EventLevel.LogAlways : EventLevel.Warning);
                 await next(ic);
             });
 
@@ -136,6 +160,7 @@ namespace Microsoft.Graph.Cli
                 var authSection = ctx.Configuration.GetSection(nameof(AuthenticationOptions));
                 services.Configure<AuthenticationOptions>(authSection);
                 services.AddTransient<LoggingHandler>();
+                services.AddTransient<HttpHeadersHandler>();
                 services.AddSingleton<HttpClient>(p =>
                 {
                     var assemblyVersion = Assembly.GetExecutingAssembly().GetName().Version;
@@ -145,8 +170,11 @@ namespace Microsoft.Graph.Cli
                         GraphServiceLibraryClientVersion = $"{assemblyVersion?.Major ?? 0}.{assemblyVersion?.Minor ?? 0}.{assemblyVersion?.Build ?? 0}",
                         GraphServiceTargetVersion = "1.0"
                     };
-
-                    return GraphCliClientFactory.GetDefaultClient(options, loggingHandler: p.GetRequiredService<LoggingHandler>());
+                    return GraphCliClientFactory.GetDefaultClient(
+                        options,
+                        loggingHandler: p.GetRequiredService<LoggingHandler>(),
+                        middlewares: new[] { p.GetRequiredService<HttpHeadersHandler>() }
+                    );
                 });
                 services.AddSingleton<IAuthenticationProvider>(p =>
                 {
