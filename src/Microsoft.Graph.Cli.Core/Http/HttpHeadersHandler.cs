@@ -4,16 +4,28 @@ using System.Linq;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 
 namespace Microsoft.Graph.Cli.Core.Http;
 
 public class HttpHeadersHandler : DelegatingHandler
 {
+    private readonly ILogger<HttpHeadersHandler> log;
+
+    public HttpHeadersHandler(ILogger<HttpHeadersHandler> logger)
+    {
+        log = logger;
+    }
+
     protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
         foreach (var headerItem in HeadersStore.Instance.Headers)
         {
-            request.Headers.Add(headerItem.Key, headerItem.Value);
+            try {
+                request.Headers.Add(headerItem.Key, headerItem.Value);
+            } catch (Exception ex) when (ex is InvalidOperationException || ex is FormatException) {
+                log.LogWarning(ex, "Could not add the header {}", headerItem.Key);
+            }
         }
 
         HeadersStore.Instance.ClearHeaders();
