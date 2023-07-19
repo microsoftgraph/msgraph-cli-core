@@ -15,6 +15,8 @@ public class HttpHeadersHandler : DelegatingHandler
         {
             request.Headers.Add(headerItem.Key, headerItem.Value);
         }
+
+        HeadersStore.Instance.ClearHeaders();
         return base.SendAsync(request, cancellationToken);
     }
 }
@@ -32,8 +34,17 @@ public sealed class HeadersStore
     {
     }
 
+    public void ClearHeaders() {
+        this.headers.Clear();
+    }
+
     public void SetHeadersFromStrings(string[] headers)
     {
+        if (headers.Length < 1)
+        {
+            return;
+        }
+
         this.headers.Clear();
 
         var mapped = headers
