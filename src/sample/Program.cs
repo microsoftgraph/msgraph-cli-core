@@ -126,16 +126,12 @@ namespace Microsoft.Graph.Cli
 
             builder.AddMiddleware(async (ic, next) =>
             {
+                // Collect headers
                 if (ic.ParseResult.GetValueForOption(headersOption) is { } options)
                 {
                     HeadersStore.Instance.SetHeadersFromStrings(options);
                 }
 
-                await next(ic);
-            });
-
-            builder.AddMiddleware(async (ic, next) =>
-            {
                 debugEnabled = ic.ParseResult.GetValueForOption<bool>(debugOption);
                 listener = AzureEventSourceListener.CreateConsoleLogger(debugEnabled ? EventLevel.LogAlways : EventLevel.Warning);
                 await next(ic);
