@@ -108,21 +108,18 @@ namespace Microsoft.Graph.Cli
             var headersOption = new Option<string[]>("--headers", "Add custom request headers to the request. Can be used multiple times to add many headers. e.g. --headers key1=value1 --headers key2=value2");
             headersOption.Arity = ArgumentArity.ZeroOrMore;
 
-            static void AddOptionToCommandIf(ref Command command, in Option option, Func<Command, bool> predicate) {
+            static void AddOptionToCommandIf(Command command, in Option option, Func<Command, bool> predicate) {
                 if (predicate(command)) {
                     command.AddOption(option);
                 }
 
-                foreach (var sym in command.Children)
+                foreach (var cmd in command.Subcommands)
                 {
-                    if (sym is Command cmd)
-                    {
-                        AddOptionToCommandIf(ref cmd, option, predicate);
-                    }
+                    AddOptionToCommandIf(cmd, option, predicate);
                 }
             }
 
-            AddOptionToCommandIf(ref rootCommand, headersOption, cmd => cmd.Handler is not null);
+            AddOptionToCommandIf(rootCommand, headersOption, cmd => cmd.Handler is not null);
 
             builder.AddMiddleware(async (ic, next) =>
             {
