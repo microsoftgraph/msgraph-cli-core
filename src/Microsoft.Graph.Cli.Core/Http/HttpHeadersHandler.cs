@@ -35,10 +35,10 @@ public class HttpHeadersHandler : DelegatingHandler
 public sealed class HeadersStore
 {
     private readonly Dictionary<string, List<string>> headers = new();
-    private static readonly Lazy<HeadersStore> lazy =
-        new Lazy<HeadersStore>(() => new HeadersStore());
+    private static readonly Lazy<HeadersStore> storeLazyInstance =
+        new(() => new HeadersStore());
 
-    public static HeadersStore Instance { get { return lazy.Value; } }
+    public static HeadersStore Instance { get { return storeLazyInstance.Value; } }
 
     public IEnumerable<KeyValuePair<string, List<string>>> Headers { get { return headers; } }
 
