@@ -8,7 +8,7 @@ public class GraphCliClientFactory
 {
     public static IEnumerable<DelegatingHandler> GetDefaultMiddlewaresWithOptions(GraphClientOptions? options) => GraphClientFactory.CreateDefaultHandlers(options);
 
-    public static HttpClient GetDefaultClient(GraphClientOptions? options = null, string nationalCloud = GraphClientFactory.Global_Cloud, HttpMessageHandler? finalHandler = null, LoggingHandler? loggingHandler = null, params DelegatingHandler[] middlewares)
+    public static HttpClient GetDefaultClient(GraphClientOptions? options = null, string version = "v1.0", string nationalCloud = GraphClientFactory.Global_Cloud, HttpMessageHandler? finalHandler = null, LoggingHandler? loggingHandler = null, params DelegatingHandler[] middlewares)
     {
         var m = new List<DelegatingHandler>();
 
@@ -45,6 +45,6 @@ public class GraphCliClientFactory
             }
         });
 
-        return GraphClientFactory.Create(nationalCloud: nationalCloud, finalHandler: finalHandler, handlers: m);
+        return GraphClientFactory.Create(version: version, nationalCloud: nationalCloud, finalHandler: finalHandler, handlers: m);
     }
 }
