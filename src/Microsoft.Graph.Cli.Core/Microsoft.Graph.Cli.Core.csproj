@@ -33,6 +33,10 @@
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
+  <!-- https://github.com/clairernovotny/DeterministicBuilds#deterministic-builds -->
+  <PropertyGroup Condition="'$(TF_BUILD)' == 'true'">
+    <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+  </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Azure.Identity" Version="1.10.0" />
@@ -44,6 +48,7 @@
     <PackageReference Include="Microsoft.Kiota.Http.HttpClientLibrary" Version="1.1.1" />
     <PackageReference Include="Spectre.Console" Version="0.47.0" />
     <PackageReference Include="System.CommandLine" Version="2.0.0-beta4.22272.1" />
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" />
   </ItemGroup>
 
   <ItemGroup>
