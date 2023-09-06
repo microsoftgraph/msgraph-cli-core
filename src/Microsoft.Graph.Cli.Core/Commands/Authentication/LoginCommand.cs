@@ -1,10 +1,10 @@
-using System.CommandLine;
-using System.CommandLine.Builder;
-using System.Text;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Graph.Cli.Core.Authentication;
 using Microsoft.Graph.Cli.Core.IO;
 using Microsoft.Graph.Cli.Core.Utils;
+using System.CommandLine;
+using System.CommandLine.Builder;
+using System.Text;
 
 namespace Microsoft.Graph.Cli.Core.Commands.Authentication;
 
@@ -69,6 +69,8 @@ public sealed class LoginCommand : Command
                 builder.Append(": Open a browser on this computer to log in.\n    ");
                 builder.Append(nameof(AuthenticationStrategy.ClientCertificate));
                 builder.Append(":  Use a certificate stored on this computer's certificate store to sign in. The certificate must have a private key available.\n    ");
+                builder.Append(nameof(AuthenticationStrategy.ManagedIdentity));
+                builder.Append(": Use the managed identity of the Azure resource to log in. \n    ");
                 builder.Append(nameof(AuthenticationStrategy.Environment));
                 builder.Append(":        Use values stored in environment variables to log in.");
                 builder.Append($"\n      Supported environment variables:");
