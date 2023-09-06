@@ -9,7 +9,7 @@ namespace Microsoft.Graph.Cli.Core.Authentication;
 
 public class InteractiveLoginService<T> : LoginServiceBase where T : TokenCredential
 {
-    private T credential;
+    private readonly T credential;
 
     public InteractiveLoginService(T credential, IPathUtility pathUtility) : base(pathUtility)
     {

@@ -26,6 +26,8 @@ using Microsoft.Graph.Cli.Core.IO;
 using Microsoft.Kiota.Abstractions;
 using Microsoft.Kiota.Abstractions.Authentication;
 using Microsoft.Kiota.Cli.Commons.Extensions;
+using Microsoft.Kiota.Cli.Commons.Http;
+using Microsoft.Kiota.Cli.Commons.Http.Headers;
 using Microsoft.Kiota.Http.HttpClientLibrary;
 using Microsoft.Kiota.Serialization.Form;
 using Microsoft.Kiota.Serialization.Json;
@@ -54,7 +56,9 @@ namespace Microsoft.Graph.Cli
                     }
                     adapter.BaseUrl = adapter.BaseUrl?.TrimEnd('/');
                     return adapter;
-                }).RegisterCommonServices();
+                })
+                .RegisterCommonServices()
+                .RegisterHeadersOption(() => InMemoryHeadersStore.Instance);
             builder.AddMiddleware(async (ic, next) =>
             {
                 var host = ic.GetHost();
@@ -146,7 +150,9 @@ namespace Microsoft.Graph.Cli
                         GraphServiceTargetVersion = "1.0"
                     };
 
-                    return GraphCliClientFactory.GetDefaultClient(options, loggingHandler: p.GetRequiredService<LoggingHandler>());
+                    var headersHandler = new NativeHttpHeadersHandler(() => InMemoryHeadersStore.Instance, p.GetService<ILogger<NativeHttpHeadersHandler>>());
+
+                    return GraphCliClientFactory.GetDefaultClient(options, loggingHandler: p.GetRequiredService<LoggingHandler>(), middlewares: new[] { headersHandler });
                 });
                 services.AddSingleton<IAuthenticationProvider>(p =>
                 {
@@ -155,7 +161,6 @@ namespace Microsoft.Graph.Cli
                     AuthenticationStrategy authStrategy = authSettings?.Strategy ?? AuthenticationStrategy.DeviceCode;
                     var credential = serviceFactory.GetTokenCredentialAsync(authStrategy, authSettings?.TenantId, authSettings?.ClientId, authSettings?.ClientCertificateName, authSettings?.ClientCertificateThumbPrint);
                     credential.Wait();
-                    var client = p.GetRequiredService<HttpClient>();
                     return new AzureIdentityAuthenticationProvider(credential.Result);
                 });
                 services.AddSingleton<IRequestAdapter>(p =>
