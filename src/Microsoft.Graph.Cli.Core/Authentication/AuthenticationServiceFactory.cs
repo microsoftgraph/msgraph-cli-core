@@ -42,13 +42,13 @@ public class AuthenticationServiceFactory
         {
             return new AppOnlyLoginService<ClientCertificateCredential>(GetClientCertificateCredential(tenantId, clientId, certificateName, certificateThumbPrint), pathUtility);
         }
-        else if (strategy == AuthenticationStrategy.Environment && credential is EnvironmentCredential envCred)
-        {
-            return new AppOnlyLoginService<EnvironmentCredential>(envCred, pathUtility);
-        }
         else if (strategy == AuthenticationStrategy.ManagedIdentity && credential is ManagedIdentityCredential managedIdentityCred)
         {
             return new AppOnlyLoginService<ManagedIdentityCredential>(managedIdentityCred, pathUtility);
+        }
+        else if (strategy == AuthenticationStrategy.Environment && credential is EnvironmentCredential envCred)
+        {
+            return new AppOnlyLoginService<EnvironmentCredential>(envCred, pathUtility);
         }
         else
         {

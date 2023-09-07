@@ -19,13 +19,13 @@ public enum AuthenticationStrategy
     /// </summary>
     ClientCertificate,
     /// <summary>
-    /// Environment strategy. Enables authentication using environment variables. Supports certificate file & client secret login
-    /// </summary>
-    Environment,
-    /// <summary>
     /// Managed Identity strategy. Enables authentication using a managed identity.
     /// </summary>
-    ManagedIdentity
+    ManagedIdentity,
+    /// <summary>
+    /// Environment strategy. Enables authentication using environment variables. Supports certificate file & client secret login
+    /// </summary>
+    Environment
 }
 
 public static class AuthenticationStrategyExtensions
