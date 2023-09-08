@@ -1,11 +1,11 @@
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 using Azure.Core;
 using Azure.Identity;
 using Microsoft.Graph.Cli.Core.Configuration;
 using Microsoft.Graph.Cli.Core.IO;
 using Microsoft.Graph.Cli.Core.Utils;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Microsoft.Graph.Cli.Core.Authentication;
 
@@ -42,6 +42,10 @@ public class AuthenticationServiceFactory
         {
             return new AppOnlyLoginService<ClientCertificateCredential>(GetClientCertificateCredential(tenantId, clientId, certificateName, certificateThumbPrint), pathUtility);
         }
+        else if (strategy == AuthenticationStrategy.ManagedIdentity && credential is ManagedIdentityCredential managedIdentityCred)
+        {
+            return new AppOnlyLoginService<ManagedIdentityCredential>(managedIdentityCred, pathUtility);
+        }
         else if (strategy == AuthenticationStrategy.Environment && credential is EnvironmentCredential envCred)
         {
             return new AppOnlyLoginService<EnvironmentCredential>(envCred, pathUtility);
@@ -64,6 +68,8 @@ public class AuthenticationServiceFactory
                 return GetClientCertificateCredential(tenantId, clientId, certificateName, certificateThumbPrint);
             case AuthenticationStrategy.Environment:
                 return new EnvironmentCredential(tenantId, clientId);
+            case AuthenticationStrategy.ManagedIdentity:
+                return new ManagedIdentityCredential(clientId);
             default:
                 throw new InvalidOperationException($"The authentication strategy {strategy} is not supported");
         }
