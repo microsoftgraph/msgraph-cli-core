@@ -103,7 +103,6 @@ public class AuthenticationServiceFactory
         TokenCachePersistenceOptions tokenCacheOptions = new() { Name = Constants.TokenCacheName };
         credOptions.TokenCachePersistenceOptions = tokenCacheOptions;
         credOptions.AuthenticationRecord = await authenticationCacheManager.ReadAuthenticationRecordAsync(cancellationToken);
-        credOptions.LoginHint = credOptions.AuthenticationRecord?.Username;
 
         return new InteractiveBrowserCredential(credOptions);
     }
