@@ -112,11 +112,11 @@ namespace Microsoft.Graph.Cli
                 debugEnabled = ic.ParseResult.GetValueForOption<bool>(debugOption);
                 if (debugEnabled)
                 {
-                    listener = AzureEventSourceListener.CreateConsoleLogger(EventLevel.LogAlways);
+                    listener = CreateStdErrLogger(EventLevel.LogAlways);
                 }
                 else
                 {
-                    listener = AzureEventSourceListener.CreateConsoleLogger(EventLevel.Warning);
+                    listener = CreateStdErrLogger(EventLevel.Error);
                 }
                 await next(ic);
             });
@@ -190,6 +190,9 @@ namespace Microsoft.Graph.Cli
             }).ConfigureLogging((ctx, logBuilder) =>
             {
                 logBuilder.SetMinimumLevel(LogLevel.Warning);
+                logBuilder.ClearProviders();
+                // Log everything to stderr. Investigate if this breaks scripts that check for stderr instead of the exit code.
+                logBuilder.AddConsole(c => c.LogToStandardErrorThreshold = LogLevel.Trace);
                 logBuilder.AddFilter("Microsoft.Graph.Cli", level => level >= (debugEnabled ? LogLevel.Debug : LogLevel.Warning));
             });
 
@@ -204,6 +207,15 @@ namespace Microsoft.Graph.Cli
             builder.AddJsonFile(userConfigPath, optional: true);
             builder.AddJsonFile(authCache.GetAuthenticationCacheFilePath(), optional: true, reloadOnChange: true);
             builder.AddEnvironmentVariables(prefix: "MGC_");
+        }
+
+        static AzureEventSourceListener CreateStdErrLogger(EventLevel level = EventLevel.Informational)
+        {
+            return new AzureEventSourceListener(delegate (EventWrittenEventArgs eventData, string text)
+            {
+                // By default, AzureEventSourceListener.CreateConsoleLogger logs to stdout. Use stderr instead.
+                Console.Error.WriteLine("[{1}] {0}: {2}", eventData.EventSource.Name, eventData.Level, text);
+            }, level);
         }
     }
 }
