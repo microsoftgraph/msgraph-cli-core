@@ -1,4 +1,3 @@
-using System;
 using System.IO;
 using System.Net;
 using System.Net.Http;
@@ -19,22 +18,15 @@ public class LoggingHandlerTests
     [Fact]
     public async Task Logs_Request_And_Response_Messages_Empty_Response()
     {
-        string? request = null;
-        string? response = null;
-        var calls = 0;
-        var loggerObj = SetUpLoggerWithCallBack<LoggingHandler>((s) =>
-        {
-            if (calls == 0) request = s;
-            else if (calls == 1) response = s;
-            calls++;
-        });
+        var loggerObj = new TestLogger<LoggingHandler>();
         var handler = new LoggingHandler(loggerObj);
         var mockHandler = new Mock<HttpMessageHandler>();
-        var responseMsg = new HttpResponseMessage()
+        var responseMsg = new HttpResponseMessage
         {
-            Content = new StringContent("")
+            Content = new StringContent(""),
+            StatusCode = HttpStatusCode.NoContent
         };
-        responseMsg.StatusCode = HttpStatusCode.NoContent;
+        responseMsg.Content.Headers.ContentLength = 0;
         mockHandler.Protected()
                 .Setup<Task<HttpResponseMessage>>("SendAsync", ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>())
                 .ReturnsAsync(responseMsg);
@@ -44,24 +36,15 @@ public class LoggingHandlerTests
 
         var responseMessage = await client.SendAsync(message);
 
-        Assert.NotNull(request);
-        Assert.NotNull(response);
-        Assert.Equal("\nRequest:\n\nGET http://example.com/ HTTP/1.1\n\n\n", request);
-        Assert.Equal("\nResponse:\n\nHTTP/1.1 204 No Content\nContent-Type: text/plain; charset=utf-8\nContent-Length: 0\n\n\n", response);
+        Assert.Equal(2, loggerObj.Messages.Count);
+        Assert.Equal("\nRequest:\n\nGET http://example.com/ HTTP/1.1\n\n\n", loggerObj.Messages[0]);
+        Assert.Equal("\nResponse:\n\nHTTP/1.1 204 No Content\nContent-Type: text/plain; charset=utf-8\nContent-Length: 0\n\n\n", loggerObj.Messages[1]);
     }
 
     [Fact]
     public async Task Logs_Request_And_Response_Messages_With_Content()
     {
-        string? request = null;
-        string? response = null;
-        var calls = 0;
-        var loggerObj = SetUpLoggerWithCallBack<LoggingHandler>((s) =>
-        {
-            if (calls == 0) request = s;
-            else if (calls == 1) response = s;
-            calls++;
-        });
+        var loggerObj = new TestLogger<LoggingHandler>();
         var handler = new LoggingHandler(loggerObj);
         var mockHandler = new Mock<HttpMessageHandler>();
         const string resp = "Response from server";
@@ -79,24 +62,15 @@ public class LoggingHandlerTests
 
         var responseMessage = await client.SendAsync(message);
 
-        Assert.NotNull(request);
-        Assert.NotNull(response);
-        Assert.Equal("\nRequest:\n\nGET http://example.com/ HTTP/1.1\n\n\n", request);
-        Assert.Equal("\nResponse:\n\nHTTP/1.1 200 OK\nContent-Type: text/plain; charset=utf-8\nContent-Length: 20\n\nResponse from server\n", response);
+        Assert.Equal(2, loggerObj.Messages.Count);
+        Assert.Equal("\nRequest:\n\nGET http://example.com/ HTTP/1.1\n\n\n", loggerObj.Messages[0]);
+        Assert.Equal("\nResponse:\n\nHTTP/1.1 200 OK\nContent-Type: text/plain; charset=utf-8\nContent-Length: 20\n\nResponse from server\n", loggerObj.Messages[1]);
     }
 
     [Fact]
     public async Task Logs_Response_For_Stream_Messages_Without_Content_Length()
     {
-        string? request = null;
-        string? response = null;
-        var calls = 0;
-        var loggerObj = SetUpLoggerWithCallBack<LoggingHandler>((s) =>
-        {
-            if (calls == 0) request = s;
-            else if (calls == 1) response = s;
-            calls++;
-        });
+        var loggerObj = new TestLogger<LoggingHandler>();
         var handler = new LoggingHandler(loggerObj);
         var mockHandler = new Mock<HttpMessageHandler>();
         var responseMsg = new HttpResponseMessage()
@@ -114,32 +88,24 @@ public class LoggingHandlerTests
 
         var responseMessage = await client.SendAsync(message);
 
-        Assert.NotNull(request);
-        Assert.NotNull(response);
-        Assert.Contains("Content-Length: 0", response);
-        Assert.Contains("[...<data stream>...]", response);
+        Assert.Equal(2, loggerObj.Messages.Count);
+        Assert.Contains("Content-Length: 0", loggerObj.Messages[1]);
+        Assert.Contains("[...<data stream>...]", loggerObj.Messages[1]);
     }
 
     [Fact]
     public async Task Logs_Response_Length_For_Stream_Messages_With_Content_Length()
     {
-        string? request = null;
-        string? response = null;
-        var calls = 0;
-        var loggerObj = SetUpLoggerWithCallBack<LoggingHandler>((s) =>
-        {
-            if (calls == 0) request = s;
-            else if (calls == 1) response = s;
-            calls++;
-        });
+        var loggerObj = new TestLogger<LoggingHandler>();
         var handler = new LoggingHandler(loggerObj);
         var mockHandler = new Mock<HttpMessageHandler>();
         using var ms = new MemoryStream(Encoding.UTF8.GetBytes("Test message"));
         var responseMsg = new HttpResponseMessage()
         {
-            Content = new StreamContent(ms)
+            Content = new StreamContent(ms),
         };
         responseMsg.Content.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
+        responseMsg.Content.Headers.ContentLength = ms.Length;
 
         mockHandler.Protected()
                 .Setup<Task<HttpResponseMessage>>("SendAsync", ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>())
@@ -150,24 +116,15 @@ public class LoggingHandlerTests
 
         var responseMessage = await client.SendAsync(message);
 
-        Assert.NotNull(request);
-        Assert.NotNull(response);
-        Assert.Contains("Content-Length: 12", response);
-        Assert.Contains("[...<12 byte data stream>...]", response);
+        Assert.Equal(2, loggerObj.Messages.Count);
+        Assert.Contains("Content-Length: 12", loggerObj.Messages[1]);
+        Assert.Contains("[...<12 byte data stream>...]", loggerObj.Messages[1]);
     }
 
     [Fact]
     public async Task Hides_Sensitive_Content_In_Logs()
     {
-        string? request = null;
-        string? response = null;
-        var calls = 0;
-        var loggerObj = SetUpLoggerWithCallBack<LoggingHandler>((s) =>
-        {
-            if (calls == 0) request = s;
-            else if (calls == 1) response = s;
-            calls++;
-        });
+        var loggerObj = new TestLogger<LoggingHandler>();
         var handler = new LoggingHandler(loggerObj);
         var mockHandler = new Mock<HttpMessageHandler>();
         const string resp = "Response from server";
@@ -186,25 +143,16 @@ public class LoggingHandlerTests
 
         var responseMessage = await client.SendAsync(message);
 
-        Assert.NotNull(request);
-        Assert.NotNull(response);
-        Assert.Contains("Authorization: [PROTECTED]", request);
-        Assert.DoesNotContain("Secret Content", request);
+        Assert.Equal(2, loggerObj.Messages.Count);
+        Assert.Contains("Authorization: [PROTECTED]", loggerObj.Messages[0]);
+        Assert.DoesNotContain("Secret Content", loggerObj.Messages[0]);
     }
 
     [Fact]
     public async Task Skips_Logging_If_Log_Level_Is_Disabled()
     {
-        string? request = null;
-        string? response = null;
-        var calls = 0;
-        var loggerObj = SetUpLoggerWithCallBack<LoggingHandler>((s) =>
-        {
-            if (calls == 0) request = s;
-            else if (calls == 1) response = s;
-            calls++;
-        }, LogLevel.None);
-
+        var loggerObj = new TestLogger<LoggingHandler>();
+        loggerObj.SetLevel(LogLevel.None);
         var handler = new LoggingHandler(loggerObj);
         var mockHandler = new Mock<HttpMessageHandler>();
         mockHandler.Protected()
@@ -216,35 +164,6 @@ public class LoggingHandlerTests
 
         var responseMessage = await client.SendAsync(message);
 
-        Assert.Null(request);
-        Assert.Null(response);
-        Assert.Equal(0, calls);
-    }
-
-    private ILogger<T> SetUpLoggerWithCallBack<T>(Action<string> callback, LogLevel logLevel = LogLevel.Trace)
-    {
-        var logger = new Mock<ILogger<T>>();
-        logger.Setup(l => l.IsEnabled(It.IsAny<LogLevel>())).Returns<LogLevel>(ll => ll >= logLevel);
-
-        logger.Setup(l => l.Log(
-                    It.IsAny<LogLevel>(),
-                    It.IsAny<EventId>(),
-                    It.IsAny<It.IsAnyType>(),
-                    It.IsAny<Exception>(),
-                    (Func<It.IsAnyType, Exception?, string>)It.IsAny<object>()
-                ))
-                .Callback((IInvocation invocation) =>
-                {
-                    var logLevel = (LogLevel)invocation.Arguments[0];
-                    var eventId = (EventId)invocation.Arguments[1];
-                    var state = invocation.Arguments[2];
-                    var exception = (Exception)invocation.Arguments[3];
-                    var formatter = invocation.Arguments[4];
-
-                    var invokeMethod = formatter.GetType().GetMethod("Invoke");
-                    var s = ((string?)invokeMethod?.Invoke(formatter, new[] { state, exception })) ?? string.Empty;
-                    callback(s);
-                });
-        return logger.Object;
+        Assert.Empty(loggerObj.Messages);
     }
 }

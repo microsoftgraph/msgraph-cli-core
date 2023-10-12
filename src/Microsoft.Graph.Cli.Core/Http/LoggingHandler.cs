@@ -14,13 +14,13 @@ namespace Microsoft.Graph.Cli.Core.Http;
 /// </summary>
 public partial class LoggingHandler : DelegatingHandler
 {
-    private readonly ILogger<LoggingHandler> log;
+    private readonly ILogger<LoggingHandler>? log;
 
     /// <summary>
-    /// Creates a new LoggingHandler.
+    /// Creates a new LoggingHandler. If no logging handler is provided, no message will be printed.
     /// </summary>
     /// <param name="logger">The logger to use.</param>
-    public LoggingHandler(ILogger<LoggingHandler> logger)
+    public LoggingHandler(ILogger<LoggingHandler>? logger)
     {
         log = logger;
     }
@@ -29,7 +29,7 @@ public partial class LoggingHandler : DelegatingHandler
     protected override async Task<HttpResponseMessage> SendAsync(
         HttpRequestMessage request, System.Threading.CancellationToken cancellationToken)
     {
-        if (!log.IsEnabled(LogLevel.Debug)) return await base.SendAsync(request, cancellationToken);
+        if (log is null || !log.IsEnabled(LogLevel.Debug)) return await base.SendAsync(request, cancellationToken);
 
         var requestContent = await ContentToStringAsync(request.Content, cancellationToken);
 
@@ -51,7 +51,7 @@ public partial class LoggingHandler : DelegatingHandler
         base.Dispose(disposing);
     }
 
-    private static string HeadersToString(in HttpHeaders headers, in HttpHeaders? contentHeaders)
+    private static string HeadersToString(in HttpHeaders headers, in HttpContentHeaders? contentHeaders)
     {
         if (!headers.Any() && contentHeaders?.Any() == false) return string.Empty;
         static string selector(KeyValuePair<string, IEnumerable<string>> h)
@@ -62,9 +62,12 @@ public partial class LoggingHandler : DelegatingHandler
                 value = "[PROTECTED]";
             }
             return string.Format("{0}: {1}\n", h.Key, value);
-        }
+        };
 
-        Func<string, string, string> aggregator = (a, b) => string.Join(string.Empty, a, b);
+        static string aggregator(string a, string b)
+        {
+            return string.Join(string.Empty, a, b);
+        }
 
         var h = headers.Select(selector).Aggregate("", aggregator);
         if (contentHeaders != null)
@@ -97,7 +100,9 @@ public partial class LoggingHandler : DelegatingHandler
             if (content.Headers.ContentLength > 0)
             {
                 return $"[...<{content.Headers.ContentLength} byte data stream>...]";
-            } else {
+            }
+            else
+            {
                 return "[...<data stream>...]";
             }
         }
