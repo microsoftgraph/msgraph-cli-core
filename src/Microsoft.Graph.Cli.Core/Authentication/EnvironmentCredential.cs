@@ -42,6 +42,12 @@ namespace Microsoft.Graph.Cli.Core.Authentication
 
         internal TokenCredential? Credential { get; }
 
+        /// <summary>
+        /// Creates a new environment credential.
+        /// </summary>
+        /// <param name="tenantId">Tenant Id</param>
+        /// <param name="clientId">Client Id</param>
+        /// <param name="options">Credential options</param>
         public EnvironmentCredential(string? tenantId, string? clientId, TokenCredentialOptions? options = null)
         {
             _options = options ?? new TokenCredentialOptions();

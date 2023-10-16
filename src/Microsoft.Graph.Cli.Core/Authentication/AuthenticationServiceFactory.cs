@@ -20,13 +20,30 @@ public class AuthenticationServiceFactory
 
     private readonly AuthenticationOptions? authenticationOptions;
 
-    public AuthenticationServiceFactory(IPathUtility pathUtility, IAuthenticationCacheManager authenticationCacheManager, AuthenticationOptions? authOptions)
+    /// <summary>
+    /// Creates a new authentication service factory instance
+    /// </summary>
+    /// <param name="pathUtility">Path utility</param>
+    /// <param name="authenticationCacheManager">Cache manager.</param>
+    /// <param name="authenticationOptions">Authentication options.</param>
+    public AuthenticationServiceFactory(IPathUtility pathUtility, IAuthenticationCacheManager authenticationCacheManager, AuthenticationOptions? authenticationOptions)
     {
         this.pathUtility = pathUtility;
-        this.authenticationOptions = authOptions;
+        this.authenticationOptions = authenticationOptions;
         this.authenticationCacheManager = authenticationCacheManager;
     }
 
+    /// <summary>
+    /// Returns a login service that satisfies the provided authentication strategy.
+    /// </summary>
+    /// <param name="strategy">Authentication strategy.</param>
+    /// <param name="tenantId">Tenant Id</param>
+    /// <param name="clientId">Client Id</param>
+    /// <param name="certificateName">Certificate name</param>
+    /// <param name="certificateThumbPrint">Certificate thumb-print</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>Returns a login service instance.</returns>
+    /// <exception cref="InvalidOperationException">When an unsupported authentication strategy is provided.</exception>
     public virtual async Task<LoginServiceBase> GetAuthenticationServiceAsync(AuthenticationStrategy strategy, string? tenantId, string? clientId, string? certificateName, string? certificateThumbPrint, CancellationToken cancellationToken = default)
     {
         var credential = await GetTokenCredentialAsync(strategy, tenantId, clientId, certificateName, certificateThumbPrint, cancellationToken);
@@ -56,6 +73,17 @@ public class AuthenticationServiceFactory
         }
     }
 
+    /// <summary>
+    /// Returns a credential object instance that satisfies the provided authentication strategy
+    /// </summary>
+    /// <param name="strategy">Authentication strategy.</param>
+    /// <param name="tenantId">Tenant Id</param>
+    /// <param name="clientId">Client Id</param>
+    /// <param name="certificateName">Certificate name</param>
+    /// <param name="certificateThumbPrint">Certificate thumb-print</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>A token credential instance.</returns>
+    /// <exception cref="InvalidOperationException">When an unsupported authentication strategy is provided.</exception>
     public virtual async Task<TokenCredential> GetTokenCredentialAsync(AuthenticationStrategy strategy, string? tenantId, string? clientId, string? certificateName, string? certificateThumbPrint, CancellationToken cancellationToken = default)
     {
         switch (strategy)

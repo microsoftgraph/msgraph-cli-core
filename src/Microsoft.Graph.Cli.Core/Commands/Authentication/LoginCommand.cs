@@ -8,6 +8,9 @@ using System.Text;
 
 namespace Microsoft.Graph.Cli.Core.Commands.Authentication;
 
+/// <summary>
+/// Login command
+/// </summary>
 public sealed class LoginCommand : Command
 {
     private Option<string[]> scopesOption = new("--scopes", "The login scopes e.g. User.Read. Required scopes can be found in the docs linked against each verb (get, list, create...) command.")
@@ -53,6 +56,10 @@ public sealed class LoginCommand : Command
         });
     }
 
+    /// <summary>
+    /// Creates a new login command instance.
+    /// </summary>
+    /// <param name="builder">Command line builder to use for customizing help.</param>
     public LoginCommand(CommandLineBuilder builder) : this()
     {
         builder?.UseHelp((ctx) =>

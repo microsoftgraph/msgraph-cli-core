@@ -74,6 +74,8 @@ namespace Microsoft.Graph.Cli
                 {
                     _ when ex is AuthenticationRequiredException => "Token acquisition failed. Run mgc login command first to get an access token.",
                     _ when ex is TaskCanceledException => string.Empty,
+                    AuthenticationFailedException e => $"Authentication failed: {e.Message}",
+                    Identity.Client.MsalException e => $"Authentication failed: {e.Message}",
                     _ => ex.Message
                 };
 

@@ -13,20 +13,31 @@ using Microsoft.Identity.Client.Extensions.Msal;
 
 namespace Microsoft.Graph.Cli.Core.IO;
 
+/// <summary>
+/// Authentication cache manager.
+/// </summary>
 public class AuthenticationCacheManager : IAuthenticationCacheManager
 {
     private readonly IPathUtility pathUtility;
 
+    /// <summary>
+    /// Creates a new instance of the authentication cache manager.
+    /// </summary>
+    /// <param name="pathUtility">The path utility.</param>
     public AuthenticationCacheManager(IPathUtility pathUtility)
     {
         this.pathUtility = pathUtility;
     }
 
+    /// <inheritdoc/>
     public string GetAuthenticationCacheFilePath()
     {
         return Path.Join(pathUtility.GetApplicationDataDirectory(), Constants.AuthenticationIdCachePath);
     }
 
+    /// <inheritdoc/>
+    /// <exception cref="FileNotFoundException">If the authentication cache file does not exist.</exception>
+    /// <exception cref="AuthenticationIdentifierException">If the data in the authentication cache file does not have any authentication options.</exception>
     public async Task<AuthenticationOptions> ReadAuthenticationIdentifiersAsync(CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
@@ -42,6 +53,7 @@ public class AuthenticationCacheManager : IAuthenticationCacheManager
         return configRoot.AuthenticationOptions;
     }
 
+    /// <inheritdoc/>
     public async Task SaveAuthenticationIdentifiersAsync(string? clientId, string? tenantId, string? certificateName, string? certificateThumbPrint, AuthenticationStrategy strategy, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
@@ -73,6 +85,7 @@ public class AuthenticationCacheManager : IAuthenticationCacheManager
         }
     }
 
+    /// <inheritdoc/>
     public async Task<AuthenticationRecord?> ReadAuthenticationRecordAsync(CancellationToken cancellationToken = default)
     {
         var recordPath = Path.Combine(pathUtility.GetApplicationDataDirectory(), Constants.AuthRecordPath);
@@ -87,6 +100,11 @@ public class AuthenticationCacheManager : IAuthenticationCacheManager
 
         return record;
     }
+
+    /// <inheritdoc/>
+    /// <remarks>
+    /// Exists to work around Azure Identity's lack of logout support.
+    /// </remarks>
     public async Task ClearTokenCache(CancellationToken cancellationToken = default)
     {
         // https://learn.microsoft.com/en-us/azure/active-directory/develop/msal-net-clear-token-cache
@@ -197,16 +215,24 @@ public class AuthenticationCacheManager : IAuthenticationCacheManager
         return await MsalCacheHelper.CreateAsync(storageProperties);
     }
 
+    /// <summary>
+    /// An exception that signifies an error with reading authentication options.
+    /// </summary>
     public class AuthenticationIdentifierException : Exception
     {
+        /// <summary>
+        /// Creates a new instance of this exception
+        /// </summary>
         public AuthenticationIdentifierException()
         {
         }
 
+        /// <inheritdoc/>
         public AuthenticationIdentifierException(string? message) : base(message)
         {
         }
 
+        /// <inheritdoc/>
         public AuthenticationIdentifierException(string? message, Exception? innerException) : base(message, innerException)
         {
         }

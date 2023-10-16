@@ -14,11 +14,21 @@ public abstract class LoginServiceBase
 {
     private readonly IPathUtility pathUtility;
 
+    /// <summary>
+    /// Creates a new instance of the login service base abstract class.
+    /// </summary>
+    /// <param name="pathUtility">The path utility</param>
     protected LoginServiceBase(IPathUtility pathUtility)
     {
         this.pathUtility = pathUtility;
     }
 
+    /// <summary>
+    /// Perform login.
+    /// </summary>
+    /// <param name="scopes">Login scopes.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>A void task.</returns>
     public async Task LoginAsync(string[] scopes, CancellationToken cancellationToken = default)
     {
         var record = await this.DoLoginAsync(scopes, cancellationToken);
