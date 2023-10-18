@@ -7,6 +7,9 @@ using Azure.Identity;
 
 namespace Microsoft.Graph.Cli.Core.Authentication;
 
+/// <summary>
+/// Client certificate credential factory.
+/// </summary>
 public static class ClientCertificateCredentialFactory
 {
     /// <summary>
@@ -57,8 +60,9 @@ public static class ClientCertificateCredentialFactory
     /// </summary>
     /// <param name="certificateNameOrThumbPrint">Subject name or thumb print of the certificate to get.</param>
     /// <param name="isThumbPrint">If true, try to find the certificate by the thumb print.</param>
-    /// <returns>A matching unexpired certificate.</returns>
-    internal static bool TryGetCertificateFromStore(string certNameOrThumbPrint, bool isThumbPrint, out X509Certificate2? certificate)
+    /// <param name="certificate">A matching unexpired certificate from the store.</param>
+    /// <returns>Returns true if the certificate was fetched successfully.</returns>
+    internal static bool TryGetCertificateFromStore(string certificateNameOrThumbPrint, bool isThumbPrint, out X509Certificate2? certificate)
     {
         bool result = false;
         certificate = null;
@@ -71,7 +75,7 @@ public static class ClientCertificateCredentialFactory
             // If using a certificate with a trusted root you do not need to FindByTimeValid, instead:
             // currentCerts.Find(X509FindType.FindBySubjectDistinguishedName, certName, true);
             X509Certificate2Collection signingCerts = store.Certificates.Find(X509FindType.FindByTimeValid, DateTime.Now, false)
-                .Find(isThumbPrint ? X509FindType.FindByThumbprint : X509FindType.FindBySubjectDistinguishedName, certNameOrThumbPrint, false);
+                .Find(isThumbPrint ? X509FindType.FindByThumbprint : X509FindType.FindBySubjectDistinguishedName, certificateNameOrThumbPrint, false);
             if (signingCerts.Count == 0)
             {
                 result = false;
@@ -118,7 +122,7 @@ public static class ClientCertificateCredentialFactory
     /// <param name="path">The path to a certificate file.</param>
     /// <param name="password">The optional password for the certificate file.</param>
     /// <param name="certificate">The certificate. Will be null if the certificate failed to open or if the certificate has no pricate key. A certificate with no private key cannot be used to authenticate.</param>
-    /// <returns>returns true if the certificate was fetched successfully.</returns>
+    /// <returns>Returns true if the certificate was fetched successfully.</returns>
     internal static bool TryGetCertificateFromFile(string path, string? password, out X509Certificate2? certificate)
     {
         bool result = false;

@@ -23,13 +23,22 @@ public enum AuthenticationStrategy
     /// </summary>
     ManagedIdentity,
     /// <summary>
-    /// Environment strategy. Enables authentication using environment variables. Supports certificate file & client secret login
+    /// Environment strategy. Enables authentication using environment variables. Supports certificate file &amp; client secret login
     /// </summary>
     Environment
 }
 
+/// <summary>
+/// Authentication strategy extensions.
+/// </summary>
 public static class AuthenticationStrategyExtensions
 {
+    /// <summary>
+    /// Returns a boolean indicating if the authentication strategy uses a private client.
+    /// </summary>
+    /// <param name="strategy">The authentication strategy</param>
+    /// <returns></returns>
+    /// <exception cref="System.ArgumentOutOfRangeException">When an unsupported authentication strategy is used.</exception>
     public static bool IsPrivateClient(this AuthenticationStrategy strategy)
     {
         return strategy switch
