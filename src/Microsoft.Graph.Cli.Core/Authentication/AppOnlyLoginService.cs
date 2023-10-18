@@ -12,16 +12,12 @@ namespace Microsoft.Graph.Cli.Core.Authentication;
 /// <typeparam name="T">An app-only token credential type</typeparam>
 public class AppOnlyLoginService<T> : LoginServiceBase where T : TokenCredential
 {
-    private T credential;
-
     /// <summary>
     /// Creates a new instance of an app-only login service.
     /// </summary>
-    /// <param name="credential">The app-only login credential.</param>
     /// <param name="pathUtility">The path utility instance.</param>
-    public AppOnlyLoginService(T credential, IPathUtility pathUtility) : base(pathUtility)
+    public AppOnlyLoginService(IPathUtility pathUtility) : base(pathUtility)
     {
-        this.credential = credential;
     }
 
     /// <summary>

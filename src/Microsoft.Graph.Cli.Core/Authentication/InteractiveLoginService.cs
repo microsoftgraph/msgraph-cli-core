@@ -41,16 +41,18 @@ public class InteractiveLoginService<T> : LoginServiceBase where T : TokenCreden
     /// <exception cref="InvalidOperationException">When the credential is not supported.</exception>
     protected override async Task<AuthenticationRecord?> DoLoginAsync(string[] scopes, CancellationToken cancellationToken = default)
     {
-        if (credential is DeviceCodeCredential deviceCodeCred)
+        var requestContext = new TokenRequestContext(scopes);
+        var record = credential switch
         {
-            return await deviceCodeCred.AuthenticateAsync(new TokenRequestContext(scopes), cancellationToken);
-        }
-        else if (credential is InteractiveBrowserCredential browserCred)
-        {
-            return await browserCred.AuthenticateAsync(new TokenRequestContext(scopes), cancellationToken);
-        }
+            DeviceCodeCredential deviceCodeCred => await deviceCodeCred.AuthenticateAsync(requestContext, cancellationToken),
+            InteractiveBrowserCredential browserCred => await browserCred.AuthenticateAsync(requestContext, cancellationToken),
+            // Due to the check in the constructor, this code shouldn't be reachable normally.
+            _ => throw new InvalidOperationException("The provided credential is not supported."),
+        };
 
-        // Due to the check in the constructor, this code shouldn't be reachable normally.
-        throw new InvalidOperationException("The provided credential is not supported.");
+        // Request a new token to update the cache allowing incremental consent.
+        var _ = await credential.GetTokenAsync(requestContext, cancellationToken);
+
+        return record;
     }
 }

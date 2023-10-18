@@ -55,17 +55,17 @@ public class AuthenticationServiceFactory
         {
             return new InteractiveLoginService<InteractiveBrowserCredential>(browserCred, pathUtility);
         }
-        else if (strategy == AuthenticationStrategy.ClientCertificate && credential is ClientCertificateCredential certCred)
+        else if (strategy == AuthenticationStrategy.ClientCertificate && credential is ClientCertificateCredential)
         {
-            return new AppOnlyLoginService<ClientCertificateCredential>(GetClientCertificateCredential(tenantId, clientId, certificateName, certificateThumbPrint), pathUtility);
+            return new AppOnlyLoginService<ClientCertificateCredential>(pathUtility);
         }
-        else if (strategy == AuthenticationStrategy.ManagedIdentity && credential is ManagedIdentityCredential managedIdentityCred)
+        else if (strategy == AuthenticationStrategy.ManagedIdentity && credential is ManagedIdentityCredential)
         {
-            return new AppOnlyLoginService<ManagedIdentityCredential>(managedIdentityCred, pathUtility);
+            return new AppOnlyLoginService<ManagedIdentityCredential>(pathUtility);
         }
-        else if (strategy == AuthenticationStrategy.Environment && credential is EnvironmentCredential envCred)
+        else if (strategy == AuthenticationStrategy.Environment && credential is EnvironmentCredential)
         {
-            return new AppOnlyLoginService<EnvironmentCredential>(envCred, pathUtility);
+            return new AppOnlyLoginService<EnvironmentCredential>(pathUtility);
         }
         else
         {
