@@ -90,10 +90,11 @@ stages:
               AnalyzeHashes: true
               AnalyzeEnvironment: true
 
-          - task: PublishSecurityAnalysisLogs@2
+          - task: PublishSecurityAnalysisLogs@3
             displayName: "Publish Security Analysis Logs"
             inputs:
               ArtifactName: CodeAnalysisLogs
+              AllTools: true
 
           - task: PostAnalysis@2
             displayName: "Post Analysis"
