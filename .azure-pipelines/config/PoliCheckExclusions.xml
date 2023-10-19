@@ -8,5 +8,5 @@
     <!--<Exclusion Type="FileType">.ABC|.XYZ</Exclusion>-->
     <!--The specified file names will be skipped during the scan regardless which folder they are in -->
     <!--<Exclusion Type="FileName">ABC.TXT|XYZ.CS</Exclusion>-->
-    <Exclusion Type="FolderPathFull">SRC\GENERATED</Exclusion>
+    <Exclusion Type="FolderPathFull">SRC\SAMPLE\GENERATED</Exclusion>
   </PoliCheckExclusions>
