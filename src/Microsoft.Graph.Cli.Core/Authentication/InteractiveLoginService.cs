@@ -44,14 +44,14 @@ public class InteractiveLoginService<T> : LoginServiceBase where T : TokenCreden
         var requestContext = new TokenRequestContext(scopes);
         var record = credential switch
         {
-            DeviceCodeCredential deviceCodeCred => await deviceCodeCred.AuthenticateAsync(requestContext, cancellationToken),
-            InteractiveBrowserCredential browserCred => await browserCred.AuthenticateAsync(requestContext, cancellationToken),
+            DeviceCodeCredential deviceCodeCred => await deviceCodeCred.AuthenticateAsync(requestContext, cancellationToken).ConfigureAwait(false),
+            InteractiveBrowserCredential browserCred => await browserCred.AuthenticateAsync(requestContext, cancellationToken).ConfigureAwait(false),
             // Due to the check in the constructor, this code shouldn't be reachable normally.
             _ => throw new InvalidOperationException("The provided credential is not supported."),
         };
 
         // Request a new token to update the cache allowing incremental consent.
-        var _ = await credential.GetTokenAsync(requestContext, cancellationToken);
+        var _ = await credential.GetTokenAsync(requestContext, cancellationToken).ConfigureAwait(false);
 
         return record;
     }
