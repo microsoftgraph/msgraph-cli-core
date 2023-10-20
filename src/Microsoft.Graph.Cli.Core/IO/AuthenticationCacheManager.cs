@@ -174,7 +174,7 @@ public class AuthenticationCacheManager : IAuthenticationCacheManager
 
         try
         {
-            return await JsonSerializer.DeserializeAsync<Configuration.ConfigurationRoot>(fileStream, cancellationToken: cancellationToken);
+            return await JsonSerializer.DeserializeAsync(fileStream, SourceGenerationContext.Default.ConfigurationRoot, cancellationToken: cancellationToken).ConfigureAwait(false);
         }
         catch (Exception)
         {
@@ -188,7 +188,7 @@ public class AuthenticationCacheManager : IAuthenticationCacheManager
         try
         {
             using FileStream fileStream = File.Open(path, FileMode.Create, FileAccess.Write);
-            await JsonSerializer.SerializeAsync(fileStream, configuration, cancellationToken: cancellationToken);
+            await JsonSerializer.SerializeAsync(fileStream, configuration, SourceGenerationContext.Default.ConfigurationRoot, cancellationToken: cancellationToken).ConfigureAwait(false);
         }
         catch (DirectoryNotFoundException)
         {

@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace Microsoft.Graph.Cli.Core.Configuration;
 
 /// <summary>
@@ -9,4 +11,9 @@ public class ConfigurationRoot
     /// Authentication options
     /// </summary>
     public AuthenticationOptions AuthenticationOptions { get; set; } = new AuthenticationOptions();
+}
+
+[JsonSerializable(typeof(ConfigurationRoot))]
+internal partial class SourceGenerationContext : JsonSerializerContext
+{
 }
