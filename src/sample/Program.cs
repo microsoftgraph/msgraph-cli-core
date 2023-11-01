@@ -6,6 +6,7 @@ using System.CommandLine.IO;
 using System.CommandLine.Parsing;
 using System.Diagnostics.Tracing;
 using System.IO;
+using System.Linq;
 using System.Net.Http;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -43,16 +44,21 @@ namespace Microsoft.Graph.Cli
         static async Task<int> Main(string[] args)
         {
             // Replace `me ...` with `users ... --user-id me`
-            if (args[0] == "me") {
-                var newArgs = new string[args.Length + 2];
+            if (args[0] == "me")
+            {
+                var hasHelp = args.Any(static x => x.Contains("-h") || x.Contains("/?"));
+                var newArgs = hasHelp ? args : new string[args.Length + 2];
                 newArgs[0] = "users";
                 for (int i = 1; i < args.Length; i++)
                 {
                     newArgs[i] = args[i];
                 }
-                newArgs[args.Length] = "--user-id";
-                newArgs[args.Length + 1] = "me";
-                args = newArgs;
+                if (newArgs.Length > args.Length)
+                {
+                    newArgs[args.Length] = "--user-id";
+                    newArgs[args.Length + 1] = "me";
+                    args = newArgs;
+                }
             }
 
             var builder = BuildCommandLine()
