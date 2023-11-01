@@ -49,7 +49,7 @@ namespace Microsoft.Graph.Cli
                 var hasHelp = args.Any(static x => x.Contains("-h") || x.Contains("/?"));
                 var newArgs = hasHelp ? args : new string[args.Length + 2];
                 newArgs[0] = "users";
-                for (int i = 1; i < args.Length; i++)
+                for (var i = 1; i < args.Length; i++)
                 {
                     newArgs[i] = args[i];
                 }

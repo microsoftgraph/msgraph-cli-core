@@ -39,10 +39,10 @@ public class GraphCliClientFactory
         m.AddRange(middlewares);
 
         // Add replacement handler for /users/me to /me
-        m.Add(new UriReplacementHandler(new MeUriReplacement()));
+        m.Add(new UriReplacementHandler<MeUriReplacement>(new MeUriReplacement()));
 
         // Add logging handler.
-        if (loggingHandler is LoggingHandler lh)
+        if (loggingHandler is { } lh)
         {
             m.Add(lh);
         }
@@ -50,20 +50,19 @@ public class GraphCliClientFactory
         // Set compression handler to be last (Allows logging handler to log request body)
         m.Sort((a, b) =>
         {
-            var a_match = a is Kiota.Http.HttpClientLibrary.Middleware.CompressionHandler;
-            var b_match = b is Kiota.Http.HttpClientLibrary.Middleware.CompressionHandler;
-            if (a_match && !b_match)
+            var aMatch = a is Kiota.Http.HttpClientLibrary.Middleware.CompressionHandler;
+            var bMatch = b is Kiota.Http.HttpClientLibrary.Middleware.CompressionHandler;
+            if (aMatch && !bMatch)
             {
                 return 1;
             }
-            else if (b_match && !a_match)
+
+            if (bMatch && !aMatch)
             {
                 return -1;
             }
-            else
-            {
-                return 0;
-            }
+
+            return 0;
         });
 
         return GraphClientFactory.Create(version: version, nationalCloud: nationalCloud, finalHandler: finalHandler, handlers: m);

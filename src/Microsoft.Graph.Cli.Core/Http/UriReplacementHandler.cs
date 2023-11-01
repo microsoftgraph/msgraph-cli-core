@@ -41,12 +41,22 @@ public struct MeUriReplacement : IUriReplacement
             return original;
         }
 
-        var separator = new ReadOnlySpan<char>('/');
-        var matchUsers = new ReadOnlySpan<char>(new char[] { 'u', 's', 'e', 'r', 's' });
-        var matchMe = new ReadOnlySpan<char>(new char[] { 'm', 'e' });
+        Span<char> toMatch = stackalloc char[9];
+        toMatch[0] = '/';
+        toMatch[1] = 'u';
+        toMatch[2] = 's';
+        toMatch[3] = 'e';
+        toMatch[4] = 'r';
+        toMatch[5] = 's';
+        toMatch[6] = '/';
+        toMatch[7] = 'm';
+        toMatch[8] = 'e';
+        var separator = toMatch[..1];
+        var matchUsers = toMatch[1..6];
+        var matchMe = toMatch[7..];
 
         var maybeUsersSegment = original.Segments[2].AsSpan();
-        if (!maybeUsersSegment[..(maybeUsersSegment.Length - 1)].SequenceEqual(matchUsers))
+        if (!maybeUsersSegment[..^1].SequenceEqual(matchUsers))
         {
             return original;
         }
@@ -59,8 +69,8 @@ public struct MeUriReplacement : IUriReplacement
 
         var newUrl = new UriBuilder(original);
         var versionSegment = original.Segments[1].AsSpan();
-        const int USERS_ME_LENGTH = 9;
-        var length = versionSegment.Length + USERS_ME_LENGTH;
+        const int usersMeLength = 9;
+        var length = versionSegment.Length + usersMeLength;
         if (newUrl.Path.Length == length)
         {
             // Matched /[version]/users/me
@@ -84,14 +94,14 @@ public struct MeUriReplacement : IUriReplacement
 /// <summary>
 /// Replaces a portion of the URL.
 /// </summary>
-public partial class UriReplacementHandler : DelegatingHandler
+public class UriReplacementHandler<TUriReplacement> : DelegatingHandler where TUriReplacement: IUriReplacement
 {
-    private readonly IUriReplacement urlReplacement;
+    private readonly TUriReplacement urlReplacement;
 
     /// <summary>
     /// Creates a new UriReplacementHandler.
     /// </summary>
-    public UriReplacementHandler(IUriReplacement urlReplacement)
+    public UriReplacementHandler(TUriReplacement urlReplacement)
     {
         this.urlReplacement = urlReplacement;
     }
