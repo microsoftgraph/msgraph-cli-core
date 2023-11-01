@@ -14,24 +14,17 @@ public class MeUriReplacementTests
         Assert.Null(replacement.Replace(null));
     }
 
-    [Fact]
-    public void Returns_Original_Uri_When_No_Match_Is_Found()
+    [Theory]
+    [InlineData("http://example.com/test")]
+    [InlineData("http://example.com/users/messages")]
+    [InlineData("http://example.com/v1.0/users/messages")]
+    [InlineData("http://example.com/users/test/me")]
+    [InlineData("http://example.com/a/b/users/test/me")]
+    public void Returns_Original_Uri_When_No_Match_Is_Found(string inputUri)
     {
-        var uri = new Uri("http://example.com/test");
+        var uri = new Uri(inputUri);
         var replacement = new MeUriReplacement();
 
-        Assert.Equal(uri, replacement.Replace(uri));
-
-        uri = new Uri("http://example.com/users/messages");
-        Assert.Equal(uri, replacement.Replace(uri));
-
-        uri = new Uri("http://example.com/v1.0/users/messages");
-        Assert.Equal(uri, replacement.Replace(uri));
-
-        uri = new Uri("http://example.com/users/test/me");
-        Assert.Equal(uri, replacement.Replace(uri));
-
-        uri = new Uri("http://example.com/a/b/users/test/me");
         Assert.Equal(uri, replacement.Replace(uri));
     }
 
