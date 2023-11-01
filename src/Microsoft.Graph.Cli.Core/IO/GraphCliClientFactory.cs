@@ -38,6 +38,9 @@ public class GraphCliClientFactory
 
         m.AddRange(middlewares);
 
+        // Add replacement handler for /users/me to /me
+        m.Add(new UriReplacementHandler(new MeUriReplacement()));
+
         // Add logging handler.
         if (loggingHandler is LoggingHandler lh)
         {

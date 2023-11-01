@@ -42,6 +42,19 @@ namespace Microsoft.Graph.Cli
 
         static async Task<int> Main(string[] args)
         {
+            // Replace `me ...` with `users ... --user-id me`
+            if (args[0] == "me") {
+                var newArgs = new string[args.Length + 2];
+                newArgs[0] = "users";
+                for (int i = 1; i < args.Length; i++)
+                {
+                    newArgs[i] = args[i];
+                }
+                newArgs[args.Length] = "--user-id";
+                newArgs[args.Length + 1] = "me";
+                args = newArgs;
+            }
+
             var builder = BuildCommandLine()
                 .UseDefaults()
                 .UseHost(CreateHostBuilder)
