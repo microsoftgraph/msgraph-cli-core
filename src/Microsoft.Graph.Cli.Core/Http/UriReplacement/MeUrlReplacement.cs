@@ -1,3 +1,5 @@
+using System;
+
 namespace Microsoft.Graph.Cli.Core.Http.UriReplacement;
 
 /// <summary>
@@ -24,16 +26,7 @@ public struct MeUriReplacement : IUriReplacement
             return original;
         }
 
-        Span<char> toMatch = stackalloc char[9];
-        toMatch[0] = '/';
-        toMatch[1] = 'u';
-        toMatch[2] = 's';
-        toMatch[3] = 'e';
-        toMatch[4] = 'r';
-        toMatch[5] = 's';
-        toMatch[6] = '/';
-        toMatch[7] = 'm';
-        toMatch[8] = 'e';
+        Span<char> toMatch = stackalloc char[] { '/', 'u', 's', 'e', 'r', 's', '/', 'm', 'e' };
         var separator = toMatch[..1];
         var matchUsers = toMatch[1..6];
         var matchMe = toMatch[7..];
