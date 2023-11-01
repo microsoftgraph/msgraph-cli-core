@@ -1,21 +1,4 @@
-using System;
-using System.Net.Http;
-using System.Threading.Tasks;
-
-namespace Microsoft.Graph.Cli.Core.Http;
-
-/// <summary>
-/// Interface for making URI replacements.
-/// </summary>
-public interface IUriReplacement
-{
-    /// <summary>
-    /// Accepts a URI and returns a new URI with all replacements applied.
-    /// </summary>
-    /// <param name="original">The URI to apply replacements to</param>
-    /// <returns>A new URI with all replacements applied.</returns>
-    Uri? Replace(Uri? original);
-}
+namespace Microsoft.Graph.Cli.Core.Http.UriReplacement;
 
 /// <summary>
 /// Specialized replacement for /[version]/users/me with /[version]/me
@@ -88,29 +71,5 @@ public struct MeUriReplacement : IUriReplacement
         }
 
         return newUrl.Uri;
-    }
-}
-
-/// <summary>
-/// Replaces a portion of the URL.
-/// </summary>
-public class UriReplacementHandler<TUriReplacement> : DelegatingHandler where TUriReplacement: IUriReplacement
-{
-    private readonly TUriReplacement urlReplacement;
-
-    /// <summary>
-    /// Creates a new UriReplacementHandler.
-    /// </summary>
-    public UriReplacementHandler(TUriReplacement urlReplacement)
-    {
-        this.urlReplacement = urlReplacement;
-    }
-
-    /// <inheritdoc/>
-    protected override async Task<HttpResponseMessage> SendAsync(
-        HttpRequestMessage request, System.Threading.CancellationToken cancellationToken)
-    {
-        request.RequestUri = urlReplacement.Replace(request.RequestUri);
-        return await base.SendAsync(request, cancellationToken);
     }
 }

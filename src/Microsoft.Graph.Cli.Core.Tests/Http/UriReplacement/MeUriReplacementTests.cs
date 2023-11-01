@@ -1,8 +1,8 @@
 using System;
-using Microsoft.Graph.Cli.Core.Http;
+using Microsoft.Graph.Cli.Core.Http.UriReplacement;
 using Xunit;
 
-namespace Microsoft.Graph.Cli.Core.Tests.Http;
+namespace Microsoft.Graph.Cli.Core.Tests.Http.UriReplacement;
 
 public class MeUriReplacementTests
 {
