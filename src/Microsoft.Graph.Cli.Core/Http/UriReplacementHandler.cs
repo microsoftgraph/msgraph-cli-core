@@ -62,7 +62,7 @@ public struct MeUriReplacement : IUriReplacement
         }
 
         var maybeMeSegment = original.Segments[3].AsSpan();
-        if (!maybeMeSegment[..(maybeMeSegment.EndsWith(separator) ? maybeMeSegment.Length - 1 : maybeMeSegment.Length)].SequenceEqual(matchMe))
+        if (!maybeMeSegment[..(maybeMeSegment.EndsWith(separator) ? ^1 : ^0)].SequenceEqual(matchMe))
         {
             return original;
         }
