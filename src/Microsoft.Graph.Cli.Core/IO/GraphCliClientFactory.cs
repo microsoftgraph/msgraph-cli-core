@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using System.Net.Http;
 using Microsoft.Graph.Cli.Core.Http;
+using Microsoft.Graph.Cli.Core.Http.UriReplacement;
+using Microsoft.Kiota.Http.HttpClientLibrary.Middleware;
 
 namespace Microsoft.Graph.Cli.Core.IO;
 
@@ -39,7 +41,7 @@ public class GraphCliClientFactory
         m.AddRange(middlewares);
 
         // Add replacement handler for /users/me to /me
-        m.Add(new UriReplacementHandler<MeUriReplacement>(new MeUriReplacement()));
+        m.Add(new UriReplacementHandler<MeUriReplacementOption>(new MeUriReplacementOption()));
 
         // Add logging handler.
         if (loggingHandler is { } lh)

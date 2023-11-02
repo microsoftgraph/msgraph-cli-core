@@ -1,12 +1,30 @@
 using System;
+using Microsoft.Kiota.Http.HttpClientLibrary.Middleware.Options;
 
 namespace Microsoft.Graph.Cli.Core.Http.UriReplacement;
 
 /// <summary>
 /// Specialized replacement for /[version]/users/me with /[version]/me
 /// </summary>
-public struct MeUriReplacement : IUriReplacement
+public readonly struct MeUriReplacementOption : IUriReplacementHandlerOption
 {
+    private readonly bool isEnabled;
+
+    /// <summary>
+    /// Create new MeUriReplacement
+    /// </summary>
+    /// <param name="isEnabled"></param>
+    public MeUriReplacementOption(bool isEnabled = true)
+    {
+        this.isEnabled = isEnabled;
+    }
+
+    /// <inheritdoc/>
+    public readonly bool IsEnabled()
+    {
+        return isEnabled;
+    }
+
     /// <summary>
     /// If a URI path starts with /[version]/users/me, replace it with /[version]/me
     /// </summary>
@@ -20,7 +38,7 @@ public struct MeUriReplacement : IUriReplacement
             return null;
         }
 
-        if (original.Segments.Length < 4)
+        if (!isEnabled || original.Segments.Length < 4)
         {
             // Must have at least segments "/", "[version]/", "users/", "me"
             return original;
