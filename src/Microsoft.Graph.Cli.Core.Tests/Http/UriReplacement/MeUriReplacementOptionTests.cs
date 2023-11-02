@@ -14,39 +14,29 @@ public class MeUriReplacementOptionTests
         Assert.Null(replacement.Replace(null));
     }
 
-    [Fact]
-    public void Returns_Original_Uri_When_No_Match_Is_Found()
+    [Theory]
+    [InlineData("http://example.com/test")]
+    [InlineData("http://example.com/users/messages")]
+    [InlineData("http://example.com/v1.0/users/messages")]
+    [InlineData("http://example.com/users/test/me")]
+    [InlineData("http://example.com/a/b/users/test/me")]
+    public void Returns_Original_Uri_When_No_Match_Is_Found(string inputUri)
     {
-        var uri = new Uri("http://example.com/test");
+        var uri = new Uri(inputUri);
         var replacement = new MeUriReplacementOption();
 
-        Assert.Equal(uri, replacement.Replace(uri));
-
-        uri = new Uri("http://example.com/users/messages");
-        Assert.Equal(uri, replacement.Replace(uri));
-
-        uri = new Uri("http://example.com/v1.0/users/messages");
-        Assert.Equal(uri, replacement.Replace(uri));
-
-        uri = new Uri("http://example.com/users/test/me");
-        Assert.Equal(uri, replacement.Replace(uri));
-
-        uri = new Uri("http://example.com/a/b/users/test/me");
         Assert.Equal(uri, replacement.Replace(uri));
     }
 
-    [Fact]
-    public void Returns_A_New_Url_When_A_Match_Is_Found()
+    [Theory]
+    [InlineData("http://example.com/v1.0/users/me/messages", "http://example.com/v1.0/me/messages")]
+    [InlineData("http://example.com/v1.0/users/me", "http://example.com/v1.0/me")]
+    [InlineData("http://example.com/v1.0/users/me?a=b", "http://example.com/v1.0/me?a=b")]
+    public void Returns_A_New_Url_When_A_Match_Is_Found(string inputUri, string expectedUri)
     {
         var replacement = new MeUriReplacementOption();
 
-        var uri = new Uri("http://example.com/v1.0/users/me/messages");
-        Assert.Equal("http://example.com/v1.0/me/messages", replacement.Replace(uri)!.ToString());
-
-        uri = new Uri("http://example.com/v1.0/users/me");
-        Assert.Equal("http://example.com/v1.0/me", replacement.Replace(uri)!.ToString());
-
-        uri = new Uri("http://example.com/v1.0/users/me?a=b");
-        Assert.Equal("http://example.com/v1.0/me?a=b", replacement.Replace(uri)!.ToString());
+        var uri = new Uri(inputUri);
+        Assert.Equal(expectedUri, replacement.Replace(uri)!.ToString());
     }
 }
