@@ -6,21 +6,21 @@ namespace Microsoft.Graph.Cli.Core.Http.UriReplacement;
 /// <summary>
 /// Specialized replacement for /[version]/users/me with /[version]/me
 /// </summary>
-public readonly struct MeUriReplacementOption : IUriReplacementHandlerOption
+public class MeUriReplacementOption : IUriReplacementHandlerOption
 {
     private readonly bool isEnabled;
 
     /// <summary>
-    /// Create new MeUriReplacement
+    /// Create new MeUriReplacementOption
     /// </summary>
-    /// <param name="isEnabled"></param>
+    /// <param name="isEnabled">Whether the uri replacement is enabled.</param>
     public MeUriReplacementOption(bool isEnabled = true)
     {
         this.isEnabled = isEnabled;
     }
 
     /// <inheritdoc/>
-    public readonly bool IsEnabled()
+    public bool IsEnabled()
     {
         return isEnabled;
     }
@@ -31,7 +31,7 @@ public readonly struct MeUriReplacementOption : IUriReplacementHandlerOption
     /// <param name="original">The original URI</param>
     /// <returns>A URI with /[version]/users/me replaced with /[version]/me</returns>
     /// <remarks>This method assumes that the first segment after the root is a version segment to match Microsoft Graph API's format.</remarks>
-    public readonly Uri? Replace(Uri? original)
+    public Uri? Replace(Uri? original)
     {
         if (original is null)
         {
