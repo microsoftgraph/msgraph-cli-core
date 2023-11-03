@@ -46,7 +46,7 @@ namespace Microsoft.Graph.Cli
             // Replace `me ...` with `users ... --user-id me`
             if (args[0] == "me")
             {
-                var hasHelp = args.Any(static x => x == "--help" || x == "-h" || x == "/?");
+                var hasHelp = Array.Exists(args, static x => x == "--help" || x == "-h" || x == "/?");
                 var newArgs = hasHelp ? args : new string[args.Length + 2];
                 newArgs[0] = "users";
                 for (var i = 1; i < args.Length; i++)
