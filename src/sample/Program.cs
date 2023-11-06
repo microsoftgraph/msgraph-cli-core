@@ -146,6 +146,11 @@ namespace Microsoft.Graph.Cli
             rootCommand.Add(new LoginCommand(builder));
             rootCommand.AddGlobalOption(debugOption);
 
+            if (rootCommand.Subcommands.FirstOrDefault(static c => c.Name == "users") is {} usersCmd)
+            {
+                usersCmd.AddAlias("me");
+            }
+
             return builder;
         }
 
