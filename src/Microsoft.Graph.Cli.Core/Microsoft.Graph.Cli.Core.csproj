@@ -25,7 +25,7 @@
     <AssemblyOriginatorKeyFile>../35MSSharedLib1024.snk</AssemblyOriginatorKeyFile>
     <SignAssembly>false</SignAssembly>
     <DelaySign>false</DelaySign>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <PackageReleaseNotes>
     </PackageReleaseNotes>
