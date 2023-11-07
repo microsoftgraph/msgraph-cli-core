@@ -45,12 +45,6 @@ public partial class LoggingHandler : DelegatingHandler
         return response;
     }
 
-    /// <inheritdoc/>
-    protected override void Dispose(bool disposing)
-    {
-        base.Dispose(disposing);
-    }
-
     private static string HeadersToString(in HttpHeaders headers, in HttpContentHeaders? contentHeaders)
     {
         if (!headers.Any() && contentHeaders?.Any() == false) return string.Empty;
@@ -61,7 +55,7 @@ public partial class LoggingHandler : DelegatingHandler
             {
                 value = "[PROTECTED]";
             }
-            return string.Format("{0}: {1}\n", h.Key, value);
+            return $"{h.Key}: {value}\n";
         };
 
         static string aggregator(string a, string b)
@@ -95,17 +89,8 @@ public partial class LoggingHandler : DelegatingHandler
         {
             return await content.ReadAsStringAsync(cancellationToken);
         }
-        else
-        {
-            if (content.Headers.ContentLength > 0)
-            {
-                return $"[...<{content.Headers.ContentLength} byte data stream>...]";
-            }
-            else
-            {
-                return "[...<data stream>...]";
-            }
-        }
+
+        return content.Headers.ContentLength > 0 ? $"[...<{content.Headers.ContentLength} byte data stream>...]" : "[...<data stream>...]";
     }
 
     [LoggerMessage(EventId = 1, Level = LogLevel.Debug, Message = "\nRequest:\n\n{RequestMethod} {RequestUri} HTTP/{HttpVersion}\n{Headers}\n{RequestContent}\n")]
