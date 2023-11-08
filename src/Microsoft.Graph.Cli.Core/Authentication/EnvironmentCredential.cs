@@ -52,8 +52,8 @@ namespace Microsoft.Graph.Cli.Core.Authentication
         {
             _options = options ?? new TokenCredentialOptions();
 
-            tenantId ??= Environment.GetEnvironmentVariable(Utils.Constants.Environment.TenantId);
-            clientId ??= Environment.GetEnvironmentVariable(Utils.Constants.Environment.ClientId);
+            tenantId = Environment.GetEnvironmentVariable(Utils.Constants.Environment.TenantId) ?? tenantId;
+            clientId = Environment.GetEnvironmentVariable(Utils.Constants.Environment.ClientId) ?? clientId;
             string? clientSecret = Environment.GetEnvironmentVariable(Utils.Constants.Environment.ClientSecret);
             string? clientCertificatePath = Environment.GetEnvironmentVariable(Utils.Constants.Environment.ClientCertificatePath);
             string? clientCertificatePassword = Environment.GetEnvironmentVariable(Utils.Constants.Environment.ClientCertificatePassword);
