@@ -9,6 +9,7 @@
     <DebugType>embedded</DebugType>
     <VersionPrefix>1.0.0</VersionPrefix>
     <VersionSuffix>preview.9</VersionSuffix>
+    <IsTrimmable>true</IsTrimmable>
   </PropertyGroup>
 
   <PropertyGroup>
