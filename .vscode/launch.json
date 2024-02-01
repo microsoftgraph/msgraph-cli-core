@@ -10,7 +10,7 @@
             "request": "launch",
             "preLaunchTask": "build sample",
             // If you have changed target frameworks, make sure to update the program path.
-            "program": "${workspaceFolder}/src/sample/bin/Debug/net7.0/sample.dll",
+            "program": "${workspaceFolder}/src/sample/bin/Debug/net8.0/sample.dll",
             "args": [
                 "login",
                 "--strategy",
@@ -30,7 +30,7 @@
             "request": "launch",
             "preLaunchTask": "build sample",
             // If you have changed target frameworks, make sure to update the program path.
-            "program": "${workspaceFolder}/src/sample/bin/Debug/net7.0/sample.dll",
+            "program": "${workspaceFolder}/src/sample/bin/Debug/net8.0/sample.dll",
             "args": [
                 "login",
                 "--strategy",
@@ -46,7 +46,7 @@
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build sample",
-            "program": "${workspaceFolder}/src/sample/bin/Debug/net7.0/sample.dll",
+            "program": "${workspaceFolder}/src/sample/bin/Debug/net8.0/sample.dll",
             "args": [
                 "login",
                 "--strategy",
@@ -67,7 +67,7 @@
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build sample",
-            "program": "${workspaceFolder}/src/sample/bin/Debug/net7.0/sample.dll",
+            "program": "${workspaceFolder}/src/sample/bin/Debug/net8.0/sample.dll",
             "args": [
                 "login",
                 "--strategy",
@@ -77,6 +77,23 @@
                 "--client-id",
                 "e49807f2-94cc-4f59-9e14-be2a37eab7c2"
             ],
+            "envFile": "${workspaceFolder}/.env.local",
+            "cwd": "${workspaceFolder}/src/sample",
+            "console": "internalConsole",
+            "stopAtEntry": false
+        },
+        {
+            "name": "login national cloud (sample)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build sample",
+            "program": "${workspaceFolder}/src/sample/bin/Debug/net8.0/sample.dll",
+            "args": [
+                "login",
+                "--environment",
+                "US_GOV"
+            ],
+            "envFile": "${workspaceFolder}/.env.local",
             "cwd": "${workspaceFolder}/src/sample",
             "console": "internalConsole",
             "stopAtEntry": false
@@ -86,13 +103,32 @@
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build sample",
-            "program": "${workspaceFolder}/src/sample/bin/Debug/net7.0/sample.dll",
+            "program": "${workspaceFolder}/src/sample/bin/Debug/net8.0/sample.dll",
             "args": [
                 "users",
                 "list",
                 "--debug",
                 "--top",
-                "2"
+                "2",
+                "--headers",
+                "sample=header"
+            ],
+            "envFile": "${workspaceFolder}/.env.local",
+            "cwd": "${workspaceFolder}/src/sample",
+            "console": "integratedTerminal",
+            "stopAtEntry": false,
+            "justMyCode": false
+        },
+        {
+            "name": "me get (sample)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build sample",
+            "program": "${workspaceFolder}/src/sample/bin/Debug/net8.0/sample.dll",
+            "args": [
+                "me",
+                "get",
+                "--debug"
             ],
             "cwd": "${workspaceFolder}/src/sample",
             "console": "integratedTerminal",
@@ -103,7 +139,7 @@
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build sample",
-            "program": "${workspaceFolder}/src/sample/bin/Debug/net7.0/sample.dll",
+            "program": "${workspaceFolder}/src/sample/bin/Debug/net8.0/sample.dll",
             "args": [
                 "logout",
                 "--debug"
@@ -117,9 +153,8 @@
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build sample",
-            "program": "${workspaceFolder}/src/sample/bin/Debug/net7.0/sample.dll",
+            "program": "${workspaceFolder}/src/sample/bin/Debug/net8.0/sample.dll",
             "args": [
-                "login",
                 "--help"
             ],
             "cwd": "${workspaceFolder}/src/sample",

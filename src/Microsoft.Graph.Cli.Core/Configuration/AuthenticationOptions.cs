@@ -8,7 +8,8 @@ namespace Microsoft.Graph.Cli.Core.Configuration;
 public class AuthenticationOptions
 {
     /// <summary>
-    /// Authority
+    /// Entra authority. Corresponds to the <see cref="CloudEnvironment"/> via the
+    /// <see cref="CloudEnvironmentExtensions.Authority"/> convenience extension.
     /// </summary>
     public string? Authority { get; set; }
 
@@ -36,4 +37,10 @@ public class AuthenticationOptions
     /// Authentication strategy
     /// </summary>
     public AuthenticationStrategy Strategy { get; set; } = AuthenticationStrategy.DeviceCode;
+
+    /// <summary>
+    /// Cloud environment for authentication. This is stored separately from
+    /// Authority in case some environments use the same authority.
+    /// </summary>
+    public CloudEnvironment Environment { get; set; } = CloudEnvironment.Global;
 }

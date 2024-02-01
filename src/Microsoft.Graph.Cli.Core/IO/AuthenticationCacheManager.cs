@@ -54,13 +54,13 @@ public class AuthenticationCacheManager : IAuthenticationCacheManager
     }
 
     /// <inheritdoc/>
-    public async Task SaveAuthenticationIdentifiersAsync(string? clientId, string? tenantId, string? certificateName, string? certificateThumbPrint, AuthenticationStrategy strategy, CancellationToken cancellationToken = default)
+    public async Task SaveAuthenticationIdentifiersAsync(string? clientId, string? tenantId, string? certificateName, string? certificateThumbPrint, AuthenticationStrategy strategy, CloudEnvironment environment = CloudEnvironment.Global, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
         var path = this.GetAuthenticationCacheFilePath();
         ConfigurationRoot configuration = await ReadConfigurationAsync(cancellationToken) ?? new Configuration.ConfigurationRoot();
         var authOptions = configuration.AuthenticationOptions;
-        var adAuthority = Constants.DefaultAuthority;
+        var adAuthority = environment.Authority();
         clientId = clientId ?? Constants.DefaultAppId;
         tenantId = tenantId ?? Constants.DefaultTenant;
 
@@ -68,17 +68,18 @@ public class AuthenticationCacheManager : IAuthenticationCacheManager
         if (
                 clientId != authOptions.ClientId || tenantId != authOptions.TenantId || certificateName != authOptions.ClientCertificateName ||
                 certificateThumbPrint != authOptions.ClientCertificateThumbPrint || strategy != authOptions.Strategy ||
-                adAuthority != authOptions.Authority
+                (authOptions.Authority is not null && adAuthority != new Uri(authOptions.Authority))
         )
         {
             configuration.AuthenticationOptions = new AuthenticationOptions
             {
-                Authority = adAuthority,
+                Authority = adAuthority.ToString(),
                 ClientId = clientId,
                 TenantId = tenantId,
                 ClientCertificateName = certificateName,
                 ClientCertificateThumbPrint = certificateThumbPrint,
                 Strategy = strategy,
+                Environment = environment,
             };
 
             await WriteConfigurationAsync(path, configuration, cancellationToken);
@@ -183,18 +184,18 @@ public class AuthenticationCacheManager : IAuthenticationCacheManager
         }
     }
 
-    private async Task WriteConfigurationAsync(string path, ConfigurationRoot configuration, CancellationToken cancellationToken = default, int retryCount = 0)
+    private async Task WriteConfigurationAsync(string path, ConfigurationRoot configuration, CancellationToken cancellationToken = default, int retryCount = 1)
     {
         try
         {
-            using FileStream fileStream = File.Open(path, FileMode.Create, FileAccess.Write);
+            using FileStream fileStream = File.Open(path, FileMode.Create, FileAccess.Write, FileShare.Read);
             await JsonSerializer.SerializeAsync(fileStream, configuration, SourceGenerationContext.Default.ConfigurationRoot, cancellationToken: cancellationToken).ConfigureAwait(false);
         }
         catch (DirectoryNotFoundException)
         {
             Directory.CreateDirectory(path);
-            if (retryCount < 1)
-                await WriteConfigurationAsync(path, configuration, cancellationToken, retryCount + 1);
+            if (retryCount > 0)
+                await WriteConfigurationAsync(path, configuration, cancellationToken, retryCount - 1);
         }
     }
 
