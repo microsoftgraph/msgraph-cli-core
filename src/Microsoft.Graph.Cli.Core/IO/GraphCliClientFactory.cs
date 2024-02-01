@@ -23,12 +23,12 @@ public class GraphCliClientFactory
     /// </summary>
     /// <param name="options">Graph client options</param>
     /// <param name="version">API version</param>
-    /// <param name="nationalCloud">National cloud in use.</param>
+    /// <param name="environment">The cloud environment in use.</param>
     /// <param name="finalHandler">Final HTTP handler</param>
     /// <param name="loggingHandler">Logging handler</param>
     /// <param name="middlewares">Other middlewares.</param>
     /// <returns>Returns a new HTTP client.</returns>
-    public static HttpClient GetDefaultClient(GraphClientOptions? options = null, string version = "v1.0", string nationalCloud = GraphClientFactory.Global_Cloud, HttpMessageHandler? finalHandler = null, LoggingHandler? loggingHandler = null, params DelegatingHandler[] middlewares)
+    public static HttpClient GetDefaultClient(GraphClientOptions? options = null, string version = "v1.0", CloudEnvironment environment = CloudEnvironment.Global, HttpMessageHandler? finalHandler = null, LoggingHandler? loggingHandler = null, params DelegatingHandler[] middlewares)
     {
         var m = new List<DelegatingHandler>();
 
@@ -67,6 +67,6 @@ public class GraphCliClientFactory
             return 0;
         });
 
-        return GraphClientFactory.Create(version: version, nationalCloud: nationalCloud, finalHandler: finalHandler, handlers: m);
+        return GraphClientFactory.Create(version: version, nationalCloud: environment.GraphClientCloud(), finalHandler: finalHandler, handlers: m);
     }
 }

@@ -72,11 +72,11 @@ namespace Microsoft.Graph.Cli.Core.Authentication
                     bool sendCertificateChain = !string.IsNullOrEmpty(clientSendCertificateChain) &&
                         (clientSendCertificateChain == "1" || clientSendCertificateChain == "true");
 
-                    ClientCertificateCredentialOptions clientCertificateCredentialOptions = new ClientCertificateCredentialOptions
+                    ClientCertificateCredentialOptions clientCertificateCredentialOptions = new()
                     {
                         AuthorityHost = _options.AuthorityHost,
                         Transport = _options.Transport,
-                        SendCertificateChain = sendCertificateChain
+                        SendCertificateChain = sendCertificateChain,
                     };
                     // Use reflection to set internal properties.
                     X509Certificate2? cert;

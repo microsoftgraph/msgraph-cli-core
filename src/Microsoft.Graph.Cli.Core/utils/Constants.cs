@@ -5,7 +5,7 @@ namespace Microsoft.Graph.Cli.Core.Utils
     /// <summary>
     /// Graph CLI Core Constants
     /// </summary>
-    public class Constants
+    internal class Constants
     {
         /// <summary>
         /// Name of the CLI core directory in the APPDATA root.
@@ -38,14 +38,9 @@ namespace Microsoft.Graph.Cli.Core.Utils
         public const string DefaultTenant = "common";
 
         /// <summary>
-        /// Default authority
-        /// </summary>
-        public const string DefaultAuthority = "https://login.microsoftonline.com";
-
-        /// <summary>
         /// Environmrnt constants.
         /// </summary>
-        public static class Environment
+        internal static class Environment
         {
             /// <summary>
             /// Tenant Id.

@@ -27,6 +27,8 @@ public sealed class LoginCommand : Command
 
     private Option<string> certificateThumbPrintOption = new("--certificate-thumb-print", "The thumbprint of your certificate. The certificate will be retrieved from the current user's certificate store.");
 
+    private Option<CloudEnvironment> environmentOption = new("--environment", () => CloudEnvironment.Global, "Select the cloud environment to log in to. If login is run without providing an environment, Global is used.");
+
     private Option<AuthenticationStrategy> strategyOption = new("--strategy", () => Constants.defaultAuthStrategy);
 
     internal LoginCommand() : base("login", "Login and store the session for use in subsequent commands")
@@ -36,6 +38,7 @@ public sealed class LoginCommand : Command
         AddOption(tenantIdOption);
         AddOption(certificateNameOption);
         AddOption(certificateThumbPrintOption);
+        AddOption(environmentOption);
         AddOption(strategyOption);
         this.SetHandler(async (context) =>
         {
@@ -44,15 +47,16 @@ public sealed class LoginCommand : Command
             var tenantId = context.ParseResult.GetValueForOption(tenantIdOption);
             var certificateName = context.ParseResult.GetValueForOption(certificateNameOption);
             var certificateThumbPrint = context.ParseResult.GetValueForOption(certificateThumbPrintOption);
+            var environment = context.ParseResult.GetValueForOption(environmentOption);
             var strategy = context.ParseResult.GetValueForOption(strategyOption);
             var cancellationToken = context.GetCancellationToken();
 
             var authUtil = context.BindingContext.GetRequiredService<IAuthenticationCacheManager>();
             var authSvcFactory = context.BindingContext.GetRequiredService<AuthenticationServiceFactory>();
 
-            var authService = await authSvcFactory.GetAuthenticationServiceAsync(strategy, tenantId, clientId, certificateName, certificateThumbPrint, cancellationToken);
+            var authService = await authSvcFactory.GetAuthenticationServiceAsync(strategy, tenantId, clientId, certificateName, certificateThumbPrint, environment, cancellationToken);
             await authService.LoginAsync(scopes, cancellationToken);
-            await authUtil.SaveAuthenticationIdentifiersAsync(clientId, tenantId, certificateName, certificateThumbPrint, strategy, cancellationToken);
+            await authUtil.SaveAuthenticationIdentifiersAsync(clientId, tenantId, certificateName, certificateThumbPrint, strategy, environment, cancellationToken);
         });
     }
 

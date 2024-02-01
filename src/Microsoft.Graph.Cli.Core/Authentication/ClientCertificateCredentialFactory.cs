@@ -4,6 +4,7 @@ using System.Security;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using Azure.Identity;
+using Microsoft.Graph.Cli.Core.Utils;
 
 namespace Microsoft.Graph.Cli.Core.Authentication;
 
@@ -19,15 +20,17 @@ public static class ClientCertificateCredentialFactory
     /// <param name="clientId">ClientId</param>
     /// <param name="certificateName">Subject name of the certificate.</param>
     /// <param name="certificateThumbPrint">Thumb print of the certificate.</param>
+    /// <param name="authorityHost">The entra authentication endpoint (to use with national clouds)</param>
     /// <returns>A ClientCertificateCredential</returns>
-    public static ClientCertificateCredential GetClientCertificateCredential(string? tenantId, string? clientId, string? certificateName, string? certificateThumbPrint)
+    /// <exception cref="ArgumentNullException">When a null url is provided for the authority host.</exception>
+    public static ClientCertificateCredential GetClientCertificateCredential(string? tenantId, string? clientId, string? certificateName, string? certificateThumbPrint, Uri authorityHost)
     {
         if (string.IsNullOrWhiteSpace(certificateName) && string.IsNullOrWhiteSpace(certificateThumbPrint))
         {
             throw new ArgumentException("Either a certificate name or a certificate thumb print must be provided.");
         }
 
-        ClientCertificateCredentialOptions credOptions = new();
+        ClientCertificateCredentialOptions credOptions = new() { AuthorityHost = authorityHost };
 
         // // TODO: Enable token caching
         // // Fix error:
