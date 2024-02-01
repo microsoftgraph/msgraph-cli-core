@@ -110,8 +110,16 @@ public class AuthenticationCacheManager : IAuthenticationCacheManager
     {
         // https://learn.microsoft.com/en-us/azure/active-directory/develop/msal-net-clear-token-cache
         // Work-around until https://github.com/Azure/azure-sdk-for-net/issues/32048 is resolved
-        var options = await ReadAuthenticationIdentifiersAsync(cancellationToken);
-        var record = await ReadAuthenticationRecordAsync(cancellationToken);
+        var optionsTask = ReadAuthenticationIdentifiersAsync(cancellationToken);
+        var recordTask = ReadAuthenticationRecordAsync(cancellationToken);
+
+        // Run both tasks concurrently
+        await Task.WhenAll(optionsTask, recordTask);
+
+        // The tasks should be complete at this point. Result won't block.
+        var options = optionsTask.Result;
+        var record = recordTask.Result;
+
         var clientId = record?.ClientId ?? options?.ClientId;
         var tenantId = record?.TenantId ?? options?.TenantId;
         if (options == null || string.IsNullOrWhiteSpace(clientId))
