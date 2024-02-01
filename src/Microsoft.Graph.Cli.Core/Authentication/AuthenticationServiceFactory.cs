@@ -87,7 +87,7 @@ public class AuthenticationServiceFactory
     /// <returns>A token credential instance.</returns>
     /// <exception cref="InvalidOperationException">When an unsupported authentication strategy is provided.</exception>
     /// <exception cref="ArgumentNullException">When a null url is provided for the authority host.</exception>
-    public virtual async Task<TokenCredential> GetTokenCredentialAsync(AuthenticationStrategy strategy, string? tenantId, string? clientId, string? certificateName, string? certificateThumbPrint, CloudEnvironment environment = CloudEnvironment.Global, CancellationToken cancellationToken = default)
+    public virtual async Task<TokenCredential> GetTokenCredentialAsync(AuthenticationStrategy strategy, string? tenantId, string? clientId, string? certificateName, string? certificateThumbPrint, CloudEnvironment environment, CancellationToken cancellationToken = default)
     {
         var authorityHost = environment.Authority();
         return strategy switch
