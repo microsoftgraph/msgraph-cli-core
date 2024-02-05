@@ -25,9 +25,10 @@ public interface IAuthenticationCacheManager
     /// <param name="certificateName">Certificate name</param>
     /// <param name="certificateThumbPrint">Certificate thumb-print</param>
     /// <param name="strategy">Authentication strategy.</param>
+    /// <param name="environment">The cloud environment.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>A void awaitable task.</returns>
-    Task SaveAuthenticationIdentifiersAsync(string? clientId, string? tenantId, string? certificateName, string? certificateThumbPrint, AuthenticationStrategy strategy, CancellationToken cancellationToken = default);
+    Task SaveAuthenticationIdentifiersAsync(string? clientId, string? tenantId, string? certificateName, string? certificateThumbPrint, AuthenticationStrategy strategy, CloudEnvironment environment = CloudEnvironment.Global, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Reads authentication options from the authentication cache path.
