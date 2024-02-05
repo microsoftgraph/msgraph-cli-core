@@ -1,30 +1,33 @@
 {
-    "packages": {
-      ".": {
-        "changelog-path": "CHANGELOG.md",
-        "release-type": "simple",
-        "bump-minor-pre-major": false,
-        "bump-patch-for-minor-pre-major": false,
-        "draft": false,
-        "prerelease": false,
-        "bootstrap-sha": "e9b73fc10c023bc83c0b7816d7e872199d92cbee",
-        "exclude-paths": [
-            ".azure-pipelines",
-            ".github",
-            ".idea",
-            ".vs",
-            ".vscode",
-            "src/",
-            "src/Microsoft.Graph.Cli.Core.Tests"
-        ],
-        "extra-files": [
-            {
-              "type": "xml",
-              "path": "src/Microsoft.Graph.Cli.Core/Microsoft.Graph.Cli.Core.csproj",
-              "xpath": "//Project/PropertyGroup/Version"
-            }
-          ]
-      }
-    },
-    "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json"
-  }
+  "bootstrap-sha": "e9b73fc10c023bc83c0b7816d7e872199d92cbee",
+  "exclude-paths": [
+    ".azure-pipelines",
+    ".github",
+    ".idea",
+    ".vs",
+    ".vscode",
+    "src/sample",
+    "src/Microsoft.Graph.Cli.Core.Tests"
+  ],
+  "release-type": "simple",
+  "bump-minor-pre-major": true,
+  "bump-patch-for-minor-pre-major": true,
+  "include-component-in-tag": false,
+  "include-v-in-tag": true,
+  "draft": false,
+  "prerelease": false,
+  "packages": {
+    ".": {
+      "package-name": "msgraph-cli-core",
+      "changelog-path": "CHANGELOG.md",
+      "extra-files": [
+        {
+          "type": "xml",
+          "path": "src/Microsoft.Graph.Cli.Core/Microsoft.Graph.Cli.Core.csproj",
+          "xpath": "//Project/PropertyGroup/Version"
+        }
+      ]
+    }
+  },
+  "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json"
+}
