@@ -68,7 +68,7 @@ public class AuthenticationCacheManager : IAuthenticationCacheManager
         if (
                 clientId != authOptions.ClientId || tenantId != authOptions.TenantId || certificateName != authOptions.ClientCertificateName ||
                 certificateThumbPrint != authOptions.ClientCertificateThumbPrint || strategy != authOptions.Strategy ||
-                (authOptions.Authority is not null && adAuthority != new Uri(authOptions.Authority))
+                (authOptions.Authority is not null && adAuthority != new Uri(authOptions.Authority)) || environment != authOptions.Environment
         )
         {
             configuration.AuthenticationOptions = new AuthenticationOptions
