@@ -7,6 +7,7 @@ trigger:
     branches:
         include:
             - main
+            - refs/tags/v*
 pr: none
 
 pool:
@@ -240,7 +241,7 @@ stages:
                       targetPath: $(Build.ArtifactStagingDirectory)/Nugets
 
     - stage: deploy
-      condition: and(contains(variables['build.sourceBranch'], 'refs/heads/main'), succeeded())
+      condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/tags/v'))
       dependsOn: build
       jobs:
           - deployment: deploy_cli_core
