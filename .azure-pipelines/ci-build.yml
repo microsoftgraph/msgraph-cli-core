@@ -104,13 +104,13 @@ stages:
 
                 - task: UseDotNet@2
                   displayName: "Add .NET 2"
-                  condition: and(contains(variables['build.sourceBranch'], 'refs/heads/main'), succeeded())
+                  condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/tags/v'))
                   inputs:
                       version: 2.x
 
                 - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
                   displayName: "ESRP DLL Strong Name"
-                  condition: and(contains(variables['build.sourceBranch'], 'refs/heads/main'), succeeded())
+                  condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/tags/v'))
                   inputs:
                       ConnectedServiceName: "microsoftgraph ESRP CodeSign DLL and NuGet (AKV)"
                       FolderPath: $(ProductBinPath)
@@ -137,7 +137,7 @@ stages:
 
                 - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
                   displayName: "ESRP DLL CodeSigning"
-                  condition: and(contains(variables['build.sourceBranch'], 'refs/heads/main'), succeeded())
+                  condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/tags/v'))
                   inputs:
                       ConnectedServiceName: "microsoftgraph ESRP CodeSign DLL and NuGet (AKV)"
                       FolderPath: src
@@ -184,14 +184,14 @@ stages:
 
                 # arguments are not parsed in DotNetCoreCLI@2 task for `pack` command, that's why we have a custom pack command here
                 - pwsh: dotnet pack "$(ProjectFile)" /p:IncludeSymbols=true /p:SymbolPackageFormat=snupkg --no-build --output $env:BUILD_ARTIFACTSTAGINGDIRECTORY/Nugets --configuration $env:BUILD_CONFIGURATION
-                  condition: and(contains(variables['build.sourceBranch'], 'refs/heads/main'), succeeded())
+                  condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/tags/v'))
                   env:
                       BUILD_CONFIGURATION: $(BuildConfiguration)
                   displayName: Dotnet pack
 
                 - task: PowerShell@2
                   displayName: "Validate project version has been incremented"
-                  condition: and(contains(variables['build.sourceBranch'], 'refs/heads/main'), succeeded())
+                  condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/tags/v'))
                   inputs:
                       targetType: "filePath"
                       filePath: $(System.DefaultWorkingDirectory)\scripts\ValidateProjectVersionUpdated.ps1
@@ -200,7 +200,7 @@ stages:
 
                 - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
                   displayName: "ESRP CodeSigning Nuget Packages"
-                  condition: and(contains(variables['build.sourceBranch'], 'refs/heads/main'), succeeded())
+                  condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/tags/v'))
                   inputs:
                       ConnectedServiceName: "microsoftgraph ESRP CodeSign DLL and NuGet (AKV)"
                       FolderPath: "$(Build.ArtifactStagingDirectory)/Nugets"
@@ -227,7 +227,7 @@ stages:
 
                 - task: CopyFiles@2
                   displayName: "Copy release scripts to artifact staging directory"
-                  condition: and(contains(variables['build.sourceBranch'], 'refs/heads/main'), succeeded())
+                  condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/tags/v'))
                   inputs:
                       SourceFolder: "$(Build.SourcesDirectory)"
                       Contents: 'scripts\**'
@@ -235,7 +235,7 @@ stages:
 
                 - task: PublishPipelineArtifact@1
                   displayName: "Upload Artifact: Nugets"
-                  condition: and(contains(variables['build.sourceBranch'], 'refs/heads/main'), succeeded())
+                  condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/tags/v'))
                   inputs:
                       artifactName: Nugets
                       targetPath: $(Build.ArtifactStagingDirectory)/Nugets
