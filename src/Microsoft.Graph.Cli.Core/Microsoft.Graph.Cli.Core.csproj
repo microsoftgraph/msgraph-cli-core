@@ -6,7 +6,7 @@
     <ImplicitUsings>disable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <!-- Recommended: Embed symbols containing Source Link in the main file (exe/dll) -->
-    <DebugType>embedded</DebugType>
+    <DebugType>portable</DebugType>
     <Version>1.2.1</Version>
     <IsTrimmable>true</IsTrimmable>
 
