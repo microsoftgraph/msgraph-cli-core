@@ -130,6 +130,7 @@ public static class ClientCertificateCredentialFactory
             // Use this certificate if it became valid after the currently selected one.
             if (certificate is null || cert.NotBefore > certificate.NotBefore)
             {
+                certificate?.Dispose();
                 certificate = cert;
             }
         }
