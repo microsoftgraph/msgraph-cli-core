@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
@@ -47,29 +47,48 @@ public partial class LoggingHandler : DelegatingHandler
 
     private static string HeadersToString(in HttpHeaders headers, in HttpContentHeaders? contentHeaders)
     {
-        if (!headers.Any() && contentHeaders?.Any() == false) return string.Empty;
-        static string selector(KeyValuePair<string, IEnumerable<string>> h)
+        var headersEnumerator = headers.GetEnumerator();
+        var contentHeadersEnumerator = contentHeaders?.GetEnumerator();
+        if (!headersEnumerator.MoveNext() && contentHeadersEnumerator?.MoveNext() == false) return string.Empty;
+        headersEnumerator.Dispose();
+        contentHeadersEnumerator?.Dispose();
+        static void StringifyHeader(string name, IEnumerable<string> values, in StringBuilder sb)
         {
-            var value = string.Join(",", h.Value);
-            if (h.Key.Contains("Authorization", StringComparison.OrdinalIgnoreCase))
+            sb.Append(name);
+            sb.Append(':');
+            sb.Append(' ');
+            if (name.Contains("Authorization", StringComparison.OrdinalIgnoreCase))
             {
-                value = "[PROTECTED]";
+                sb.Append("[PROTECTED]");
             }
-            return $"{h.Key}: {value}\n";
-        };
+            else
+            {
+                foreach (var value in values)
+                {
+                    sb.Append(value);
+                    sb.Append(',');
+                }
 
-        static string aggregator(string a, string b)
+                sb.Remove(sb.Length - 1, 1);
+            }
+        }
+        static void JoinHeaders(IEnumerable<KeyValuePair<string, IEnumerable<string>>> headers, in StringBuilder sb)
         {
-            return string.Join(string.Empty, a, b);
+            foreach (var header in headers)
+            {
+                StringifyHeader(header.Key, header.Value, sb);
+                sb.Append('\n');
+            }
         }
 
-        var h = headers.Select(selector).Aggregate("", aggregator);
+        var sb = new StringBuilder(200);
+        JoinHeaders(headers, sb);
         if (contentHeaders != null)
         {
-            h += contentHeaders.Select(selector).Aggregate("", aggregator);
+            JoinHeaders(contentHeaders, sb);
         }
 
-        return h;
+        return sb.ToString();
     }
 
     /// <summary>
