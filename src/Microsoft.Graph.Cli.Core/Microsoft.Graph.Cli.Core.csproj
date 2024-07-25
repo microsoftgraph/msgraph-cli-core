@@ -7,7 +7,7 @@
     <Nullable>enable</Nullable>
     <!-- Recommended: Embed symbols containing Source Link in the main file (exe/dll) -->
     <DebugType>portable</DebugType>
-    <Version>1.2.1</Version>
+    <Version>1.2.2</Version>
     <IsTrimmable>true</IsTrimmable>
 
     <PackageValidationBaselineVersion>1.0.0</PackageValidationBaselineVersion>
