@@ -77,9 +77,9 @@ public static class ClientCertificateCredentialFactory
         {
             store.Open(OpenFlags.ReadOnly);
             X509Certificate2Collection signingCerts = store.Certificates
-                .Find(X509FindType.FindByTimeValid, DateTime.Now, true)
+                .Find(X509FindType.FindByTimeValid, DateTime.Now, false)
                 .Find(isThumbPrint ? X509FindType.FindByThumbprint : X509FindType.FindBySubjectDistinguishedName,
-                    certificateNameOrThumbPrint, true);
+                    certificateNameOrThumbPrint, false);
             if (signingCerts.Count == 0)
             {
                 result = false;
@@ -89,6 +89,8 @@ public static class ClientCertificateCredentialFactory
                 // Return the first certificate in the collection, has the right name and is current.
                 foreach (var cert in signingCerts)
                 {
+                    // Check validity period.
+                    if (cert.NotAfter < DateTime.Now || cert.NotBefore > DateTime.Now) continue;
                     // Use this certificate if it became valid after the currently selected one.
                     if (certificate is null || cert.NotBefore > certificate.NotBefore)
                     {
