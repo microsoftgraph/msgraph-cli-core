@@ -1,10 +1,8 @@
 using System;
-using System.Linq;
 using System.Security;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using Azure.Identity;
-using Microsoft.Graph.Cli.Core.Utils;
 
 namespace Microsoft.Graph.Cli.Core.Authentication;
 
@@ -23,7 +21,8 @@ public static class ClientCertificateCredentialFactory
     /// <param name="authorityHost">The entra authentication endpoint (to use with national clouds)</param>
     /// <returns>A ClientCertificateCredential</returns>
     /// <exception cref="ArgumentNullException">When a null url is provided for the authority host.</exception>
-    public static ClientCertificateCredential GetClientCertificateCredential(string? tenantId, string? clientId, string? certificateName, string? certificateThumbPrint, Uri authorityHost)
+    public static ClientCertificateCredential GetClientCertificateCredential(string? tenantId, string? clientId,
+        string? certificateName, string? certificateThumbPrint, Uri authorityHost)
     {
         if (string.IsNullOrWhiteSpace(certificateName) && string.IsNullOrWhiteSpace(certificateThumbPrint))
         {
@@ -46,11 +45,13 @@ public static class ClientCertificateCredentialFactory
 
         X509Certificate2? certificate;
 
-        if (!string.IsNullOrWhiteSpace(certificateName) && TryGetCertificateFromStore(certificateName, isThumbPrint: false, out certificate))
+        if (!string.IsNullOrWhiteSpace(certificateName) &&
+            TryGetCertificateFromStore(certificateName, isThumbPrint: false, out certificate))
         {
             return new ClientCertificateCredential(tenantId, clientId, certificate, credOptions);
         }
-        else if (!string.IsNullOrWhiteSpace(certificateThumbPrint) && TryGetCertificateFromStore(certificateThumbPrint, isThumbPrint: true, out certificate))
+        else if (!string.IsNullOrWhiteSpace(certificateThumbPrint) &&
+                 TryGetCertificateFromStore(certificateThumbPrint, isThumbPrint: true, out certificate))
         {
             return new ClientCertificateCredential(tenantId, clientId, certificate, credOptions);
         }
@@ -65,7 +66,8 @@ public static class ClientCertificateCredentialFactory
     /// <param name="isThumbPrint">If true, try to find the certificate by the thumb print.</param>
     /// <param name="certificate">A matching unexpired certificate from the store.</param>
     /// <returns>Returns true if the certificate was fetched successfully.</returns>
-    internal static bool TryGetCertificateFromStore(string certificateNameOrThumbPrint, bool isThumbPrint, out X509Certificate2? certificate)
+    internal static bool TryGetCertificateFromStore(string certificateNameOrThumbPrint, bool isThumbPrint,
+        out X509Certificate2? certificate)
     {
         bool result = false;
         certificate = null;
@@ -74,11 +76,10 @@ public static class ClientCertificateCredentialFactory
         try
         {
             store.Open(OpenFlags.ReadOnly);
-
-            // If using a certificate with a trusted root you do not need to FindByTimeValid, instead:
-            // currentCerts.Find(X509FindType.FindBySubjectDistinguishedName, certName, true);
-            X509Certificate2Collection signingCerts = store.Certificates.Find(X509FindType.FindByTimeValid, DateTime.Now, false)
-                .Find(isThumbPrint ? X509FindType.FindByThumbprint : X509FindType.FindBySubjectDistinguishedName, certificateNameOrThumbPrint, false);
+            X509Certificate2Collection signingCerts = store.Certificates
+                .Find(X509FindType.FindByTimeValid, DateTime.Now, true)
+                .Find(isThumbPrint ? X509FindType.FindByThumbprint : X509FindType.FindBySubjectDistinguishedName,
+                    certificateNameOrThumbPrint, true);
             if (signingCerts.Count == 0)
             {
                 result = false;
@@ -86,7 +87,15 @@ public static class ClientCertificateCredentialFactory
             else
             {
                 // Return the first certificate in the collection, has the right name and is current.
-                certificate = signingCerts.OrderByDescending(static c => c.NotBefore).FirstOrDefault();
+                foreach (var cert in signingCerts)
+                {
+                    // Use this certificate if it became valid after the currently selected one.
+                    if (certificate is null || cert.NotBefore > certificate.NotBefore)
+                    {
+                        certificate = cert;
+                    }
+                }
+
                 result = true;
             }
         }
@@ -98,7 +107,7 @@ public static class ClientCertificateCredentialFactory
         }
         catch (SecurityException)
         {
-            // Isufficient permissions to read the store
+            // Insufficient permissions to read the store
             result = false;
         }
         catch (ArgumentException)
@@ -113,6 +122,7 @@ public static class ClientCertificateCredentialFactory
                 certificate.Dispose();
                 certificate = null;
             }
+
             store.Close();
         }
 
