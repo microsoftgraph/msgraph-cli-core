@@ -86,17 +86,7 @@ public static class ClientCertificateCredentialFactory
             }
             else
             {
-                // Return the first certificate in the collection, has the right name and is current.
-                foreach (var cert in signingCerts)
-                {
-                    // Check validity period.
-                    if (cert.NotAfter < DateTime.Now || cert.NotBefore > DateTime.Now) continue;
-                    // Use this certificate if it became valid after the currently selected one.
-                    if (certificate is null || cert.NotBefore > certificate.NotBefore)
-                    {
-                        certificate = cert;
-                    }
-                }
+                certificate = FindLatestByValidity(signingCerts);
 
                 result = true;
             }
@@ -129,6 +119,22 @@ public static class ClientCertificateCredentialFactory
         }
 
         return result;
+    }
+
+    internal static X509Certificate2? FindLatestByValidity(X509Certificate2Collection signingCerts)
+    {
+        X509Certificate2? certificate = null;
+        // Return the first certificate in the collection, has the right name and is current.
+        foreach (var cert in signingCerts)
+        {
+            // Use this certificate if it became valid after the currently selected one.
+            if (certificate is null || cert.NotBefore > certificate.NotBefore)
+            {
+                certificate = cert;
+            }
+        }
+
+        return certificate;
     }
 
     /// <summary>
