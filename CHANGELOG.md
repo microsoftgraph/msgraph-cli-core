@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.2](https://github.com/microsoftgraph/msgraph-cli-core/compare/v1.2.1...v1.2.2) (2024-07-25)
+
+
+### Bug Fixes
+
+* only fetch valid X.509 certificates from the certificate store ([#425](https://github.com/microsoftgraph/msgraph-cli-core/issues/425)) ([79db8c9](https://github.com/microsoftgraph/msgraph-cli-core/commit/79db8c90ea8a93d0f82847f2ea4e6dce3a1d8f52))
+
 ## [1.2.1](https://github.com/microsoftgraph/msgraph-cli-core/compare/v1.2.0...v1.2.1) (2024-02-13)
 
 
