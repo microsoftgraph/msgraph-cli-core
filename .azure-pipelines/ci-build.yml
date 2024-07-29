@@ -233,6 +233,6 @@ extends:
                 - task: 1ES.PublishNuget@1
                   displayName: 'NuGet push'
                   inputs:
-                    packagesToPush: '$(Pipeline.Workspace)/Nugets/Microsoft.Graph.Cli.Core.*.nupkg;$(Pipeline.Workspace)/Nugets/Microsoft.Graph.Cli.Core.*.snupkg'
+                    packagesToPush: '$(Pipeline.Workspace)/Nugets/Microsoft.Graph.Cli.Core.*.nupkg'
                     nuGetFeedType: external
                     publishFeedCredentials: 'microsoftgraph NuGet connection'
