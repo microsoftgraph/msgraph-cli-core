@@ -32,6 +32,13 @@ extends:
     pool:
       name: Azure-Pipelines-1ESPT-ExDShared
       vmImage: windows-latest
+    sdl:
+      git:
+        longpaths: true
+      credscan:
+        suppressionsFile: $(Build.SourcesDirectory)/.azure-pipelines/config/CredScanSuppressions.json
+      policheck:
+        exclusionFile: $(Build.SourcesDirectory)/.azure-pipelines/config/PoliCheckExclusions.xml
     stages:
 
     - stage: build
