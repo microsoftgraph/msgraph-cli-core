@@ -48,7 +48,10 @@ public abstract class LoginServiceBase
     {
         if (record is null) return;
         var recordPath = Path.Combine(pathUtility.GetApplicationDataDirectory(), Constants.AuthRecordPath);
-        using var authRecordStream = new FileStream(recordPath, FileMode.Create, FileAccess.Write);
-        await record.SerializeAsync(authRecordStream, cancellationToken);
+        var authRecordStream = new FileStream(recordPath, FileMode.Create, FileAccess.Write);
+        await using (authRecordStream.ConfigureAwait(false))
+        {
+            await record.SerializeAsync(authRecordStream, cancellationToken);
+        }
     }
 }

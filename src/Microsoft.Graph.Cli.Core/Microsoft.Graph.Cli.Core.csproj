@@ -11,6 +11,10 @@
     <IsTrimmable>true</IsTrimmable>
 
     <PackageValidationBaselineVersion>1.0.0</PackageValidationBaselineVersion>
+
+    <!-- Needed to use LibraryImport -->
+    <!-- see: https://learn.microsoft.com/en-us/dotnet/standard/native-interop/pinvoke-source-generation#differences-from-dllimport -->
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -39,9 +43,12 @@
   <PropertyGroup Condition="'$(TF_BUILD)' == 'true'">
     <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
   </PropertyGroup>
-
+  <PropertyGroup Condition="'$(OS)' == 'Windows_NT'">
+    <DefineConstants>OS_WINDOWS</DefineConstants>
+  </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Azure.Identity" Version="1.12.0"/>
+    <PackageReference Include="Azure.Identity.Broker" Version="1.1.0" Condition="'$(OS)' == 'Windows_NT'" />
     <PackageReference Include="JmesPath.Net" Version="1.0.330"/>
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0"/>
     <PackageReference Include="Microsoft.Extensions.Http" Version="8.0.0"/>
