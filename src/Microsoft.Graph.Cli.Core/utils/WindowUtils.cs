@@ -36,7 +36,7 @@ internal partial class WindowUtils
     internal static IntPtr GetConsoleOrTerminalWindow()
     {
         var consoleHandle = GetConsoleWindow();
-        var handle = GetAncestor(consoleHandle, GetAncestorFlags.GetRootOwner );
+        var handle = GetAncestor(consoleHandle, GetAncestorFlags.GetRootOwner);
         return handle;
     }
 }
