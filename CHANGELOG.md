@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.3.0](https://github.com/microsoftgraph/msgraph-cli-core/compare/v1.2.2...v1.3.0) (2024-08-09)
+
+
+### Features
+
+* add web account manager (WAM) support ([#436](https://github.com/microsoftgraph/msgraph-cli-core/issues/436)) ([a5fe538](https://github.com/microsoftgraph/msgraph-cli-core/commit/a5fe538d448cb1a977942cfcf45bb1bbb57ac089))
+
+
+### Bug Fixes
+
+* add default scopes to solve login error when no scopes are provided ([a5fe538](https://github.com/microsoftgraph/msgraph-cli-core/commit/a5fe538d448cb1a977942cfcf45bb1bbb57ac089))
+
 ## [1.2.2](https://github.com/microsoftgraph/msgraph-cli-core/compare/v1.2.1...v1.2.2) (2024-07-25)
 
 
