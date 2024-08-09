@@ -25,11 +25,9 @@ internal partial class WindowUtils
     /// <param name="flags">The ancestor to be retrieved.</param>
     /// <returns>The return value is the handle to the ancestor window.</returns>
     [LibraryImport("user32.dll")]
-    [SupportedOSPlatform("Windows")]
     private static partial IntPtr GetAncestor(IntPtr hwnd, GetAncestorFlags flags);
 
     [LibraryImport("kernel32.dll")]
-    [SupportedOSPlatform("Windows")]
     private static partial IntPtr GetConsoleWindow();
 
     // https://learn.microsoft.com/en-us/entra/msal/dotnet/acquiring-tokens/desktop-mobile/wam#parent-window-handles
