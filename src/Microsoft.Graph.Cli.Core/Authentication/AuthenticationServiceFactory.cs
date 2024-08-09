@@ -7,6 +7,12 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 
+#if OS_WINDOWS
+using System.Diagnostics;
+using Azure.Identity.Broker;
+using Microsoft.Graph.Cli.Core.utils;
+#endif
+
 namespace Microsoft.Graph.Cli.Core.Authentication;
 
 /// <summary>
@@ -120,13 +126,17 @@ public class AuthenticationServiceFactory
 
     private async Task<InteractiveBrowserCredential> GetInteractiveBrowserCredentialAsync(string? tenantId, string? clientId, Uri authorityHost, CancellationToken cancellationToken = default)
     {
-        InteractiveBrowserCredentialOptions credOptions = new()
-        {
-            ClientId = clientId ?? Constants.DefaultAppId,
-            TenantId = tenantId ?? Constants.DefaultTenant,
-            DisableAutomaticAuthentication = true,
-            AuthorityHost = authorityHost
-        };
+#if OS_WINDOWS
+        Debug.Assert(OperatingSystem.IsWindows());
+        InteractiveBrowserCredentialBrokerOptions credOptions = new(WindowUtils.GetConsoleOrTerminalWindow());
+#else
+        InteractiveBrowserCredentialOptions credOptions = new();
+#endif
+
+        credOptions.ClientId = clientId ?? Constants.DefaultAppId;
+        credOptions.TenantId = tenantId ?? Constants.DefaultTenant;
+        credOptions.DisableAutomaticAuthentication = true;
+        credOptions.AuthorityHost = authorityHost;
 
         TokenCachePersistenceOptions tokenCacheOptions = new() { Name = Constants.TokenCacheName };
         credOptions.TokenCachePersistenceOptions = tokenCacheOptions;
