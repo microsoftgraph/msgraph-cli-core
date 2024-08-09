@@ -33,7 +33,6 @@ internal partial class WindowUtils
     private static partial IntPtr GetConsoleWindow();
 
     // https://learn.microsoft.com/en-us/entra/msal/dotnet/acquiring-tokens/desktop-mobile/wam#parent-window-handles
-    [SupportedOSPlatform("Windows")]
     internal static IntPtr GetConsoleOrTerminalWindow()
     {
         var consoleHandle = GetConsoleWindow();
