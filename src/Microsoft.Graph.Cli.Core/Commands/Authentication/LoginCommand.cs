@@ -13,7 +13,7 @@ namespace Microsoft.Graph.Cli.Core.Commands.Authentication;
 /// </summary>
 public sealed class LoginCommand : Command
 {
-    private Option<string[]> scopesOption = new("--scopes", "The login scopes e.g. User.Read. Required scopes can be found in the docs linked against each verb (get, list, create...) command.")
+    private Option<string[]> scopesOption = new("--scopes",() => ["User.Read"], "The login scopes e.g. User.Read. Required scopes can be found in the docs linked against each verb (get, list, create...) command.")
     {
         Arity = ArgumentArity.ZeroOrMore,
         AllowMultipleArgumentsPerToken = true,
