@@ -9,7 +9,7 @@ namespace Microsoft.Graph.Cli.Core.IO;
 /// <summary>
 /// HTTP client factory for the graph CLI.
 /// </summary>
-public class GraphCliClientFactory
+public static class GraphCliClientFactory
 {
     /// <summary>
     /// Gets default middlewares.
@@ -48,24 +48,6 @@ public class GraphCliClientFactory
         {
             m.Add(lh);
         }
-
-        // Set compression handler to be last (Allows logging handler to log request body)
-        m.Sort((a, b) =>
-        {
-            var aMatch = a is Kiota.Http.HttpClientLibrary.Middleware.CompressionHandler;
-            var bMatch = b is Kiota.Http.HttpClientLibrary.Middleware.CompressionHandler;
-            if (aMatch && !bMatch)
-            {
-                return 1;
-            }
-
-            if (bMatch && !aMatch)
-            {
-                return -1;
-            }
-
-            return 0;
-        });
 
         return GraphClientFactory.Create(version: version, nationalCloud: environment.GraphClientCloud(), finalHandler: finalHandler, handlers: m);
     }
