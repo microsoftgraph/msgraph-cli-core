@@ -21,7 +21,9 @@ public class GraphODataPagingServiceTests
 
     [Theory]
     [InlineData(0)]
+#pragma warning disable xUnit1012
     [InlineData(null)]
+#pragma warning restore xUnit1012
     [InlineData("test")]
     public void Sets_Top_If_Value_Is_Invalid(object topValue)
     {

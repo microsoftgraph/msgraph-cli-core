@@ -146,7 +146,7 @@ namespace Microsoft.Graph.Cli
             rootCommand.Add(new LoginCommand(builder));
             rootCommand.AddGlobalOption(debugOption);
 
-            if (rootCommand.Subcommands.FirstOrDefault(static c => c.Name == "users") is {} usersCmd)
+            if (rootCommand.Subcommands.FirstOrDefault(static c => c.Name == "users") is { } usersCmd)
             {
                 usersCmd.AddAlias("me");
             }
@@ -188,7 +188,7 @@ namespace Microsoft.Graph.Cli
                     AuthenticationStrategy authStrategy = authSettings?.Strategy ?? AuthenticationStrategy.DeviceCode;
                     var credential = serviceFactory.GetTokenCredentialAsync(authStrategy, authSettings?.TenantId, authSettings?.ClientId, authSettings?.ClientCertificateName, authSettings?.ClientCertificateThumbPrint, authSettings?.Environment ?? CloudEnvironment.Global);
                     credential.Wait();
-                    return new AzureIdentityAuthenticationProvider(credential.Result);
+                    return new AzureIdentityAuthenticationProvider(credential.Result, isCaeEnabled: true); // disambiguates the call to the constructor
                 });
                 services.AddSingleton<IRequestAdapter>(p =>
                 {
