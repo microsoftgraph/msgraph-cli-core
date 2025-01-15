@@ -47,7 +47,7 @@
     <DefineConstants>OS_WINDOWS</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Azure.Identity" Version="1.13.1" />
+    <PackageReference Include="Azure.Identity" Version="1.13.2" />
     <PackageReference Include="Azure.Identity.Broker" Version="1.2.0" Condition="'$(OS)' == 'Windows_NT'" />
     <PackageReference Include="JmesPath.Net" Version="1.0.330" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.1" />
