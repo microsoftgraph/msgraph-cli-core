@@ -51,7 +51,7 @@
     <PackageReference Include="Azure.Identity.Broker" Version="1.2.0" Condition="'$(OS)' == 'Windows_NT'" />
     <PackageReference Include="JmesPath.Net" Version="1.0.330" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.1" />
-    <PackageReference Include="Microsoft.Extensions.Http" Version="9.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="9.0.2" />
     <PackageReference Include="Microsoft.Graph.Core" Version="3.2.3" />
     <PackageReference Include="Microsoft.Kiota.Authentication.Azure" Version="1.17.0" />
     <PackageReference Include="Microsoft.Kiota.Cli.Commons" Version="1.1.2" />
